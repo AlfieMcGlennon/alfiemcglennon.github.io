@@ -1,0 +1,30 @@
+---
+const pathname = Astro.url.pathname;
+
+const links = [
+  { href: '/', label: 'about' },
+  { href: '/blog/', label: 'blog' },
+  { href: '/projects/', label: 'projects' },
+  { href: '/cv/', label: 'cv' },
+];
+
+function isActive(href, current) {
+  if (href === '/') return current === '/' || current === '';
+  return current.startsWith(href);
+}
+---
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">Alfie McGlennon</a>
+    <ul class="nav-links">
+      {links.map(link => (
+        <li>
+          <a href={link.href} class={isActive(link.href, pathname) ? 'active' : ''}>
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</nav>

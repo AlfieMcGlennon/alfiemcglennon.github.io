@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="About" description="Power systems analysis, reinforcement learning, and open-source tools.">
+  <h1>Hi, I'm <span class="accent-gradient">Alfie</span></h1>
+
+  <p>
+    I work on power systems analysis, grid constraint modelling, and
+    reinforcement learning for energy dispatch.
+  </p>
+
+  <p>
+    I built an <a href="https://alfiemcglennon.github.io/gb-grid-tool/">open-source interactive tool</a>
+    for exploring GB transmission constraints — DC power flow, LP dispatch, and
+    ERA5 weather data, all running in the browser. It's validated against NESO
+    published boundary transfer data and solves constrained dispatch using HiGHS
+    compiled to WebAssembly.
+  </p>
+
+  <p>
+    Currently exploring how RL agents can learn network-constrained dispatch
+    from experience — training topology-aware agents with 109 continuous actions
+    across 27 zones to approximate what LP solvers compute analytically.
+  </p>
+</Base>

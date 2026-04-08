@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+---
+
+<Base title="Projects" description="Tools and research — power systems analysis, grid constraints, and reinforcement learning.">
+  <h1>Projects</h1>
+  <p>Applied tools and research — energy systems, climate risk, and machine learning.</p>
+
+  <div class="projects-grid">
+    <ProjectCard
+      title="GB Grid Scenario Tool"
+      description="Interactive browser-based DC power flow for GB transmission constraints. Three dispatch modes, ERA5 weather data, and ETYS network topology — all running client-side with no backend."
+      project="grid-tool"
+      tags={['power-systems', 'dc-power-flow', 'open-data', 'webassembly']}
+      demoUrl="https://alfiemcglennon.github.io/gb-grid-tool/"
+      sourceUrl="https://github.com/AlfieMcGlennon/gb-grid-tool"
+      blogUrl="/blog/building-gb-grid-tool/"
+      image="/images/grid-tool/hero.png"
+    />
+
+    <ProjectCard
+      title="RL Grid Dispatch"
+      description="Reinforcement learning agents for network-constrained power dispatch. Training topology-aware agents with 109 continuous actions across 27 zones to approximate LP-optimal dispatch from experience."
+      project="rl-dispatch"
+      tags={['reinforcement-learning', 'power-systems', 'ppo', 'gymnasium']}
+      blogUrl="/blog/rl-grid-dispatch-baseline/"
+      status="Series in progress"
+    />
+
+    <ProjectCard
+      title="City Climate Bars & Stripes"
+      description="Interactive temperature anomaly visualisation for 6,000+ cities worldwide, from 1850 to present. Annual and seasonal views, multiple baselines, and three colour scaling modes — all running client-side from Berkeley Earth data."
+      project="climate-stripes"
+      tags={['climate', 'visualisation', 'd3js', 'open-data']}
+      demoUrl="https://alfiemcglennon.github.io/city-climate-stripes/"
+      sourceUrl="https://github.com/AlfieMcGlennon/city-climate-stripes"
+      blogUrl="/blog/city-climate-stripes/"
+      image="/images/climate-stripes.png"
+    />
+  </div>
+</Base>
+
+<style>
+  .projects-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+</style>

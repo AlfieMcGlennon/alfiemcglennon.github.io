@@ -1,0 +1,125 @@
+---
+import Base from './Base.astro';
+
+const { title, description, date, project, accent, tags, image } = Astro.props;
+
+const formatted = new Date(date).toLocaleDateString('en-GB', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+// Estimate reading time from the slot content
+const html = await Astro.slots.render('default');
+const words = html.replace(/<[^>]*>/g, '').split(/\s+/).length;
+const readingTime = Math.max(1, Math.ceil(words / 230));
+---
+
+<Base title={title} description={description} image={image} project={project}>
+  <article class="post">
+    <header class="post-header">
+      <h1>{title}</h1>
+      <div class="post-meta">
+        <time datetime={new Date(date).toISOString()}>{formatted}</time>
+        <span class="meta-sep">&middot;</span>
+        <span>{readingTime} min read</span>
+        {tags && tags.length > 0 && (
+          <>
+            <span class="meta-sep">&middot;</span>
+            <div class="post-tags">
+              {tags.map(t => <span class="tag">{t}</span>)}
+            </div>
+          </>
+        )}
+      </div>
+    </header>
+
+    {image && (
+      <div class="post-hero">
+        <img src={image} alt={title} />
+      </div>
+    )}
+
+    <div class="post-content" set:html={html} />
+  </article>
+</Base>
+
+<style>
+  .post-header {
+    margin-bottom: 2rem;
+  }
+
+  .post-header h1 {
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .post-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
+  }
+
+  .meta-sep {
+    opacity: 0.4;
+  }
+
+  .post-tags {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .post-hero {
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .post-hero img {
+    border-radius: 0;
+  }
+
+  .post-content :global(h2) {
+    color: var(--accent);
+  }
+
+  .post-content :global(a) {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .post-content :global(a:hover) {
+    color: var(--accent-sky);
+  }
+
+  /* Climate stripes gradient overrides */
+  :global([data-project="climate-stripes"]) .post-header h1,
+  :global([data-project="climate-stripes"]) .post-content :global(h2),
+  :global([data-project="climate-stripes"]) .post-content :global(h3) {
+    background: linear-gradient(90deg, #2166ac, #67a9cf 25%, #f7f7f7 50%, #ef8a62 75%, #b2182b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    width: fit-content;
+  }
+
+  :global([data-project="climate-stripes"]) .post-content :global(a) {
+    color: var(--accent);
+  }
+
+  :global([data-project="climate-stripes"]) .post-content :global(a:hover) {
+    color: var(--accent-sky);
+  }
+
+  :global([data-project="climate-stripes"]) .post-tags .tag {
+    color: var(--accent);
+    background: var(--accent-subtle);
+  }
+</style>

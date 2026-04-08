@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npx create-astro@latest astro-temp --template minimal --no-install --skip-houston --no-git)",
+      "Bash(cp /c/Website/astro-temp/package.json /c/Website/alfiemcglennon.github.io/)",
+      "Bash(cp /c/Website/astro-temp/tsconfig.json /c/Website/alfiemcglennon.github.io/)",
+      "Bash(cp -r /c/Website/astro-temp/src /c/Website/alfiemcglennon.github.io/)",
+      "Bash(cp -r /c/Website/astro-temp/public /c/Website/alfiemcglennon.github.io/)",
+      "Bash(rm -rf /c/Website/astro-temp)",
+      "Bash(npm install:*)",
+      "Bash(npx astro:*)",
+      "Bash(npm run:*)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(mkdir -p \"C:\\\\Website\\\\alfiemcglennon.github.io\\\\public\\\\images\\\\grid-tool\")",
+      "Bash(cp \"C:\\\\Website\\\\alfiemcglennon.github.io\\\\docs\\\\screenshots\\\\map-overview.png\" \"C:\\\\Website\\\\alfiemcglennon.github.io\\\\public\\\\images\\\\grid-tool\\\\hero.png\")",
+      "Bash(cp \"C:\\\\Website\\\\alfiemcglennon.github.io\\\\docs\\\\screenshots\\\\dispatch-lopf.png\" \"C:\\\\Website\\\\alfiemcglennon.github.io\\\\public\\\\images\\\\grid-tool\\\\lopf.png\")",
+      "Bash(pip install:*)",
+      "Bash(python -c ':*)",
+      "Bash(node -e ':*)",
+      "Bash(where python3:*)",
+      "Bash(where python:*)",
+      "Bash(where py:*)",
+      "Bash(\"/c/Users/alfie/AppData/Local/Programs/Python/Python312/python.exe\" --version)",
+      "Bash(\"/c/Users/alfie/AppData/Local/Microsoft/WindowsApps/python3.exe\" --version)",
+      "Read(//c/Users/alfie/AppData/Local/Programs/Python//**)",
+      "Bash(ls /c/Python*)",
+      "Bash(/c/Users/alfie/AppData/Local/Programs/Python/Python312/python.exe -m pip install PyPDF2 -q)",
+      "Bash(/c/Users/alfie/AppData/Local/Programs/Python/Python312/python.exe -c ':*)",
+      "Bash(ls:*)"
+    ]
+  }
+}

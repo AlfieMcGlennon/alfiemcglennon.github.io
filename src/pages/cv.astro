@@ -1,0 +1,547 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="CV" description="Alfie McGlennon — climate risk, energy systems, and applied ML.">
+  <div class="cv-top">
+    <h1>CV</h1>
+    <a href="/Alfie_McGlennon_CV.pdf" class="cv-pdf-icon" target="_blank" rel="noopener noreferrer" title="Download PDF">
+      <svg viewBox="0 0 32 32" width="40" height="40" fill="none">
+        <rect x="4" y="2" width="24" height="28" rx="2" fill="var(--bg-card)" stroke="var(--border)" stroke-width="1.5"/>
+        <path d="M10 18h3.5v-4h2v4H19l-4.5 5-4.5-5z" fill="var(--text-muted)"/>
+        <text x="16" y="13" text-anchor="middle" font-size="7" font-weight="700" font-family="var(--font-mono)" fill="var(--accent)">PDF</text>
+      </svg>
+    </a>
+  </div>
+
+  <div class="cv-layout">
+    <aside class="cv-sidebar">
+      <nav>
+        <a href="#overview" class="active">Overview</a>
+        <a href="#projects">Projects</a>
+        <a href="#education">Education</a>
+        <a href="#skills">Skills</a>
+        <a href="#experience">Experience</a>
+        <a href="#other">Other</a>
+      </nav>
+    </aside>
+
+    <div class="cv-main">
+
+      <section id="overview" class="cv-block">
+        <h2>Overview</h2>
+        <dl class="cv-overview">
+          <dt>Name</dt>
+          <dd>Alfie McGlennon</dd>
+
+          <dt>Label</dt>
+          <dd>Climate Risk & Applied ML</dd>
+
+          <dt>Email</dt>
+          <dd><a href="mailto:alfie.mcglennon@outlook.com">alfie.mcglennon@outlook.com</a></dd>
+
+          <dt>Location</dt>
+          <dd>Reading, UK</dd>
+
+          <dt>Url</dt>
+          <dd><a href="https://alfiemcglennon.github.io">alfiemcglennon.github.io</a></dd>
+
+          <dt>Summary</dt>
+          <dd>
+            MSc student in Climate Change and AI at the University of Reading.
+            Research focus on compound climate extremes and their implications for
+            reinsurance and catastrophe modelling. I build applied tools that go
+            beyond standard ML coursework: a validated DC power flow model of the
+            GB transmission network running in the browser, and reinforcement
+            learning agents trained to dispatch the national grid. Experienced with
+            large-scale climate datasets (ERA5, Berkeley Earth), interactive
+            visualisation, and GPU-accelerated training on HPC infrastructure.
+          </dd>
+        </dl>
+      </section>
+
+      <section id="projects" class="cv-block">
+        <h2>Projects</h2>
+
+        <div class="cv-entry">
+          <div class="cv-entry-meta">
+            <span class="cv-badge">2026</span>
+          </div>
+          <div class="cv-entry-body">
+            <h3>GB Grid Scenario Tool</h3>
+            <p class="cv-org">Interactive browser-based DC power flow for GB transmission constraints</p>
+            <ul>
+              <li>Built a 27-zone DC power flow model of the GB electricity network from NESO open data, validated against published boundary transfers (B6F within 2%)</li>
+              <li>Implemented LP-optimal dispatch using HiGHS compiled to WebAssembly, solving constrained dispatch in ~10ms client-side</li>
+              <li>Integrated ERA5 weather climatology (140k hours, 27 zones) for wind, solar, and demand scenario generation</li>
+              <li>Tested 16 network configurations across 4 resolutions, 3 dispatch methods, and 2 interconnector models</li>
+            </ul>
+            <div class="cv-project-links">
+              <a href="https://alfiemcglennon.github.io/gb-grid-tool/" target="_blank" rel="noopener noreferrer">Live demo</a>
+              <a href="https://github.com/AlfieMcGlennon/gb-grid-tool" target="_blank" rel="noopener noreferrer">Source</a>
+              <a href="/blog/building-gb-grid-tool/">Write-up</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-entry-meta">
+            <span class="cv-badge">2026</span>
+          </div>
+          <div class="cv-entry-body">
+            <h3>RL Grid Dispatch</h3>
+            <p class="cv-org">Reinforcement learning agents for network-constrained power dispatch</p>
+            <ul>
+              <li>Trained PPO agents (Stable-Baselines3) on 9 years of hourly generation, demand, and weather data on HPC GPU cluster</li>
+              <li>Designed and compared 4 reward functions across MLP and CNN architectures (448k parameters, 72 ERA5 weather channels)</li>
+              <li>Best agent achieved +12.8% vs NESO dispatch cost with emissions 16% lower than cost-only baseline</li>
+              <li>Identified action-space bottleneck: spatial CNN observations couldn't improve dispatch without topology-aware actions</li>
+            </ul>
+            <div class="cv-project-links">
+              <a href="/blog/rl-grid-dispatch-baseline/">Write-up</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-entry-meta">
+            <span class="cv-badge">2025</span>
+          </div>
+          <div class="cv-entry-body">
+            <h3>City Climate Bars & Stripes</h3>
+            <p class="cv-org">Interactive web app for city-level temperature visualisation</p>
+            <ul>
+              <li>Processed multi-decadal Berkeley Earth gridded temperature data for city-level climate stripe visualisations</li>
+              <li>Built data pipeline in Python, frontend in D3.js with seasonal and annual rendering modes</li>
+            </ul>
+            <div class="cv-project-links">
+              <a href="https://alfiemcglennon.github.io/city-climate-stripes/" target="_blank" rel="noopener noreferrer">Live demo</a>
+              <a href="https://github.com/AlfieMcGlennon/city-climate-stripes" target="_blank" rel="noopener noreferrer">Source</a>
+              <a href="/blog/city-climate-stripes/">Write-up</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-entry-meta">
+            <span class="cv-badge">2026</span>
+          </div>
+          <div class="cv-entry-body">
+            <h3>Climate Playbook</h3>
+            <p class="cv-org">Interactive climate education and analytics platform</p>
+            <ul>
+              <li>Designing an interactive platform spanning KS1-KS5 and adult learners, grounded in physically realistic climate representations</li>
+              <li>Building uncertainty-aware visualisations and simplified modelling tools using ERA5 reanalysis data</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="education" class="cv-block">
+        <h2>Education</h2>
+
+        <div class="cv-entry">
+          <div class="cv-entry-meta">
+            <span class="cv-badge">2025 – 2026</span>
+            <span class="cv-location">Reading, UK</span>
+          </div>
+          <div class="cv-entry-body">
+            <h3>MSc Climate Change and Artificial Intelligence</h3>
+            <p class="cv-org">University of Reading</p>
+            <ul>
+              <li>Dissertation: Compound climate extremes — frameworks for correlated hazard prediction across Europe</li>
+              <li>Modules: Applied Data Science with Python, AI and Machine Learning, Data Science and Climate Services</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-entry-meta">
+            <span class="cv-badge">2021 – 2025</span>
+            <span class="cv-location">Reading, UK</span>
+          </div>
+          <div class="cv-entry-body">
+            <h3>BSc Meteorology and Climate (2:1)</h3>
+            <p class="cv-org">University of Reading</p>
+            <ul>
+              <li>Dissertation: Investigating an Equilibrium Approximation for the Bowen Ratio (First Class)</li>
+              <li>Key modules: Data Science and Climate Services, Numerical Modelling, Boundary Layer Meteorology</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-entry-meta">
+            <span class="cv-badge">2021</span>
+            <span class="cv-location">Wokingham</span>
+          </div>
+          <div class="cv-entry-body">
+            <h3>A-Levels</h3>
+            <p class="cv-org">The Forest School</p>
+            <p class="cv-inline">Mathematics (A), Geography (A), Physics (B)</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="skills" class="cv-block">
+        <h2>Skills</h2>
+        <div class="cv-skills-grid">
+          <div>
+            <h3>Programming & ML</h3>
+            <p>Python (pandas, NumPy, matplotlib, PyTorch, Stable-Baselines3, scikit-learn), JavaScript, D3.js, SQL, Git</p>
+          </div>
+          <div>
+            <h3>Climate & Energy Data</h3>
+            <p>ERA5 reanalysis, Berkeley Earth, NESO grid data, ETYS boundary transfers, gridded dataset processing, time-series analysis</p>
+          </div>
+          <div>
+            <h3>ML & Modelling</h3>
+            <p>Reinforcement learning (PPO), CNNs, feature engineering, DC power flow, linear programming (HiGHS), SHAP interpretation</p>
+          </div>
+          <div>
+            <h3>Tools & Infrastructure</h3>
+            <p>HPC GPU training (SLURM), WebAssembly, Astro, Power BI, JupyterLab, Gymnasium</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="experience" class="cv-block">
+        <h2>Experience</h2>
+
+        <div class="cv-entry">
+          <div class="cv-entry-meta">
+            <span class="cv-badge">2024.07</span>
+            <span class="cv-location">Borehamwood</span>
+          </div>
+          <div class="cv-entry-body">
+            <h3>Data Analyst Intern</h3>
+            <p class="cv-org">Safestore</p>
+            <ul>
+              <li>Analysed customer data to identify behaviour trends and retention metrics</li>
+              <li>Built data visualisations in Python (pandas, matplotlib, seaborn) to support business retention strategies</li>
+              <li>Delivered presentations to senior management</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="cv-entry">
+          <div class="cv-entry-meta">
+            <span class="cv-badge">2019 – Present</span>
+            <span class="cv-location">Reading</span>
+          </div>
+          <div class="cv-entry-body">
+            <h3>Swim Teacher (Level 2) & Lifeguard</h3>
+            <p class="cv-org">Places Leisure</p>
+            <ul>
+              <li>Delivered structured instruction across all ability levels, adapting methods to diverse learning styles</li>
+              <li>Maintained safety standards and incident response as part of a team</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="other" class="cv-block">
+        <h2>Other</h2>
+        <ul class="cv-other-list">
+          <li>Triathlon competitor (10+ years, national level)</li>
+          <li>Coach, TVTristars Triathlon Club (2018–2021)</li>
+          <li>Swim instructor support, Bulmershe Leisure Centre and Reading Swim Club (2016–2019)</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+</Base>
+
+<script>
+  // Scroll spy: highlight active sidebar link
+  function initScrollSpy() {
+    const sections = document.querySelectorAll('.cv-block');
+    const links = document.querySelectorAll('.cv-sidebar a');
+    if (!sections.length || !links.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          links.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+          });
+        }
+      });
+    }, {
+      rootMargin: '-80px 0px -60% 0px',
+      threshold: 0
+    });
+
+    sections.forEach(section => observer.observe(section));
+  }
+
+  initScrollSpy();
+  document.addEventListener('astro:after-swap', initScrollSpy);
+</script>
+
+<style>
+  /* Widen the content area for sidebar layout */
+  :global(.content-wrapper:has(.cv-layout)) {
+    max-width: 960px;
+  }
+
+  .cv-top {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .cv-top h1 {
+    margin-bottom: 0;
+    text-align: center;
+  }
+
+  .cv-pdf-icon {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .cv-pdf-icon:hover {
+    color: var(--accent);
+  }
+
+  /* Two-column layout */
+  .cv-layout {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 2.5rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* Sidebar navigation with active bar */
+  .cv-sidebar nav {
+    position: sticky;
+    top: 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .cv-sidebar a {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    border-left: 2px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .cv-sidebar a:hover {
+    color: var(--text-primary);
+  }
+
+  .cv-sidebar a.active {
+    color: var(--text-primary);
+    border-left-color: var(--accent);
+    background: var(--accent-subtle);
+  }
+
+  /* Section blocks */
+  .cv-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .cv-block h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Overview key-value pairs */
+  .cv-overview {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 0.6rem 1.5rem;
+  }
+
+  .cv-overview dt {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .cv-overview dd {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .cv-overview dd a {
+    color: var(--accent);
+  }
+
+  /* Entry layout */
+  .cv-entry {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .cv-entry:last-child {
+    margin-bottom: 0;
+  }
+
+  .cv-entry-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-top: 0.1rem;
+  }
+
+  .cv-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-subtle);
+    border: 1px solid rgba(43, 124, 212, 0.25);
+    border-radius: 4px;
+    padding: 0.2em 0.5em;
+    white-space: nowrap;
+    width: fit-content;
+  }
+
+  .cv-location {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .cv-entry-body h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.15rem 0;
+  }
+
+  .cv-org {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .cv-inline {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+  }
+
+  .cv-entry-body ul {
+    margin-bottom: 0.5rem;
+    padding-left: 1.25rem;
+  }
+
+  .cv-entry-body li {
+    font-size: 0.88rem;
+    margin-bottom: 0.2rem;
+    color: var(--text-secondary);
+  }
+
+  /* Project links — these get accent colors */
+  .cv-project-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.4rem;
+  }
+
+  .cv-project-links a {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .cv-project-links a:hover {
+    color: var(--accent-sky);
+  }
+
+  /* Skills grid */
+  .cv-skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .cv-skills-grid h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    margin-top: 0;
+  }
+
+  .cv-skills-grid p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+
+  /* Other section */
+  .cv-other-list {
+    padding-left: 1.25rem;
+  }
+
+  .cv-other-list li {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .cv-layout {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .cv-sidebar {
+      display: none;
+    }
+
+    .cv-block {
+      padding: 1.25rem 1rem;
+    }
+
+    .cv-overview {
+      grid-template-columns: 80px 1fr;
+    }
+
+    .cv-entry {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+
+    .cv-entry-meta {
+      flex-direction: row;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .cv-skills-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

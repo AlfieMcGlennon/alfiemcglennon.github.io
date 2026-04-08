@@ -1,0 +1,120 @@
+---
+const { title, description, project, tags, demoUrl, sourceUrl, blogUrl, image, status } = Astro.props;
+---
+
+<div class="project-card card" data-project={project}>
+  {image && (
+    <div class="project-image">
+      <img src={image} alt={`${title} screenshot`} loading="lazy" />
+    </div>
+  )}
+  <div class="project-body">
+    <h3 class="project-title">{title}</h3>
+    {status && <span class="project-status">{status}</span>}
+    <p class="project-desc">{description}</p>
+    {tags && (
+      <div class="project-tags">
+        {tags.map(t => <span class="tag">{t}</span>)}
+      </div>
+    )}
+    <div class="project-links">
+      {demoUrl && <a href={demoUrl} class="project-link" target="_blank" rel="noopener noreferrer">Live demo &rarr;</a>}
+      {sourceUrl && <a href={sourceUrl} class="project-link" target="_blank" rel="noopener noreferrer">Source</a>}
+      {blogUrl && <a href={blogUrl} class="project-link">Read more</a>}
+    </div>
+  </div>
+</div>
+
+<style>
+  .project-card {
+    display: flex;
+    flex-direction: column;
+    border-left-width: 3px;
+    overflow: hidden;
+  }
+
+  .project-card[data-project="climate-stripes"] {
+    border-image: linear-gradient(to bottom, #2166ac, #67a9cf, #f7f7f7, #ef8a62, #b2182b) 1;
+    border-radius: 0;
+  }
+
+  .project-card[data-project="climate-stripes"] .project-title {
+    background: linear-gradient(90deg, #2166ac, #67a9cf 25%, #f7f7f7 50%, #ef8a62 75%, #b2182b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    width: fit-content;
+  }
+
+  .project-image {
+    margin: -1.5rem -1.5rem 1.25rem -1.5rem;
+    overflow: hidden;
+  }
+
+  .project-image img {
+    width: 100%;
+    border-radius: 0;
+    transition: transform 0.3s ease;
+  }
+
+  .project-card:hover .project-image img {
+    transform: scale(1.02);
+  }
+
+  .project-title {
+    color: var(--accent);
+    font-size: 1.3rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .project-status {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-subtle);
+    padding: 0.15em 0.6em;
+    border-radius: 9999px;
+    margin-bottom: 0.75rem;
+  }
+
+  .project-desc {
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .project-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .project-link {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent);
+    transition: color 0.2s ease;
+  }
+
+  .project-link:hover {
+    color: var(--accent-sky);
+  }
+
+  .project-card[data-project="climate-stripes"] .project-links {
+    background: linear-gradient(90deg, #2166ac, #67a9cf 25%, #f7f7f7 50%, #ef8a62 75%, #b2182b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    width: fit-content;
+  }
+
+  .project-card[data-project="climate-stripes"] .project-link {
+    -webkit-text-fill-color: transparent;
+  }
+</style>

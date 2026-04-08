@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Not Found" description="Page not found.">
+  <div class="not-found">
+    <h1>404</h1>
+    <p>This page is currently not built or under construction.</p>
+    <p class="redirect-msg">Redirecting to home in <span id="countdown">3</span>s...</p>
+  </div>
+</Base>
+
+<style>
+  .not-found {
+    text-align: center;
+    padding-top: 6rem;
+  }
+
+  .not-found h1 {
+    font-size: 4rem;
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent-sky));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+  }
+
+  .redirect-msg {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+</style>
+
+<script>
+  let count = 3;
+  const el = document.getElementById('countdown');
+  const timer = setInterval(() => {
+    count--;
+    if (el) el.textContent = String(count);
+    if (count <= 0) {
+      clearInterval(timer);
+      window.location.href = '/';
+    }
+  }, 1000);
+</script>
