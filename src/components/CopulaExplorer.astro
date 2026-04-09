@@ -1,0 +1,224 @@
+---
+---
+
+<div class="copula-explorer">
+  <div class="copula-controls">
+    <div class="control-group">
+      <label>Family</label>
+      <div class="button-group" id="ce-family-btns">
+        <button class="active" data-family="gaussian">Gaussian</button>
+        <button data-family="clayton">Clayton</button>
+        <button data-family="gumbel">Gumbel</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <label id="ce-param-label">Correlation (&rho;)</label>
+      <div class="slider-row">
+        <input type="range" id="ce-param-slider" min="5" max="95" value="70" />
+        <span id="ce-param-value" class="param-display">0.70</span>
+      </div>
+    </div>
+    <div class="control-group">
+      <label>3D View</label>
+      <div class="button-group" id="ce-view-btns">
+        <button class="active" data-view="copula">Copula density</button>
+        <button data-view="joint">Joint density</button>
+      </div>
+    </div>
+  </div>
+  <div class="ce-layout">
+    <div class="ce-main">
+      <canvas id="ce-3d"></canvas>
+    </div>
+    <div class="ce-side">
+      <div class="ce-side-panel">
+        <div class="ce-panel-label">Samples in [0,1]&sup2;</div>
+        <canvas id="ce-scatter"></canvas>
+      </div>
+      <div class="ce-side-panel">
+        <div class="ce-panel-label">Density heatmap</div>
+        <canvas id="ce-heatmap"></canvas>
+      </div>
+    </div>
+  </div>
+  <p class="copula-hint">Drag 3D surface to rotate &middot; All views update together</p>
+</div>
+
+<style>
+  .copula-explorer { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin: 2rem 0; }
+  .copula-controls { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 0.75rem; align-items: flex-end; }
+  .control-group { display: flex; flex-direction: column; gap: 0.3rem; }
+  .control-group label { font-size: 0.72rem; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .slider-row { display: flex; align-items: center; gap: 0.5rem; }
+  .button-group { display: flex; }
+  .button-group button { background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary); padding: 0.3rem 0.6rem; font-size: 0.75rem; font-family: var(--font-mono); cursor: pointer; transition: all 0.2s; }
+  .button-group button:first-child { border-radius: 4px 0 0 4px; }
+  .button-group button:last-child { border-radius: 0 4px 4px 0; }
+  .button-group button:not(:first-child) { border-left: none; }
+  .button-group button.active { background: var(--accent); color: #0f1523; border-color: var(--accent); }
+  .button-group button:hover:not(.active) { background: var(--bg-card-hover); color: var(--text-primary); }
+  input[type="range"] { width: 120px; accent-color: var(--accent); }
+  .param-display { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); min-width: 3ch; }
+
+  .ce-layout { display: grid; grid-template-columns: 5fr 3fr; gap: 0.75rem; align-items: start; }
+  .ce-main canvas { width: 100%; aspect-ratio: 1; border-radius: 6px; background: #0a0e18; display: block; cursor: grab; }
+  .ce-main canvas:active { cursor: grabbing; }
+  .ce-side { display: flex; flex-direction: column; gap: 0.75rem; }
+  .ce-side-panel { background: #0a0e18; border-radius: 6px; padding: 0.4rem 0.4rem 0.25rem; }
+  .ce-panel-label { font-size: 0.68rem; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; text-align: center; margin-bottom: 0.2rem; }
+  .ce-side canvas { width: 100%; aspect-ratio: 1; display: block; border-radius: 4px; }
+  .copula-hint { text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0; font-family: var(--font-mono); }
+
+  @media (max-width: 640px) {
+    .ce-layout { grid-template-columns: 1fr; }
+    .ce-side { flex-direction: row; }
+  }
+</style>
+
+<script>
+  function initCE() {
+    const c3d = document.getElementById('ce-3d');
+    const cS = document.getElementById('ce-scatter');
+    const cH = document.getElementById('ce-heatmap');
+    if (!c3d || !cS || !cH) return;
+    const x3 = c3d.getContext('2d'), xS = cS.getContext('2d'), xH = cH.getContext('2d');
+
+    let fam = 'gaussian', par = 0.7, viewMode = 'copula';
+    let rotY = -0.7, rotX = 0.45;
+    let drag = false, lx = 0, ly = 0;
+    let cachedSamples = null, sFam = null, sPar = null;
+
+    function sz(cv, cx) {
+      const r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio||1, 2);
+      const w = Math.round(r.width), h = Math.round(r.height);
+      cv.width = w*d; cv.height = h*d; cx.setTransform(d,0,0,d,0,0); return {w,h};
+    }
+    let s3, sS, sH;
+    function resize() { s3=sz(c3d,x3); sS=sz(cS,xS); sH=sz(cH,xH); cachedSamples=null; draw(); }
+
+    const sl = document.getElementById('ce-param-slider');
+    const pv = document.getElementById('ce-param-value');
+    const pl = document.getElementById('ce-param-label');
+
+    function updUI() {
+      if (fam==='gaussian') { pl.innerHTML='Correlation (&rho;)'; sl.min=5; sl.max=95; sl.value=Math.round(par*100); pv.textContent=par.toFixed(2); }
+      else { pl.innerHTML='Theta (&theta;)'; sl.min=50; sl.max=800; sl.value=Math.round(par*100); pv.textContent=par.toFixed(1); }
+    }
+    sl.addEventListener('input', () => { par=parseFloat(sl.value)/100; pv.textContent=fam==='gaussian'?par.toFixed(2):par.toFixed(1); cachedSamples=null; draw(); });
+    document.getElementById('ce-family-btns').addEventListener('click', e => {
+      const b=e.target.closest('button'); if(!b) return;
+      document.querySelectorAll('#ce-family-btns button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); fam=b.dataset.family; par=fam==='gaussian'?0.7:3.0; cachedSamples=null; updUI(); draw();
+    });
+    document.getElementById('ce-view-btns').addEventListener('click', e => {
+      const b=e.target.closest('button'); if(!b) return;
+      document.querySelectorAll('#ce-view-btns button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); viewMode=b.dataset.view; draw();
+    });
+
+    c3d.addEventListener('mousedown', e=>{drag=true;lx=e.clientX;ly=e.clientY;e.preventDefault();});
+    window.addEventListener('mouseup', ()=>{if(drag){drag=false;resetIdle();}});
+    window.addEventListener('mousemove', e=>{if(!drag)return;rotY+=(e.clientX-lx)*0.01;rotX=Math.max(0.15,Math.min(1.2,rotX+(e.clientY-ly)*0.007));lx=e.clientX;ly=e.clientY;draw();});
+    c3d.addEventListener('touchstart',e=>{if(e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}},{passive:true});
+    c3d.addEventListener('touchend',()=>{drag=false;resetIdle();});
+    c3d.addEventListener('touchmove',e=>{if(!drag||e.touches.length!==1)return;e.preventDefault();rotY+=(e.touches[0].clientX-lx)*0.01;rotX=Math.max(0.15,Math.min(1.2,rotX+(e.touches[0].clientY-ly)*0.007));lx=e.touches[0].clientX;ly=e.touches[0].clientY;draw();},{passive:false});
+
+    function ni(p){if(p<=0.001)return -3.1;if(p>=0.999)return 3.1;if(p<0.5)return -ra(Math.sqrt(-2*Math.log(p)));return ra(Math.sqrt(-2*Math.log(1-p)));}
+    function ra(t){return t-(2.515517+t*(0.802853+t*0.010328))/(1+t*(1.432788+t*(0.189269+t*0.001308)));}
+    function nc(x){const s=x<0?-1:1;x=Math.abs(x)/1.41421356;const t=1/(1+0.3275911*x);return 0.5*(1+s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x)));}
+    function npdf(x){return Math.exp(-x*x/2)/2.50663;}
+
+    function gDens(u,v,rho){if(u<=0.02||u>=0.98||v<=0.02||v>=0.98)return 0;const x=ni(u),y=ni(v),d=1-rho*rho;if(d<0.01)return 0;return Math.exp(-(x*x-2*rho*x*y+y*y)/(2*d))/(6.28318*Math.sqrt(d))/(npdf(x)*npdf(y));}
+    function cDens(u,v,th){if(u<=0.02||u>=0.98||v<=0.02||v>=0.98)return 0;const a=Math.pow(u,-th)+Math.pow(v,-th)-1;if(a<=0)return 0;return(th+1)*Math.pow(u*v,-th-1)*Math.pow(a,-1/th-2);}
+    function gumDens(u,v,th){if(u<=0.03||u>=0.97||v<=0.03||v>=0.97)return 0;const lu=-Math.log(u),lv=-Math.log(v),A=Math.pow(lu,th)+Math.pow(lv,th),Ai=Math.pow(A,1/th),C=Math.exp(-Ai);return Math.max(0,C/(u*v)*Math.pow(lu,th-1)*Math.pow(lv,th-1)*Math.pow(A,2/th-2)*(Ai+th-1));}
+    function getDens(u,v){if(fam==='gaussian')return gDens(u,v,par);if(fam==='clayton')return cDens(u,v,par);return gumDens(u,v,par);}
+    function jointGauss(x,y,rho){const d=1-rho*rho;if(d<0.01)return 0;return Math.exp(-(x*x-2*rho*x*y+y*y)/(2*d))/(6.28318*Math.sqrt(d));}
+
+    function getSamples(){
+      if(cachedSamples&&sFam===fam&&sPar===par)return cachedSamples;
+      sFam=fam;sPar=par;const n=1500,pts=[];
+      if(fam==='gaussian'){for(let i=0;i<n;i++){const z1=ni(Math.random()*0.96+0.02),z2=ni(Math.random()*0.96+0.02);pts.push([nc(z1),nc(par*z1+Math.sqrt(1-par*par)*z2)]);}}
+      else if(fam==='clayton'){for(let i=0;i<n;i++){const u1=Math.random()*0.96+0.02,w=Math.random()*0.96+0.02;pts.push([u1,Math.max(0.02,Math.min(0.98,Math.pow(Math.pow(u1,-par)*(Math.pow(w,-par/(1+par))-1)+1,-1/par)))]);}}
+      else{const rho=Math.max(0,1-1/par);for(let i=0;i<n;i++){const z1=ni(Math.random()*0.96+0.02),z2=ni(Math.random()*0.96+0.02);let u=nc(z1),v=nc(rho*z1+Math.sqrt(1-rho*rho)*z2);if(u>0.65&&v>0.65)v=Math.min(0.98,v+Math.random()*0.1*(1-Math.abs(u-v)));pts.push([u,v]);}}
+      cachedSamples=pts;return pts;
+    }
+
+    function hc(t){t=Math.max(0,Math.min(1,t));if(t<0.25){const s=t/0.25;return[33+s*70|0,102+s*67|0,172+s*35|0];}if(t<0.5){const s=(t-0.25)/0.25;return[103+s*144|0,169+s*78|0,207-s*10|0];}if(t<0.75){const s=(t-0.5)/0.25;return[247-s*8|0,247-s*109|0,197-s*99|0];}const s=(t-0.75)/0.25;return[239-s*62|0,138-s*114|0,98-s*59|0];}
+    function proj(x,y,z,w,h){const cr=Math.cos(rotY),sr=Math.sin(rotY);let px=x*cr-z*sr,pz=x*sr+z*cr;const ct=Math.cos(rotX),st=Math.sin(rotX);const py=y*ct-pz*st;pz=y*st+pz*ct;const sc=Math.min(w,h)*0.36;return{x:w/2+px*sc,y:h/2-py*sc,z:pz};}
+
+    function draw(){draw3D();drawScatter();drawHeatmap();}
+
+    function draw3D(){
+      const{w,h}=s3;x3.fillStyle='#0a0e18';x3.fillRect(0,0,w,h);
+      const G=32,step=0.94/G;let maxZ=0.01;const pts=[];
+      const isJointGauss = viewMode==='joint'&&fam==='gaussian';
+      if(isJointGauss){const range=3,ns=2*range/G;for(let i=0;i<=G;i++){pts[i]=[];for(let j=0;j<=G;j++){const xx=-range+i*ns,yy=-range+j*ns,z=jointGauss(xx,yy,par);if(z>maxZ)maxZ=z;pts[i][j]={u:xx/range,v:yy/range,z};}}}
+      else{for(let i=0;i<=G;i++){pts[i]=[];for(let j=0;j<=G;j++){const u=0.03+i*step,v=0.03+j*step,z=Math.min(getDens(u,v),8);if(z>maxZ)maxZ=z;pts[i][j]={u:(u-0.5)*2,v:(v-0.5)*2,z};}}}
+
+      const quads=[];
+      for(let i=0;i<G;i++)for(let j=0;j<G;j++){
+        const c=[pts[i][j],pts[i+1][j],pts[i+1][j+1],pts[i][j+1]];
+        const pr=c.map(p=>proj(p.u,(p.z/maxZ)*1.5,p.v,w,h));
+        quads.push({pr,ad:(pr[0].z+pr[1].z+pr[2].z+pr[3].z)/4,ah:(c[0].z+c[1].z+c[2].z+c[3].z)/(4*maxZ)});
+      }
+      quads.sort((a,b)=>b.ad-a.ad);
+      for(const q of quads){const[r,g,b]=hc(q.ah);x3.beginPath();x3.moveTo(q.pr[0].x,q.pr[0].y);for(let k=1;k<4;k++)x3.lineTo(q.pr[k].x,q.pr[k].y);x3.closePath();x3.fillStyle=`rgba(${r},${g},${b},${0.12+q.ah*0.35})`;x3.fill();x3.strokeStyle=`rgba(${r},${g},${b},${0.18+q.ah*0.35})`;x3.lineWidth=0.5;x3.stroke();}
+
+      x3.fillStyle='#e4e4e8';x3.font=`600 ${Math.max(11,s3.w*0.032)|0}px sans-serif`;x3.textAlign='center';
+      const nm={gaussian:'Gaussian',clayton:'Clayton',gumbel:'Gumbel'};
+      const pn=fam==='gaussian'?`\u03C1 = ${par.toFixed(2)}`:`\u03B8 = ${par.toFixed(1)}`;
+      const vl=isJointGauss?' \u2014 joint density':' \u2014 copula density';
+      x3.fillText(`${nm[fam]} (${pn})${vl}`,w/2,22);
+      x3.fillStyle='#6b7280';x3.font='10px sans-serif';
+      if(isJointGauss){const p1=proj(-1,0,1.15,w,h);x3.fillText('x',p1.x,p1.y+12);const p2=proj(1.15,0,-1,w,h);x3.fillText('y',p2.x,p2.y+12);}
+      else{const p1=proj(-1,0,1.15,w,h);x3.fillText('u\u2081',p1.x,p1.y+12);const p2=proj(1.15,0,-1,w,h);x3.fillText('u\u2082',p2.x,p2.y+12);}
+    }
+
+    function drawScatter(){
+      const{w,h}=sS;xS.fillStyle='#0a0e18';xS.fillRect(0,0,w,h);
+      const m=Math.max(6,w*0.08),pw=w-2*m,ph=h-2*m;
+      // Axes
+      xS.strokeStyle='#1e2030';xS.lineWidth=0.5;xS.strokeRect(m,m,pw,ph);
+      xS.strokeStyle='#1e203050';
+      for(let i=1;i<4;i++){const gx=m+pw*i/4,gy=m+ph*i/4;xS.beginPath();xS.moveTo(gx,m);xS.lineTo(gx,m+ph);xS.stroke();xS.beginPath();xS.moveTo(m,gy);xS.lineTo(m+pw,gy);xS.stroke();}
+      // Diagonal
+      xS.strokeStyle='#ffb00025';xS.lineWidth=0.8;xS.setLineDash([3,3]);xS.beginPath();xS.moveTo(m,m+ph);xS.lineTo(m+pw,m);xS.stroke();xS.setLineDash([]);
+      // Points
+      const pts=getSamples();
+      for(const[u,v]of pts){xS.beginPath();xS.arc(m+u*pw,m+(1-v)*ph,Math.max(1.2,w*0.008),0,6.283);xS.fillStyle='rgba(56,189,248,0.4)';xS.fill();}
+      // Tick labels
+      xS.fillStyle='#4b5563';xS.font=`${Math.max(7,w*0.04)|0}px sans-serif`;xS.textAlign='center';
+      xS.fillText('0',m,m+ph+10);xS.fillText('1',m+pw,m+ph+10);xS.fillText('u\u2081',m+pw/2,m+ph+10);
+      xS.textAlign='right';xS.fillText('0',m-3,m+ph);xS.fillText('1',m-3,m+6);
+    }
+
+    function drawHeatmap(){
+      const{w,h}=sH;xH.fillStyle='#0a0e18';xH.fillRect(0,0,w,h);
+      const barW=Math.max(8,w*0.07),m=Math.max(6,w*0.08),pw=w-2*m-barW-6,ph=h-2*m;
+      const RES=40,cw=pw/RES,ch=ph/RES;let maxD=0.01;
+      const grid=new Float32Array(RES*RES);
+      for(let i=0;i<RES;i++)for(let j=0;j<RES;j++){const d=getDens(0.02+(i+0.5)/RES*0.96,0.02+(j+0.5)/RES*0.96);grid[j*RES+i]=d;if(d>maxD)maxD=d;}
+      for(let i=0;i<RES;i++)for(let j=0;j<RES;j++){const t=Math.min(grid[j*RES+i]/maxD,1);if(t<0.01)continue;const[r,g,b]=hc(t);xH.fillStyle=`rgba(${r},${g},${b},${0.2+t*0.7})`;xH.fillRect(m+i*cw,m+(RES-1-j)*ch,Math.ceil(cw),Math.ceil(ch));}
+      xH.strokeStyle='#1e2030';xH.lineWidth=0.5;xH.strokeRect(m,m,pw,ph);
+      // Colourbar
+      const bx=m+pw+8,by=m;
+      for(let i=0;i<ph;i++){const t=1-i/ph;const[r,g,b]=hc(t);xH.fillStyle=`rgb(${r},${g},${b})`;xH.fillRect(bx,by+i,barW-2,1);}
+      xH.strokeStyle='#1e2030';xH.strokeRect(bx,by,barW-2,ph);
+      xH.fillStyle='#6b7280';xH.font=`${Math.max(7,w*0.035)|0}px sans-serif`;xH.textAlign='left';
+      xH.fillText(maxD.toFixed(1),bx+barW+1,by+7);xH.fillText('0',bx+barW+1,by+ph);
+      // Ticks
+      xH.fillStyle='#4b5563';xH.font=`${Math.max(7,w*0.04)|0}px sans-serif`;xH.textAlign='center';
+      xH.fillText('0',m,m+ph+10);xH.fillText('1',m+pw,m+ph+10);xH.fillText('u\u2081',m+pw/2,m+ph+10);
+    }
+
+    let idleT,autoR=false;
+    function startAR(){if(autoR)return;autoR=true;(function t(){if(!autoR)return;rotY+=0.004;draw();requestAnimationFrame(t);})();}
+    function resetIdle(){autoR=false;clearTimeout(idleT);idleT=setTimeout(startAR,4000);}
+    c3d.addEventListener('mousedown',()=>{autoR=false;clearTimeout(idleT);});
+
+    updUI();resize();resetIdle();
+    window.addEventListener('resize',resize);
+  }
+  initCE();
+  document.addEventListener('astro:after-swap',initCE);
+</script>

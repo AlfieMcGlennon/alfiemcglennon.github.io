@@ -1,0 +1,233 @@
+---
+---
+
+<div class="tri-explorer">
+  <div class="tri-header">
+    <h4>Trivariate Gaussian copula</h4>
+    <p class="tri-desc">Three correlated hazards in the unit cube. Red points exceed the threshold in <strong>all three</strong> variables simultaneously.</p>
+  </div>
+  <div class="tri-controls">
+    <div class="control-group">
+      <label>Pairwise correlation (&rho;)</label>
+      <div class="slider-row">
+        <input type="range" id="tri-rho" min="0" max="90" value="60" />
+        <span id="tri-rho-val" class="param-display">0.60</span>
+      </div>
+    </div>
+    <div class="control-group">
+      <label>Exceedance threshold</label>
+      <div class="slider-row">
+        <input type="range" id="tri-thresh" min="70" max="97" value="90" />
+        <span id="tri-thresh-val" class="param-display">0.90</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tri-layout">
+    <div class="tri-main">
+      <canvas id="tri-3d"></canvas>
+    </div>
+    <div class="tri-right">
+      <div class="tri-pair-panel">
+        <div class="tri-pair-label">u<sub>1</sub> vs u<sub>2</sub> <span>(wind &times; surge)</span></div>
+        <canvas id="tri-12"></canvas>
+      </div>
+      <div class="tri-pair-panel">
+        <div class="tri-pair-label">u<sub>1</sub> vs u<sub>3</sub> <span>(wind &times; precip)</span></div>
+        <canvas id="tri-13"></canvas>
+      </div>
+      <div class="tri-pair-panel">
+        <div class="tri-pair-label">u<sub>2</sub> vs u<sub>3</sub> <span>(surge &times; precip)</span></div>
+        <canvas id="tri-23"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="tri-stats" id="tri-stats"></div>
+  <p class="tri-hint">Drag to rotate the 3D view &middot; Red shaded regions show the joint exceedance zone</p>
+</div>
+
+<style>
+  .tri-explorer { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin: 2rem 0; }
+  .tri-header { margin-bottom: 0.75rem; }
+  .tri-header h4 { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0 0 0.25rem; }
+  .tri-desc { font-size: 0.82rem; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+  .tri-desc strong { color: #d73027; }
+  .tri-controls { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; align-items: flex-end; }
+  .control-group { display: flex; flex-direction: column; gap: 0.3rem; }
+  .control-group label { font-size: 0.72rem; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .slider-row { display: flex; align-items: center; gap: 0.5rem; }
+  input[type="range"] { width: 120px; accent-color: var(--accent); }
+  .param-display { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); }
+
+  .tri-layout { display: grid; grid-template-columns: 3fr 2fr; gap: 0.75rem; }
+  .tri-main canvas { width: 100%; aspect-ratio: 1; border-radius: 6px; background: #0a0e18; cursor: grab; display: block; border: 1px solid var(--border); }
+  .tri-main canvas:active { cursor: grabbing; }
+  .tri-right { display: flex; flex-direction: column; gap: 0.5rem; }
+  .tri-pair-panel { background: #0a0e18; border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem; }
+  .tri-pair-label { font-size: 0.68rem; font-family: var(--font-mono); color: var(--text-muted); text-align: center; margin-bottom: 0.15rem; }
+  .tri-pair-label span { color: var(--text-muted); opacity: 0.6; }
+  .tri-pair-panel canvas { width: 100%; aspect-ratio: 1.3; display: block; border-radius: 3px; }
+
+  .tri-stats { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin-top: 0.75rem; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border); }
+  .tri-stats strong { color: var(--accent); }
+  .tri-stats .exceed { color: #d73027; font-weight: 700; }
+  .tri-stats .expect { color: var(--text-muted); }
+
+  .tri-hint { text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.4rem; margin-bottom: 0; font-family: var(--font-mono); }
+
+  @media (max-width: 640px) {
+    .tri-layout { grid-template-columns: 1fr; }
+    .tri-right { flex-direction: row; }
+    .tri-pair-panel canvas { aspect-ratio: 1; }
+  }
+</style>
+
+<script>
+  function initTriCop() {
+    const c3 = document.getElementById('tri-3d');
+    const c12 = document.getElementById('tri-12'), c13 = document.getElementById('tri-13'), c23 = document.getElementById('tri-23');
+    if (!c3) return;
+    const x3=c3.getContext('2d'), x12=c12.getContext('2d'), x13=c13.getContext('2d'), x23=c23.getContext('2d');
+
+    let rho=0.6, thresh=0.9, rotY=-0.6, rotX=0.5, drag=false, lx=0, ly=0, pts=null;
+
+    function sz(cv,cx){const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2),w=Math.round(r.width),h=Math.round(r.height);cv.width=w*d;cv.height=h*d;cx.setTransform(d,0,0,d,0,0);return{w,h};}
+    let s3,s12,s13,s23;
+    function resize(){s3=sz(c3,x3);s12=sz(c12,x12);s13=sz(c13,x13);s23=sz(c23,x23);pts=null;draw();}
+
+    function ni(p){if(p<=0.001)return -3.1;if(p>=0.999)return 3.1;if(p<0.5)return -ra(Math.sqrt(-2*Math.log(p)));return ra(Math.sqrt(-2*Math.log(1-p)));}
+    function ra(t){return t-(2.515517+t*(0.802853+t*0.010328))/(1+t*(1.432788+t*(0.189269+t*0.001308)));}
+    function nc(x){const s=x<0?-1:1;x=Math.abs(x)/1.41421356;const t=1/(1+0.3275911*x);return 0.5*(1+s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x)));}
+
+    function sample(){
+      const n=2000,r=rho,r2=r*r;
+      const L22=Math.sqrt(1-r2), L32=(r-r2)/Math.sqrt(1-r2);
+      const L33sq=1-r2-L32*L32, L33=L33sq>0?Math.sqrt(L33sq):0.001;
+      pts=[];
+      for(let i=0;i<n;i++){
+        const z1=ni(Math.random()*0.96+0.02),z2=ni(Math.random()*0.96+0.02),z3=ni(Math.random()*0.96+0.02);
+        pts.push([nc(z1), nc(r*z1+L22*z2), nc(r*z1+L32*z2+L33*z3)]);
+      }
+    }
+
+    document.getElementById('tri-rho').addEventListener('input',e=>{rho=parseFloat(e.target.value)/100;document.getElementById('tri-rho-val').textContent=rho.toFixed(2);pts=null;draw();});
+    document.getElementById('tri-thresh').addEventListener('input',e=>{thresh=parseFloat(e.target.value)/100;document.getElementById('tri-thresh-val').textContent=thresh.toFixed(2);draw();});
+
+    c3.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;e.preventDefault();});
+    window.addEventListener('mouseup',()=>{if(drag){drag=false;resetIdle();}});
+    window.addEventListener('mousemove',e=>{if(!drag)return;rotY+=(e.clientX-lx)*0.01;rotX=Math.max(0.15,Math.min(1.2,rotX+(e.clientY-ly)*0.007));lx=e.clientX;ly=e.clientY;draw();});
+    c3.addEventListener('touchstart',e=>{if(e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}},{passive:true});
+    c3.addEventListener('touchend',()=>{drag=false;resetIdle();});
+    c3.addEventListener('touchmove',e=>{if(!drag||e.touches.length!==1)return;e.preventDefault();rotY+=(e.touches[0].clientX-lx)*0.01;rotX=Math.max(0.15,Math.min(1.2,rotX+(e.touches[0].clientY-ly)*0.007));lx=e.touches[0].clientX;ly=e.touches[0].clientY;draw();},{passive:false});
+
+    function proj(x,y,z,w,h){const cr=Math.cos(rotY),sr=Math.sin(rotY);let px=x*cr-z*sr,pz=x*sr+z*cr;const ct=Math.cos(rotX),st=Math.sin(rotX);const py=y*ct-pz*st;pz=y*st+pz*ct;const sc=Math.min(w,h)*0.36;return{x:w/2+px*sc,y:h/2-py*sc,z:pz};}
+
+    function draw(){
+      if(!pts) sample();
+      const exceed=pts.map(p=>p[0]>thresh&&p[1]>thresh&&p[2]>thresh);
+      const nE=exceed.filter(Boolean).length;
+      const indep=pts.length*Math.pow(1-thresh,3);
+      const ratio=indep>0.01?(nE/indep).toFixed(1):'--';
+
+      document.getElementById('tri-stats').innerHTML=
+        `<strong>${pts.length}</strong> samples &middot; threshold <strong>${thresh.toFixed(2)}</strong> &middot; `+
+        `joint exceedances: <span class="exceed">${nE}</span> &middot; `+
+        `independent expectation: <span class="expect">${Math.max(0.1,indep).toFixed(1)}</span> &middot; `+
+        `risk ratio: <span class="exceed">${ratio}&times;</span>`;
+
+      draw3D(exceed);
+      drawPair(x12,s12,0,1,exceed);
+      drawPair(x13,s13,0,2,exceed);
+      drawPair(x23,s23,1,2,exceed);
+    }
+
+    function draw3D(exceed){
+      const{w,h}=s3;x3.fillStyle='#0a0e18';x3.fillRect(0,0,w,h);
+      // Cube edges
+      const edges=[[[-1,-1,-1],[1,-1,-1]],[[-1,-1,-1],[-1,1,-1]],[[-1,-1,-1],[-1,-1,1]],[[1,1,1],[-1,1,1]],[[1,1,1],[1,-1,1]],[[1,1,1],[1,1,-1]],[[1,-1,-1],[1,-1,1]],[[1,-1,-1],[1,1,-1]],[[-1,1,-1],[1,1,-1]],[[-1,1,-1],[-1,1,1]],[[-1,-1,1],[1,-1,1]],[[-1,-1,1],[-1,1,1]]];
+      x3.strokeStyle='rgba(103,169,207,0.25)';x3.lineWidth=0.8;
+      for(const[a,b]of edges){const p1=proj(a[0],a[1],a[2],w,h),p2=proj(b[0],b[1],b[2],w,h);x3.beginPath();x3.moveTo(p1.x,p1.y);x3.lineTo(p2.x,p2.y);x3.stroke();}
+
+      // Axis tick marks on cube edges
+      x3.fillStyle='rgba(103,169,207,0.3)';x3.font=`${Math.max(8,w*0.022)|0}px sans-serif`;x3.textAlign='center';
+      for(let t=0;t<=1;t+=0.5){
+        const v=(t-0.5)*2;
+        const p=proj(v,-1.05,-1,w,h); x3.fillText(t.toFixed(1),p.x,p.y+8);
+      }
+
+      // Threshold planes
+      const tv=(thresh-0.5)*2;
+      x3.strokeStyle='rgba(215,48,39,0.2)';x3.lineWidth=0.6;
+      // Draw three threshold planes
+      for(const plane of [
+        [proj(tv,-1,-1,w,h),proj(tv,1,-1,w,h),proj(tv,1,1,w,h),proj(tv,-1,1,w,h)],
+        [proj(-1,tv,-1,w,h),proj(1,tv,-1,w,h),proj(1,tv,1,w,h),proj(-1,tv,1,w,h)],
+        [proj(-1,-1,tv,w,h),proj(1,-1,tv,w,h),proj(1,1,tv,w,h),proj(-1,1,tv,w,h)]
+      ]){
+        x3.beginPath();plane.forEach((p,i)=>i===0?x3.moveTo(p.x,p.y):x3.lineTo(p.x,p.y));x3.closePath();
+        x3.fillStyle='rgba(215,48,39,0.03)';x3.fill();x3.stroke();
+      }
+
+      // Points sorted by depth
+      const sorted=pts.map((p,i)=>({p,i,pr:proj((p[0]-0.5)*2,(p[1]-0.5)*2,(p[2]-0.5)*2,w,h)}));
+      sorted.sort((a,b)=>b.pr.z-a.pr.z);
+      for(const{p,i,pr}of sorted){
+        const isE=exceed[i];
+        // Depth-based alpha: closer points are brighter
+        const depthAlpha = Math.max(0.15, Math.min(0.7, 0.5 + pr.z * 0.3));
+        x3.beginPath();x3.arc(pr.x,pr.y,isE?3:1.5,0,6.283);
+        x3.fillStyle=isE?'rgba(215,48,39,0.9)':`rgba(56,189,248,${depthAlpha.toFixed(2)})`;
+        x3.fill();
+      }
+      // Axis labels
+      x3.fillStyle='rgba(103,169,207,0.6)';x3.font=`600 ${Math.max(11,w*0.035)|0}px sans-serif`;x3.textAlign='center';
+      const pa=proj(1.25,-1,-1,w,h);x3.fillText('u\u2081 (wind)',pa.x,pa.y+12);
+      const pb=proj(-1,1.25,-1,w,h);x3.fillText('u\u2082 (surge)',pb.x,pb.y-4);
+      const pc=proj(-1,-1,1.25,w,h);x3.fillText('u\u2083 (precip)',pc.x,pc.y+12);
+    }
+
+    function drawPair(cx,s,i1,i2,exceed){
+      const{w,h}=s;cx.fillStyle='#0a0e18';cx.fillRect(0,0,w,h);
+      const m=Math.max(4,w*0.06),pw=w-2*m,ph=h-2*m;
+      cx.strokeStyle='#1e2030';cx.lineWidth=0.5;cx.strokeRect(m,m,pw,ph);
+
+      // Threshold region
+      const tx=m+thresh*pw,ty=m+(1-thresh)*ph;
+      cx.fillStyle='rgba(215,48,39,0.06)';cx.fillRect(tx,m,pw-(thresh*pw),ty-m);
+      cx.strokeStyle='#d7302725';cx.lineWidth=0.8;cx.setLineDash([2,2]);
+      cx.beginPath();cx.moveTo(tx,m);cx.lineTo(tx,m+ph);cx.stroke();
+      cx.beginPath();cx.moveTo(m,ty);cx.lineTo(m+pw,ty);cx.stroke();
+      cx.setLineDash([]);
+
+      // Non-exceeding points first
+      for(let k=0;k<pts.length;k++){
+        if(exceed[k]) continue;
+        const u=pts[k][i1],v=pts[k][i2];
+        cx.beginPath();cx.arc(m+u*pw,m+(1-v)*ph,1.2,0,6.283);
+        cx.fillStyle='rgba(56,189,248,0.35)';cx.fill();
+      }
+      // Exceeding points on top
+      for(let k=0;k<pts.length;k++){
+        if(!exceed[k]) continue;
+        const u=pts[k][i1],v=pts[k][i2];
+        cx.beginPath();cx.arc(m+u*pw,m+(1-v)*ph,2.5,0,6.283);
+        cx.fillStyle='rgba(215,48,39,0.9)';cx.fill();
+      }
+
+      // Tick labels
+      cx.fillStyle='#4b5563';cx.font=`${Math.max(6,w*0.05)|0}px sans-serif`;cx.textAlign='center';
+      cx.fillText('0',m,m+ph+8);cx.fillText('1',m+pw,m+ph+8);
+    }
+
+    let idleT,autoR=false;
+    function startAR(){if(autoR)return;autoR=true;(function t(){if(!autoR)return;rotY+=0.004;draw();requestAnimationFrame(t);})();}
+    function resetIdle(){autoR=false;clearTimeout(idleT);idleT=setTimeout(startAR,4000);}
+    c3.addEventListener('mousedown',()=>{autoR=false;clearTimeout(idleT);});
+
+    resize();resetIdle();
+    window.addEventListener('resize',resize);
+  }
+  initTriCop();
+  document.addEventListener('astro:after-swap',initTriCop);
+</script>

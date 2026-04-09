@@ -46,6 +46,14 @@
   --accent-subtle: rgba(124, 58, 237, 0.08);
 }
 
+[data-project="compound-risk"] {
+  --accent: #ef8a62;
+  --accent-deep: #c4603a;
+  --accent-sky: #f4a582;
+  --accent-glow: rgba(239, 138, 98, 0.15);
+  --accent-subtle: rgba(239, 138, 98, 0.08);
+}
+
 [data-project="climate-stripes"] {
   --accent: #2b7cd4;
   --accent-deep: #1a5fb4;
