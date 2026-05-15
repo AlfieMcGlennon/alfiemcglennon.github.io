@@ -3,106 +3,348 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base>
-  <section class="section hero">
-    <h1 class="hero-name">Alfie McGlennon</h1>
-    <p class="hero-sub">MSc Climate Change &amp; AI // University of Reading</p>
-  </section>
+  <!-- Hero: animated atmospheric sky -->
+  <section class="hero" aria-label="Introduction">
+    <div class="sky" aria-hidden="true">
+      <svg
+        class="sky-svg"
+        viewBox="0 0 1200 600"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="sky-gradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#d8e8eb" />
+            <stop offset="55%" stop-color="#ece8dc" />
+            <stop offset="100%" stop-color="#f3e1c8" />
+          </linearGradient>
+          <filter id="cloud-blur" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="5" />
+          </filter>
+          <symbol id="cloud-a" viewBox="0 0 320 100">
+            <ellipse cx="80" cy="60" rx="80" ry="26" fill="#ffffff" />
+            <ellipse cx="160" cy="48" rx="100" ry="32" fill="#ffffff" />
+            <ellipse cx="240" cy="62" rx="74" ry="22" fill="#ffffff" />
+          </symbol>
+          <symbol id="cloud-b" viewBox="0 0 260 90">
+            <ellipse cx="70" cy="55" rx="70" ry="22" fill="#ffffff" />
+            <ellipse cx="150" cy="44" rx="80" ry="28" fill="#ffffff" />
+            <ellipse cx="210" cy="58" rx="50" ry="18" fill="#ffffff" />
+          </symbol>
+          <symbol id="cloud-c" viewBox="0 0 200 70">
+            <ellipse cx="60" cy="40" rx="56" ry="18" fill="#ffffff" />
+            <ellipse cx="130" cy="34" rx="62" ry="22" fill="#ffffff" />
+          </symbol>
+        </defs>
 
-  <section class="section about">
-    <p>
-      My MSc dissertation builds a copula-based framework for predicting
-      compound heat stress risk across European regions. The approach uses a
-      multiplicative decomposition that separates compound hazard bias in
-      climate models into a marginal component and a dependence component,
-      then trains XGBoost to predict Kendall&rsquo;s tau dependence from
-      large-scale atmospheric circulation patterns. The data comes from ERA5
-      reanalysis, CMIP6 projections, and the Destination Earth climate digital
-      twin.
-    </p>
-    <p>
-      I&rsquo;m targeting roles in climate risk analytics and reinsurance,
-      particularly at Swiss Re and Munich Re, or in operational meteorology
-      adjacent to ECMWF. The through-line across my work is applying machine
-      learning and statistical methods to climate data where the outputs have
-      operational or commercial value.
-    </p>
-  </section>
+        <rect width="1200" height="600" fill="url(#sky-gradient)" />
 
-  <section class="section">
-    <h2 class="section-heading">Projects</h2>
+        <!-- High wisps, slow -->
+        <g class="cloud-layer cloud-layer-slow" filter="url(#cloud-blur)">
+          <use href="#cloud-a" x="-400" y="80" width="320" height="100" opacity="0.55" />
+          <use href="#cloud-c" x="200" y="130" width="200" height="70" opacity="0.45" />
+          <use href="#cloud-b" x="700" y="60" width="260" height="90" opacity="0.55" />
+          <use href="#cloud-a" x="1100" y="110" width="320" height="100" opacity="0.5" />
+        </g>
 
-    <article class="project">
-      <h3 class="project-title">Compound heat stress risk modelling</h3>
-      <p class="project-desc">
-        Copula-based bivariate framework for temperature and humidity extremes
-        across European regions. Multiplicative decomposition of compound
-        hazard bias with ML-driven dependence correction.
-      </p>
-      <p class="project-tech">Python, xarray, scipy, XGBoost, ERA5, CMIP6, DestinE</p>
-    </article>
+        <!-- Mid clouds, medium speed -->
+        <g class="cloud-layer cloud-layer-medium" filter="url(#cloud-blur)">
+          <use href="#cloud-b" x="-300" y="220" width="260" height="90" opacity="0.7" />
+          <use href="#cloud-a" x="350" y="250" width="320" height="100" opacity="0.6" />
+          <use href="#cloud-c" x="900" y="200" width="200" height="70" opacity="0.7" />
+        </g>
 
-    <article class="project">
-      <h3 class="project-title">
-        <a href="https://alfiemcglennon.github.io/gb-grid-tool/" target="_blank" rel="noopener noreferrer">GB Grid Scenario Tool</a>
-      </h3>
-      <p class="project-desc">
-        Interactive transmission grid model built from public NESO data. 27
-        TNUoS zones, DC power flow with real backbone reactances, three
-        dispatch modes. Validated against NESO transfer capabilities (B6F
-        within 2%).
-      </p>
-      <p class="project-tech">JavaScript, Leaflet, WebAssembly, ERA5</p>
-    </article>
+        <!-- Low ambers near horizon, fastest -->
+        <g class="cloud-layer cloud-layer-fast" filter="url(#cloud-blur)">
+          <use href="#cloud-c" x="-200" y="400" width="200" height="70" opacity="0.75" style="--tint:#f3d6b3" />
+          <use href="#cloud-b" x="500" y="430" width="260" height="90" opacity="0.7" />
+          <use href="#cloud-a" x="950" y="410" width="320" height="100" opacity="0.7" />
+        </g>
+      </svg>
+    </div>
 
-    <article class="project">
-      <h3 class="project-title">RL grid dispatch agents</h3>
-      <p class="project-desc">
-        PPO agents trained on 9 years of GB generation data to learn dispatch
-        strategies from scratch. MLP, CNN, and 27-zone zonal architectures.
-        Went from spending 30B/year to within 6% of real grid operations.
-      </p>
-      <p class="project-tech">Python, Stable Baselines3, SLURM, ERA5</p>
-    </article>
-
-    <article class="project">
-      <h3 class="project-title">Quantum ML for atmospheric regression</h3>
-      <p class="project-desc">
-        Variational quantum circuits applied to ERA5 temperature fields and
-        the Lorenz &rsquo;63 system. Fourier decomposition as an
-        interpretability tool for per-qubit structured VQC regression.
-      </p>
-      <p class="project-tech">Python, PennyLane, ERA5</p>
-    </article>
-  </section>
-
-  <section class="section">
-    <h2 class="section-heading">Stack</h2>
-    <div class="stack">
-      <p class="stack-row">
-        <span class="stack-label">Languages:</span>
-        <span class="stack-value">Python, JavaScript/TypeScript, Bash</span>
-      </p>
-      <p class="stack-row">
-        <span class="stack-label">ML &amp; stats:</span>
-        <span class="stack-value">XGBoost, scikit-learn, Stable Baselines3, PyTorch, PennyLane, copula methods, scipy</span>
-      </p>
-      <p class="stack-row">
-        <span class="stack-label">Climate &amp; geo:</span>
-        <span class="stack-value">xarray, ERA5, CMIP6, UKCP18, DestinE, cartopy, cdsapi</span>
-      </p>
-      <p class="stack-row">
-        <span class="stack-label">Infrastructure:</span>
-        <span class="stack-value">SLURM, Linux, Git, LaTeX</span>
-      </p>
-      <p class="stack-row">
-        <span class="stack-label">Web:</span>
-        <span class="stack-value">Astro, Leaflet, D3.js, WebAssembly</span>
-      </p>
+    <div class="hero-content">
+      <h1 class="hero-name">Alfie McGlennon</h1>
+      <p class="hero-affiliation">MSc Climate Change &amp; AI // University of Reading</p>
+      <p class="hero-tag">Compound extremes, copula methods, and machine learning for climate risk.</p>
     </div>
   </section>
 
-  <section class="section links">
-    <a href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer">GitHub</a>
-    <a href="https://www.linkedin.com/in/alfred-mcglennon-927589253/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+  <!-- About -->
+  <section class="page about">
+    <div class="about-grid">
+      <div class="about-text">
+        <p>
+          I&rsquo;m doing the MSc in Climate Change and AI at the University of Reading.
+          My dissertation builds a copula-based framework for predicting compound heat
+          stress risk across European regions. The approach uses a multiplicative
+          decomposition that splits climate-model bias in compound extremes into a
+          marginal component and a dependence component. The ML angle is training
+          XGBoost to predict Kendall&rsquo;s tau, the dependence statistic, from
+          large-scale atmospheric circulation patterns. I work with ERA5 reanalysis,
+          CMIP6 projections, and Destination Earth climate digital-twin data.
+        </p>
+        <p>
+          What I keep coming back to is where climate-model biases in multivariate
+          extremes actually come from, and whether ML can correct dependence
+          structures directly rather than bias-correcting one variable at a time.
+          Compound risk is where the gap between what climate models simulate and
+          what actually hits people on the ground tends to be widest. If you treat
+          hazards as independent, you systematically underestimate their joint
+          probability of occurring together. Most operational climate risk work
+          still does.
+        </p>
+        <p>
+          I&rsquo;m targeting roles in climate risk analytics and reinsurance,
+          particularly at Swiss Re and Munich Re, or operational meteorology
+          adjacent to ECMWF. The through-line across my work is applying
+          statistical and machine-learning methods to climate data where the
+          outputs have operational or commercial value: quantifying compound
+          risk for an insurer, improving climate-model evaluation, or optimising
+          energy grid dispatch under weather uncertainty.
+        </p>
+        <p>
+          Background: BSc Meteorology and Climate, also at Reading. Based in the
+          Reading area.
+        </p>
+      </div>
+
+      <!-- TODO: replace src below with the actual photo path once supplied (e.g. /images/alfie.jpg) -->
+      <figure class="about-photo" aria-hidden="true">
+        <div class="photo-placeholder">
+          <span>Photo</span>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Jump-to cards -->
+  <section class="page jump">
+    <ul class="jump-cards">
+      <li>
+        <a href="/research/" class="jump-card">
+          <p class="jump-card-label">Research</p>
+          <p class="jump-card-line">Compound heat stress, copulas, and where climate models go wrong.</p>
+        </a>
+      </li>
+      <li>
+        <a href="/projects/" class="jump-card">
+          <p class="jump-card-label">Projects</p>
+          <p class="jump-card-line">RL grid dispatch, quantum ML, climate data tooling, and more.</p>
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/AlfieMcGlennon" class="jump-card" target="_blank" rel="noopener noreferrer">
+          <p class="jump-card-label">GitHub</p>
+          <p class="jump-card-line">Open-source work and side projects.</p>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.linkedin.com/in/alfred-mcglennon-927589253/" class="jump-card" target="_blank" rel="noopener noreferrer">
+          <p class="jump-card-label">LinkedIn</p>
+          <p class="jump-card-line">Career history and longer posts.</p>
+        </a>
+      </li>
+    </ul>
   </section>
 </Base>
+
+<style>
+  /* ── Hero ─────────────────────────────────────────── */
+
+  .hero {
+    position: relative;
+    width: 100%;
+    height: clamp(440px, 75vh, 640px);
+    overflow: hidden;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .sky {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .sky-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .cloud-layer {
+    transform-origin: center;
+    will-change: transform;
+  }
+
+  .cloud-layer-slow { animation: drift-slow 180s linear infinite; }
+  .cloud-layer-medium { animation: drift-medium 120s linear infinite; }
+  .cloud-layer-fast { animation: drift-fast 80s linear infinite; }
+
+  @keyframes drift-slow {
+    from { transform: translateX(-8%); }
+    to   { transform: translateX(8%); }
+  }
+  @keyframes drift-medium {
+    from { transform: translateX(-12%); }
+    to   { transform: translateX(12%); }
+  }
+  @keyframes drift-fast {
+    from { transform: translateX(-18%); }
+    to   { transform: translateX(18%); }
+  }
+
+  /* Alternate direction so layers move past each other */
+  .cloud-layer-medium { animation-direction: alternate; }
+  .cloud-layer-slow { animation-direction: alternate; }
+  .cloud-layer-fast { animation-direction: alternate; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cloud-layer { animation: none; }
+  }
+
+  .hero-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 1.5rem;
+    max-width: 920px;
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  .hero-name {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: clamp(2.6rem, 7vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.022em;
+    color: var(--ink);
+    margin-bottom: 0.85rem;
+  }
+
+  .hero-affiliation {
+    font-family: var(--font-mono);
+    font-size: clamp(0.85rem, 1.4vw, 1rem);
+    color: var(--teal-deep);
+    margin-bottom: 0.85rem;
+    letter-spacing: 0.01em;
+  }
+
+  .hero-tag {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: clamp(1rem, 1.7vw, 1.2rem);
+    color: var(--ink-dim);
+    max-width: 32ch;
+    line-height: 1.45;
+  }
+
+  /* ── About ────────────────────────────────────────── */
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+    align-items: start;
+  }
+
+  @media (min-width: 760px) {
+    .about-grid {
+      grid-template-columns: 1fr 200px;
+      gap: 2.5rem;
+    }
+  }
+
+  .about-photo {
+    margin: 0;
+    width: 100%;
+    max-width: 220px;
+  }
+
+  .photo-placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Jump cards ───────────────────────────────────── */
+
+  .jump {
+    padding-top: 0;
+  }
+
+  .jump-cards {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  @media (min-width: 640px) {
+    .jump-cards {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .jump-card {
+    display: block;
+    padding: 1.5rem 0.25rem;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink);
+    text-decoration: none;
+    border-left: 0;
+    border-right: 0;
+    background: none;
+    transition: background 0.2s ease;
+  }
+
+  .jump-card:hover {
+    background: var(--bg-raised);
+  }
+
+  @media (min-width: 640px) {
+    .jump-cards li:nth-child(odd) .jump-card {
+      padding-right: 1.5rem;
+    }
+    .jump-cards li:nth-child(even) .jump-card {
+      padding-left: 1.5rem;
+      border-left: 1px solid var(--rule);
+    }
+  }
+
+  .jump-card-label {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--teal-deep);
+    margin: 0 0 0.3rem;
+  }
+
+  .jump-card:hover .jump-card-label {
+    color: var(--amber);
+  }
+
+  .jump-card-line {
+    font-family: var(--font-serif);
+    font-size: 0.98rem;
+    color: var(--ink-muted);
+    margin: 0;
+    line-height: 1.55;
+  }
+</style>

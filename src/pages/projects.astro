@@ -1,0 +1,240 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Projects | Alfie McGlennon"
+  description="Applied builds — GB grid scenario tool with reinforcement learning, quantum ML for atmospheric regression, climate data tooling, and more."
+  ogTitle="Projects | Alfie McGlennon"
+  ogDescription="Extracurricular builds at the intersection of climate, weather, and ML. With the story behind each one, not just the spec."
+>
+  <article class="page projects">
+    <header class="projects-head">
+      <p class="kicker">Projects</p>
+      <h1>Things I&rsquo;ve built, and why</h1>
+      <p class="lede">
+        Most of these started as curiosities and got hooked into something
+        larger. Each entry below is the story behind the build, not just
+        what it does.
+      </p>
+    </header>
+
+    <!-- ── Project 1: GB Grid Scenario Tool ─────────────── -->
+    <section class="project">
+      <h2>GB Grid Scenario Tool</h2>
+      <p>
+        I&rsquo;d seen the visually compelling world of teaching AI to drive
+        cars, and all the RL demos that come with it, and I wanted to test
+        the same approach on something I actually understood: GB electricity
+        grid dispatch. Once I started, I was hooked. What began as a
+        curiosity became a long exercise in data assimilation, and a test of
+        how far you can get with a dual approach: human-led architecture and
+        decision-making with AI doing the execution. Could I build something
+        meaningful, or even usable, from only public data?
+      </p>
+      <p>
+        What I ended up with is a browser-based DC power flow model of the
+        GB transmission network, built from NESO open data. It runs at two
+        resolutions: 27 TNUoS zones, and 82 FLOP zones that match
+        NESO&rsquo;s internal boundary analysis resolution. Three dispatch
+        modes show the progression from naive to realistic. A simple all-on
+        dispatch. A cost-merit-order dispatch with minimum stable level
+        constraints. And a full LOPF that minimises system cost subject to
+        boundary flow limits, solved using HiGHS compiled to WebAssembly.
+        Weather scenarios are driven by 34 years of ERA5 climatology, and
+        you can drag a slider from 2024 to 2035 to see planned network
+        reinforcements appear. The B6F boundary flow validates within 2% of
+        NESO&rsquo;s published ETYS transfer capabilities at the 27-zone
+        resolution.
+      </p>
+      <p>
+        The RL layer sits on top of that. I trained PPO agents on nine years
+        of real GB generation and demand data, plus Elexon wholesale prices
+        and ERA5 weather, with the grid model as the environment. I
+        compared MLP, CNN, and 27-zone zonal architectures, the largest
+        with 448 thousand parameters reading 72 ERA5 weather channels.
+        Iterative reward design moved agents from spending around £30
+        billion a year on dispatch to operating within 6% of real grid
+        costs. The interesting finding was that spatial CNN observations
+        could not improve on MLPs without topology-aware action spaces.
+        The action space was the bottleneck, not the observation space.
+      </p>
+      <p class="tech-line">JavaScript, React, Leaflet, WebAssembly (HiGHS), Python, Stable-Baselines3, SLURM, ERA5</p>
+      <p class="project-links">
+        <a href="https://alfiemcglennon.github.io/gb-grid-tool/" target="_blank" rel="noopener noreferrer">Live demo</a>
+        <span class="links-sep">·</span>
+        <a href="https://github.com/AlfieMcGlennon/gb-grid-tool" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+      </p>
+    </section>
+
+    <!-- ── Project 2: Quantum ML for atmospheric regression ─ -->
+    <section class="project">
+      <h2>Quantum ML for atmospheric regression</h2>
+      <p>
+        Quantum computing as a research direction is interesting precisely
+        because nobody yet knows what it will be good for. I wanted to test
+        whether variational quantum circuits could do anything meaningful
+        on real atmospheric data, or whether they were a solution chasing
+        problems. I built VQC regression models on ERA5 temperature fields
+        and on the Lorenz &rsquo;63 system, using PennyLane, and ran depth
+        sweeps, noise ablations, and cross-validation on the Lorenz
+        attractor.
+      </p>
+      <p>
+        The honest answer on raw performance: VQCs did not beat MLPs of
+        comparable size on either problem. The classical baseline was
+        strictly better. Where the project landed instead was on
+        interpretability. Per-qubit structured VQC regression admits a
+        Fourier decomposition that lets you read off, qubit by qubit, which
+        frequency components a given circuit is using. That turned out to
+        be the more useful contribution. Not a faster predictor, but a
+        sharper lens on what these circuits are actually doing when they
+        fit data. I documented the single-seed limitations of the
+        experiments and the VQC versus MLP gap explicitly in the handoff
+        notes.
+      </p>
+      <p class="tech-line">Python, PennyLane, ERA5, Lorenz &rsquo;63</p>
+    </section>
+
+    <!-- ── Project 3: Climate Data Quickstart ───────────── -->
+    <section class="project">
+      <h2>Climate Data Quickstart</h2>
+      <p>
+        Climate data is fragmented. Every dataset has its own access
+        pattern: a CDS API for ERA5, an ESGF queue for CMIP6, raw FTP for
+        HadCET, a separate Earthdata account for NASA products, and so on.
+        Getting a working environment for any one of them is solvable in an
+        afternoon. Getting working environments for all of them, with
+        credentials configured and credentials documented and a stable
+        place to put the files, is a quietly large amount of plumbing. For
+        most early-career researchers, that plumbing is what stands between
+        them and the actual science.
+      </p>
+      <p>
+        Climate Data Quickstart is a local desktop app and script library
+        covering 19 datasets across five categories. Reanalysis (ERA5
+        variants and ARCO-ERA5), climate projections (CMIP6 via CDS and
+        ESGF), observational temperature (HadCET, HadCRUT5), precipitation
+        and station observations (GHCNd, CHIRPS, E-OBS), and specialised
+        products like UKCP18, GloFAS, GPWv4, and ECMWF Open Data. It
+        bundles setup scripts for Windows, macOS, Linux, and conda, exposes
+        a Streamlit interface for downloading and exploring data, and
+        supports lazy loading via Earth Data Hub for the larger products.
+        It was built using a three-stage agentic pipeline: dataset schema
+        extraction, code generation, then validation against each
+        provider&rsquo;s actual API.
+      </p>
+      <p class="tech-line">Python, Streamlit, xarray, cdsapi, NetCDF/GRIB/Zarr</p>
+      <p class="project-links">
+        <a href="https://github.com/AlfieMcGlennon/climate-data-quickstart" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+      </p>
+    </section>
+
+    <!-- ── Project 4: City Climate Stripes ──────────────── -->
+    <section class="project">
+      <h2>City Climate Stripes</h2>
+      <p>
+        Ed Hawkins&rsquo; warming stripes are one of the most effective
+        single climate visualisations ever made. I wanted to extend the
+        idea to individual cities, with a few extras: switching between
+        annual and seasonal anomalies (DJF, MAM, JJA, SON), toggling bars
+        versus stripes, adjustable baseline periods (1850 to 1900, or 1961
+        to 2010), and a fixed-versus-auto colour scaling. Built on Berkeley
+        Earth gridded temperatures with GeoNames city coordinates, runs
+        entirely client-side, exports PNGs. A small exploratory thing, not
+        a scientific dataset.
+      </p>
+      <p class="tech-line">HTML, JavaScript, D3, Berkeley Earth, GeoNames</p>
+      <p class="project-links">
+        <a href="https://alfiemcglennon.github.io/city-climate-stripes/" target="_blank" rel="noopener noreferrer">Live demo</a>
+        <span class="links-sep">·</span>
+        <a href="https://github.com/AlfieMcGlennon/city-climate-stripes" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+      </p>
+    </section>
+
+    <!-- ── Project 5: Climate Playbook ──────────────────── -->
+    <section class="project">
+      <h2>Climate Playbook</h2>
+      <p>
+        Climate Playbook is an interactive climate education platform aimed
+        at UK schools, Key Stage 1 through Key Stage 5. The motivation is
+        straightforward: most climate education at school level is either
+        too patronising for the older students or too jargon-heavy for the
+        younger ones, and very little of it puts the physics in the
+        children&rsquo;s hands. I want a set of modular, MDX-based lessons
+        that scale with the reader, with interactive figures showing the
+        actual mechanisms.
+      </p>
+      <p>
+        This is a slow project. Pedagogy is hard, and designing content
+        that works across a six-year age range alongside an MSc workload is
+        realistically a multi-year arc. I&rsquo;m framing it honestly as a
+        work in progress. British English throughout, no edutainment, no
+        gamification for its own sake.
+      </p>
+      <p class="tech-line">Astro, MDX, D3, vanilla JavaScript</p>
+    </section>
+
+    <!-- ── Project 6: Electricity demand forecasting (India) ─ -->
+    <section class="project">
+      <h2>Electricity demand forecasting (India)</h2>
+      <p>
+        An MSc module sub-project. State-level electricity demand
+        prediction for India using ERA5 weather variables, with linear
+        regression, XGBoost, and LSTM models as a progression in capacity.
+        I used temporal cross-validation throughout and mapped per-state
+        R-squared as a choropleth, which made the geography of the problem
+        obvious. Weather-driven prediction works well in the southern
+        states where demand is dominated by cooling load, and badly in the
+        industrial north where demand is dominated by non-weather factors.
+        A short exercise in building the whole pipeline end to end on a
+        non-UK grid.
+      </p>
+      <p class="tech-line">Python, scikit-learn, XGBoost, PyTorch, ERA5</p>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .projects-head {
+    margin-bottom: 3rem;
+  }
+
+  .project {
+    border-top: 1px solid var(--rule);
+    padding-top: 2.75rem;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .project:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .project h2 {
+    margin-top: 0;
+    margin-bottom: 1.2rem;
+  }
+
+  .project-links {
+    margin-top: 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .project-links a {
+    color: var(--teal-deep);
+    border-bottom: 1px solid var(--teal-soft);
+  }
+
+  .project-links a:hover {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+  }
+
+  .links-sep {
+    color: var(--ink-faint);
+    margin: 0 0.5rem;
+  }
+</style>

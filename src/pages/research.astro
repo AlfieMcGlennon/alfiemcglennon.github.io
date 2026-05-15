@@ -1,0 +1,174 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Research | Alfie McGlennon"
+  description="Compound heat stress risk modelling across Europe. Copula-based multiplicative decomposition of climate-model bias, with XGBoost predicting Kendall's tau dependence from atmospheric circulation patterns."
+  ogTitle="Research | Alfie McGlennon"
+  ogDescription="Compound heat stress, copula methods, and ML for dependence correction in climate models."
+>
+  <article class="page-narrow research">
+    <p class="kicker">Dissertation</p>
+    <h1>Predicting compound heat stress risk across Europe</h1>
+    <p class="lede">
+      A copula-based framework for diagnosing where climate-model bias in
+      compound extremes actually comes from, and using machine learning to
+      correct the dependence structure directly.
+    </p>
+
+    <p>
+      Climate models simulate compound extremes badly. A heatwave with high
+      humidity, a drought followed by intense rainfall, a wind storm
+      coinciding with a storm surge: these are the events that drive real
+      impacts. They are also where global climate models tend to disagree
+      most strongly with reality. Most existing bias correction methods
+      treat variables one at a time, which fixes each marginal distribution
+      but leaves the joint dependence structure untouched. If you
+      bias-correct temperature and humidity separately, you get a corrected
+      climatology for each, and a compound heat-stress climatology that
+      may still be wrong.
+    </p>
+
+    <h2>The decomposition</h2>
+    <p>
+      My dissertation develops a multiplicative decomposition of compound
+      hazard bias:
+    </p>
+    <pre><code>M_total = M_marginal &times; M_dependence</code></pre>
+    <p>
+      This splits compound bias into two diagnostic components.
+      <strong>M_marginal</strong> captures the bias you would see if the
+      dependence structure were correctly modelled and only the marginals
+      were wrong. <strong>M_dependence</strong> captures the bias that
+      remains after the marginals are corrected, attributable purely to
+      dependence-structure error. The two multiply together to recover the
+      full compound bias. Once decomposed, you can see which component
+      dominates in which region and at which return period. That alone
+      changes which method you reach for to correct it.
+    </p>
+
+    <h2>Copulas, briefly</h2>
+    <p>
+      The decomposition is built on copulas. A copula is a function that
+      fully captures the dependence between variables, completely separated
+      from their individual distributions. The mathematical foundation is
+      Sklar&rsquo;s theorem from 1959: every multivariate distribution can
+      be written as its marginal distributions composed with a copula that
+      encodes their dependence. You fit the marginals to your data, fit the
+      copula to your data, and the two can be modified independently.
+      Climate models can have correct dependence with biased marginals, or
+      vice versa. Marginal bias correction without addressing the copula
+      leaves the dependence error in place, and on compound extremes that
+      is exactly the error that matters.
+    </p>
+
+    <h2>ML for dependence</h2>
+    <p>
+      The new part is the ML-driven dependence correction. I train XGBoost
+      to predict Kendall&rsquo;s tau, the rank-based dependence statistic,
+      from large-scale atmospheric circulation patterns. The features are
+      circulation modes from ERA5 reanalysis: geopotential height fields,
+      mean sea-level pressure, jet-stream position indices. The label is
+      the local Kendall&rsquo;s tau between temperature and specific
+      humidity, computed for each grid cell on a rolling window. If
+      circulation patterns shape dependence, and we can learn that mapping,
+      we can predict the dependence structure under CMIP6 projections
+      directly, rather than assuming it from a fitted copula. This is a
+      different kind of climate-model-aware ML: not predicting the
+      meteorological field itself, but predicting how its variables
+      co-vary.
+    </p>
+
+    <h2>Data and validation</h2>
+    <p>
+      The dataset stack is ERA5 reanalysis as the ground-truth dependence
+      climatology over 1981 to 2020, CMIP6 projections for the historical
+      and future scenarios, and Destination Earth digital-twin output where
+      it overlaps. Validation works at two levels. First, can the
+      M_marginal versus M_dependence decomposition reproduce known compound
+      biases when applied to CMIP6 evaluated against ERA5? Second, does the
+      XGBoost dependence predictor generalise out of sample, both
+      geographically and across different models?
+    </p>
+
+    <h2>Publication plan</h2>
+    <p>
+      Two papers are emerging from this. The methods paper on the
+      multiplicative decomposition targets a traditional extremes or
+      statistical climatology journal. The ML-driven dependence paper
+      targets the Royal Meteorological Society&rsquo;s special issue on
+      <em>Advances in Machine Learning for Weather and Climate</em>, with a
+      December 2026 deadline.
+    </p>
+
+    <hr class="research-rule" />
+
+    <section class="other-research">
+      <div class="dot" aria-hidden="true"></div>
+      <p>
+        More research outputs coming as the MSc progresses. For now, see
+        <a href="/projects/">Projects</a> for applied work in reinforcement
+        learning, quantum ML, and climate data tooling.
+      </p>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .research-rule {
+    border: 0;
+    height: 1px;
+    background: var(--rule);
+    margin: 4rem 0 2rem;
+  }
+
+  .other-research {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1.25rem 0;
+    color: var(--ink-muted);
+    font-family: var(--font-serif);
+  }
+
+  .other-research p {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--ink-muted);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--amber);
+    flex-shrink: 0;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.35; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dot { animation: none; opacity: 0.7; }
+  }
+
+  /* Inline equation block: smaller and centred */
+  .research :global(pre) {
+    text-align: center;
+    background: var(--bg-raised);
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 1.1rem 1rem;
+    border-radius: 0;
+  }
+
+  .research :global(pre code) {
+    font-size: 1.05rem;
+    color: var(--teal-deep);
+  }
+</style>
