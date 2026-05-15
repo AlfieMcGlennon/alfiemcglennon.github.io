@@ -4,102 +4,123 @@ import Base from '../layouts/Base.astro';
 
 <Base
   title="Research | Alfie McGlennon"
-  description="Compound heat stress risk modelling across Europe. Copula-based multiplicative decomposition of climate-model bias, with XGBoost predicting Kendall's tau dependence from atmospheric circulation patterns."
+  description="MSc dissertation on compound heat stress risk in Europe. A copula-based framework with ML-driven dependence estimation, fitted to ERA5 and evaluated against CMIP6."
   ogTitle="Research | Alfie McGlennon"
-  ogDescription="Compound heat stress, copula methods, and ML for dependence correction in climate models."
+  ogDescription="Dissertation research questions, motivation, and approach. Copulas, multiplicative bias decomposition, XGBoost for Kendall's tau."
 >
   <article class="page-narrow research">
     <p class="kicker">Dissertation</p>
-    <h1>Predicting compound heat stress risk across Europe</h1>
+    <h1>Predicting Compound Heat Stress Risk in Europe: A Copula-Based Framework with ML-Driven Dependence Estimation</h1>
+
     <p class="lede">
-      A copula-based framework for diagnosing where climate-model bias in
-      compound extremes actually comes from, and using machine learning to
-      correct the dependence structure directly.
+      Compound heat stress happens when high temperature and high humidity
+      arrive together. Most climate risk assessments treat these variables
+      as independent, which recent work shows significantly underestimates
+      the probability of compound events. This dissertation develops a
+      framework to model, diagnose, and correct the dependence structure
+      using copulas and machine learning.
     </p>
 
+    <h2>Research questions</h2>
+    <ol class="rq">
+      <li>
+        How does the dependence structure between temperature and dew
+        point temperature vary across European regions and seasons, and
+        how well does an independence assumption perform for estimating
+        compound heat stress risk?
+      </li>
+      <li>
+        Can atmospheric circulation patterns (particularly Z500) predict
+        within-season variations in temperature and dew point dependence
+        using machine learning?
+      </li>
+      <li>
+        How do trends in marginal warming versus dependence evolution
+        separately contribute to changes in compound heat stress risk?
+      </li>
+    </ol>
+
+    <h2>Why it matters</h2>
     <p>
-      Climate models simulate compound extremes badly. A heatwave with high
-      humidity, a drought followed by intense rainfall, a wind storm
-      coinciding with a storm surge: these are the events that drive real
-      impacts. They are also where global climate models tend to disagree
-      most strongly with reality. Most existing bias correction methods
-      treat variables one at a time, which fixes each marginal distribution
-      but leaves the joint dependence structure untouched. If you
-      bias-correct temperature and humidity separately, you get a corrected
-      climatology for each, and a compound heat-stress climatology that
-      may still be wrong.
+      The main gap is laid out in Brett et al. (2025), <em>Review article:
+      The growth in compound weather and climate event research in the
+      decade since SREX</em>. The field has grown rapidly in characterising
+      compound events, but very little work has moved toward predicting
+      them. Most existing studies assume independence between temperature
+      and dew point when estimating joint risk, which systematically
+      underestimates compound heat stress probability.
+    </p>
+    <p>
+      Dew point serves as a direct proxy for atmospheric moisture and is a
+      key driver of heat stress alongside air temperature. Copulas offer a
+      natural framework for modelling the dependence between these
+      variables, and linking them to large-scale atmospheric circulation
+      (Z500 patterns) gives the work an operational angle for sub-seasonal
+      forecasting.
+    </p>
+    <p>
+      For reinsurance and climate adaptation, the question is not just
+      &lsquo;will it be hot?&rsquo; but &lsquo;will it be hot and humid at
+      the same time?&rsquo; Getting that joint probability right is the
+      difference between adequate and inadequate risk pricing.
     </p>
 
-    <h2>The decomposition</h2>
+    <h2>Why I chose it</h2>
     <p>
-      My dissertation develops a multiplicative decomposition of compound
-      hazard bias:
-    </p>
-    <pre><code>M_total = M_marginal &times; M_dependence</code></pre>
-    <p>
-      This splits compound bias into two diagnostic components.
-      <strong>M_marginal</strong> captures the bias you would see if the
-      dependence structure were correctly modelled and only the marginals
-      were wrong. <strong>M_dependence</strong> captures the bias that
-      remains after the marginals are corrected, attributable purely to
-      dependence-structure error. The two multiply together to recover the
-      full compound bias. Once decomposed, you can see which component
-      dominates in which region and at which return period. That alone
-      changes which method you reach for to correct it.
+      What drew me here was the intersection of statistics, climate
+      science, and practical risk. The independence assumption is wrong in
+      a way that has been repeatedly documented, yet most operational risk
+      work still uses it. There is an opportunity to build something that
+      bridges the academic compound-events literature and the operational
+      forecasting world, and the methods involved (copulas, gradient
+      boosting on circulation features) are concrete enough that the work
+      can be used, not just cited.
     </p>
 
-    <h2>Copulas, briefly</h2>
+    <h2>Approach</h2>
+    <p>The framework is built on three layers.</p>
+    <ol class="rq">
+      <li>
+        A multiplicative decomposition of compound hazard bias:
+        <code>M_total = M_marginal &times; M_dependence</code>. This
+        separates errors that come from getting individual variables wrong
+        (marginal bias) from errors that come from getting their
+        co-occurrence wrong (dependence bias).
+      </li>
+      <li>
+        Copula-based modelling of the dependence structure, fitted to ERA5
+        reanalysis as ground truth and evaluated against CMIP6 projections.
+      </li>
+      <li>
+        ML-driven dependence estimation using XGBoost to predict
+        Kendall&rsquo;s tau from large-scale circulation features (Z500,
+        MSLP, jet-stream indices), enabling dependence prediction under
+        future climate scenarios.
+      </li>
+    </ol>
     <p>
-      The decomposition is built on copulas. A copula is a function that
-      fully captures the dependence between variables, completely separated
-      from their individual distributions. The mathematical foundation is
-      Sklar&rsquo;s theorem from 1959: every multivariate distribution can
-      be written as its marginal distributions composed with a copula that
-      encodes their dependence. You fit the marginals to your data, fit the
-      copula to your data, and the two can be modified independently.
-      Climate models can have correct dependence with biased marginals, or
-      vice versa. Marginal bias correction without addressing the copula
-      leaves the dependence error in place, and on compound extremes that
-      is exactly the error that matters.
+      For a detailed visual introduction to copulas and why they matter for
+      compound risk, see the
+      <a href="/writing/copulas-compound-risk/">interactive guide on the
+      Writing page</a>.
     </p>
 
-    <h2>ML for dependence</h2>
+    <h2>Data</h2>
     <p>
-      The new part is the ML-driven dependence correction. I train XGBoost
-      to predict Kendall&rsquo;s tau, the rank-based dependence statistic,
-      from large-scale atmospheric circulation patterns. The features are
-      circulation modes from ERA5 reanalysis: geopotential height fields,
-      mean sea-level pressure, jet-stream position indices. The label is
-      the local Kendall&rsquo;s tau between temperature and specific
-      humidity, computed for each grid cell on a rolling window. If
-      circulation patterns shape dependence, and we can learn that mapping,
-      we can predict the dependence structure under CMIP6 projections
-      directly, rather than assuming it from a fitted copula. This is a
-      different kind of climate-model-aware ML: not predicting the
-      meteorological field itself, but predicting how its variables
-      co-vary.
-    </p>
-
-    <h2>Data and validation</h2>
-    <p>
-      The dataset stack is ERA5 reanalysis as the ground-truth dependence
-      climatology over 1981 to 2020, CMIP6 projections for the historical
-      and future scenarios, and Destination Earth digital-twin output where
-      it overlaps. Validation works at two levels. First, can the
-      M_marginal versus M_dependence decomposition reproduce known compound
-      biases when applied to CMIP6 evaluated against ERA5? Second, does the
-      XGBoost dependence predictor generalise out of sample, both
-      geographically and across different models?
+      ERA5 reanalysis (1981 to 2020) as the ground-truth dependence
+      climatology. CMIP6 projections for historical and future scenarios.
+      Destination Earth (DestinE) climate digital-twin output where
+      available.
     </p>
 
     <h2>Publication plan</h2>
     <p>
-      Two papers are emerging from this. The methods paper on the
-      multiplicative decomposition targets a traditional extremes or
-      statistical climatology journal. The ML-driven dependence paper
-      targets the Royal Meteorological Society&rsquo;s special issue on
-      <em>Advances in Machine Learning for Weather and Climate</em>, with a
-      December 2026 deadline.
+      Two papers are emerging. The methods paper on the multiplicative
+      decomposition targets a traditional extremes or statistical
+      climatology journal. The ML-driven dependence paper targets the
+      Royal Meteorological Society&rsquo;s special issue on <em>Advances
+      in Machine Learning for Weather and Climate</em>, with a December
+      2026 deadline.
     </p>
 
     <hr class="research-rule" />
@@ -107,15 +128,37 @@ import Base from '../layouts/Base.astro';
     <section class="other-research">
       <div class="dot" aria-hidden="true"></div>
       <p>
-        More research outputs coming as the MSc progresses. For now, see
-        <a href="/projects/">Projects</a> for applied work in reinforcement
-        learning, quantum ML, and climate data tooling.
+        This page will be updated as results come in. The framework and
+        research questions are set; the analysis is ongoing.
       </p>
     </section>
   </article>
 </Base>
 
 <style>
+  .research h2 {
+    margin-top: 2.5rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .rq {
+    padding-left: 1.4rem;
+    margin: 0.5rem 0 1.5rem;
+  }
+
+  .rq li {
+    margin-bottom: 0.85rem;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .rq li::marker {
+    color: var(--amber);
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
   .research-rule {
     border: 0;
     height: 1px;
@@ -154,21 +197,5 @@ import Base from '../layouts/Base.astro';
 
   @media (prefers-reduced-motion: reduce) {
     .dot { animation: none; opacity: 0.7; }
-  }
-
-  /* Inline equation block: smaller and centred */
-  .research :global(pre) {
-    text-align: center;
-    background: var(--bg-raised);
-    border-left: 0;
-    border-top: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-    padding: 1.1rem 1rem;
-    border-radius: 0;
-  }
-
-  .research :global(pre code) {
-    font-size: 1.05rem;
-    color: var(--teal-deep);
   }
 </style>

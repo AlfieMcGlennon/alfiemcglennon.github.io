@@ -64,8 +64,9 @@ import Base from '../layouts/Base.astro';
       <h1 class="hero-name">Alfie McGlennon</h1>
       <p class="hero-affiliation">MSc Climate Change &amp; AI // University of Reading</p>
       <p class="hero-tag">
-        Researching where compound climate extremes go wrong in models, and
-        building tools to fix them.
+        Climate science, machine learning, and compound risk. From
+        copula-based dependence modelling to reinforcement learning on the
+        national grid.
       </p>
     </div>
   </section>
@@ -75,32 +76,44 @@ import Base from '../layouts/Base.astro';
     <div class="about-grid">
       <div class="about-text">
         <p>
-          Compound climate extremes are events where multiple hazards arrive
-          together: heat with humidity, drought followed by deluge, wind
-          storms with surge. They cause most real damage, and they are where
-          climate models fail worst. My MSc dissertation is about diagnosing
-          where those failures come from, and whether machine learning can
-          fix the dependence structure directly rather than bias-correcting
-          one variable at a time.
+          I&rsquo;m finishing an MSc in Climate Change and AI at the
+          University of Reading, after a BSc in Meteorology and Climate in
+          the same department. I got hooked on the gap between what climate
+          models simulate and what actually happens on the ground,
+          particularly for compound events where multiple hazards arrive
+          together. My dissertation focuses on compound heat stress across
+          Europe: when heat and humidity combine in ways that neither
+          variable alone would predict. I&rsquo;m trying to work out where
+          climate models get the dependence wrong, and whether machine
+          learning can fix it directly.
         </p>
         <p>
-          Beyond the dissertation, I build things. The
-          <a href="/projects/">GB Grid Scenario Tool</a> started as
-          curiosity about whether reinforcement learning could learn to
-          dispatch the national grid, and turned into a validated
-          public-data transmission network model along the way. The
-          <a href="/writing/copulas-compound-risk/">interactive copula
-          explainer</a> started as notes for myself and became a visual
-          guide to dependence structures for non-statisticians. I get
-          hooked on problems and follow them further than the brief asks
-          for. Longer pieces live on <a href="/writing/">Writing</a>; the
-          rest are on <a href="/projects/">Projects</a>.
+          I was drawn to reinforcement learning through the visually
+          compelling demos of agents learning to drive cars or play games. I
+          wanted to test it on something I understood. Weather and climate
+          systems do not map cleanly to the typical RL framing, but energy
+          grids, where weather is a core input, were a much better fit. So
+          I started building an RL environment for GB electricity dispatch.
+          The scope kept growing. What began as &lsquo;can an agent learn
+          merit order?&rsquo; turned into a serious exercise in data
+          assimilation from public sources, and a test of how far you can
+          get with human-led architecture and AI execution. The
+          <a href="/projects/">GB Grid Scenario Tool</a> ended up as a
+          validated DC power flow model of the transmission network, and
+          the RL agents trained on top of it went from spending £30 billion
+          a year to within 6% of real grid costs. Alongside that, the
+          <a href="/writing/copulas-compound-risk/">copula explainer</a> I
+          wrote for my own understanding turned into an interactive visual
+          guide. I get hooked on problems and follow them further than the
+          brief asks for.
         </p>
         <p>
-          I&rsquo;m targeting roles in climate risk analytics, reinsurance,
-          or operational meteorology. BSc Meteorology and Climate at
-          Reading, currently on the MSc in Climate Change and AI in the
-          same department. Based in the Reading area.
+          I&rsquo;m targeting roles in climate risk analytics, reinsurance
+          (Swiss Re and Munich Re type work), or operational meteorology
+          (ECMWF-adjacent). Based in the Reading area. The through-line
+          across all my work is applying statistical and machine-learning
+          methods to climate and weather data where the outputs have
+          operational or commercial value.
         </p>
       </div>
 
