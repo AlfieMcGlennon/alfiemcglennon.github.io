@@ -84,11 +84,13 @@ Neither approach is wrong. DC power flow shows where power would flow if the net
 
 **Why the SCADA theme?** Every portfolio project uses Tailwind blue-on-white. The amber-on-black SCADA aesthetic communicates "this person understands how grids are operated" to anyone in the energy sector. It's also more functional: high contrast, monospace fonts for data readability, flat panels matching real control room displays.
 
-## What's next
+## Why this tool exists, and what's next
 
-This tool is the environment for a reinforcement learning research series. [The first post](/blog/rl-grid-dispatch-baseline/) trained agents with 3 national dispatch actions on scalar and spatial observations. They learned demand matching and merit order but couldn't learn network constraints because the action space had no spatial dimension.
+I built this tool because I needed a validated environment for RL dispatch research. The validation journey turned out to be bigger than expected, but the environment is now ready.
 
-With the full 27-zone topology, the agent gets 109 continuous actions: per-zone per-type dispatch fractions with physical constraints. The same reward-focused agents, but now they can see the network and act on it. The next post will show whether topology-aware actions enable the agent to learn what the LP solver computes analytically.
+[An earlier post](/writing/rl-grid-dispatch-baseline/) trained agents with three national dispatch actions on scalar and spatial observations. They learned demand matching and merit order, but they could not learn network constraints because the action space had no spatial dimension. That work mapped the ceiling of action-space-limited RL on grid dispatch and motivated everything you see in this tool.
+
+With the full 27-zone topology, the agent gets 109 continuous actions: per-zone per-type dispatch fractions with physical constraints. The same reward-focused agents, but now they can see the network and act on it. The next step is to test whether topology-aware actions let the agent learn what the LP solver computes analytically.
 
 The environment, the data, and the baselines are ready. The training infrastructure is the easy part. The hard part was building a validated environment from public data. That's done.
 

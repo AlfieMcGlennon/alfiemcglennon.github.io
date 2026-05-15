@@ -5,20 +5,19 @@ date: 2026-04-05
 project: "compound-risk"
 accent: "#ef8a62"
 tags: ["climate-risk", "copulas", "compound-extremes", "statistics"]
-draft: true
 ---
 import CopulaExplorer from '../../components/CopulaExplorer.astro';
 import TrivariateCopula from '../../components/TrivariateCopula.astro';
 
 A storm hits the coast. Wind speeds are high but not record-breaking. Rainfall is heavy but not unprecedented. Neither hazard alone would trigger a catastrophic loss. But they arrive together, and the combination produces flooding that neither marginal distribution predicted.
 
-This is compound risk. Events that are individually manageable become catastrophic in combination. It is arguably the central problem in catastrophe modelling, climate adaptation, and reinsurance pricing. And the standard statistical toolkit — fitting marginal distributions to individual hazards — handles it badly.
+This is compound risk. Events that are individually manageable become catastrophic in combination. It is arguably the central problem in catastrophe modelling, climate adaptation, and reinsurance pricing. And the standard statistical toolkit, fitting marginal distributions to individual hazards, handles it badly.
 
-This post is a visual introduction to **copulas** — the mathematical framework for modelling dependence between variables. No measure theory, no proofs. If you work in climate risk, catastrophe modelling, or reinsurance, this is the tool you use to answer "how likely are these hazards to happen together?" If you're coming from climate science, engineering, or just want to understand compound risk better, this should give you the intuition and vocabulary to read the technical literature without getting lost.
+This post is a visual introduction to **copulas**, the mathematical framework for modelling dependence between variables. No measure theory, no proofs. If you work in climate risk, catastrophe modelling, or reinsurance, this is the tool you use to answer "how likely are these hazards to happen together?" If you're coming from climate science, engineering, or just want to understand compound risk better, this should give you the intuition and vocabulary to read the technical literature without getting lost.
 
 ## The problem with marginals
 
-Climate hazards are routinely assessed in isolation. Wind return periods are estimated from wind data. Flood return periods from rainfall data. Each analysis produces a marginal distribution — a complete description of the behaviour of one variable independently.
+Climate hazards are routinely assessed in isolation. Wind return periods are estimated from wind data. Flood return periods from rainfall data. Each analysis produces a marginal distribution: a complete description of the behaviour of one variable independently.
 
 The problem is that "independently" is doing a lot of work. If two hazards are positively dependent (high wind tends to coincide with heavy rain during extratropical cyclones), their joint exceedance probability is much higher than the product of their individual probabilities.
 
@@ -34,7 +33,7 @@ Before we get to copulas, two terms that come up constantly.
 
 A **probability distribution** describes how likely different values of a variable are. Wind speed, for example, has a distribution: low speeds are common, moderate speeds are frequent, extreme gusts are rare. The shape of the distribution tells you the relative likelihood of each value.
 
-A **cumulative distribution function** (CDF) is one way to express this. Instead of asking "how likely is a wind speed of exactly 25 m/s?" the CDF asks "what fraction of all observations are *at or below* 25 m/s?" It outputs a value between 0 and 1. If the CDF at 25 m/s is 0.95, that means 95% of observations fall below 25 m/s — it is a 1-in-20 event. The CDF maps from the variable's natural units (m/s, mm, °C) to a probability scale.
+A **cumulative distribution function** (CDF) is one way to express this. Instead of asking "how likely is a wind speed of exactly 25 m/s?" the CDF asks "what fraction of all observations are *at or below* 25 m/s?" It outputs a value between 0 and 1. If the CDF at 25 m/s is 0.95, that means 95% of observations fall below 25 m/s. It is a 1-in-20 event. The CDF maps from the variable's natural units (m/s, mm, °C) to a probability scale.
 
 This mapping is what lets copulas work. By converting every variable to its CDF value, we put everything onto the same [0,1] scale regardless of whether we started with wind in m/s, rainfall in mm, or temperature in °C. That is the probability integral transform, and it is the key step in the copula machinery.
 
@@ -52,13 +51,13 @@ Conversely, any set of marginals combined with any copula produces a valid joint
 
 This decomposition is what makes copulas practical:
 
-1. **Fit the marginals** independently — GEV for wind, lognormal for surge, gamma for precipitation. This is domain-specific and well-understood.
-2. **Fit the copula** to the dependence structure — using rank-transformed data, pseudo-observations, or parametric maximum likelihood. This is portable across applications.
-3. **Combine** — any marginals with any copula gives a valid joint distribution. You can swap marginals without refitting the copula, or test different copula families without changing the marginals.
+1. **Fit the marginals** independently. GEV for wind, lognormal for surge, gamma for precipitation. This is domain-specific and well-understood.
+2. **Fit the copula** to the dependence structure, using rank-transformed data, pseudo-observations, or parametric maximum likelihood. This is portable across applications.
+3. **Combine.** Any marginals with any copula gives a valid joint distribution. You can swap marginals without refitting the copula, or test different copula families without changing the marginals.
 
 ![Sklar's theorem: marginals + copula = joint distribution](/images/copulas/09-sklars-theorem.png)
 
-The diagram shows this visually. The GEV wind distribution (left) and lognormal surge distribution (second) are combined through a Gaussian copula (third) to produce the joint distribution (right). The copula determines the shape of the joint scatter — the clustering, the tail behaviour — while the marginals determine the scale and shape of each individual variable.
+The diagram shows this visually. The GEV wind distribution (left) and lognormal surge distribution (second) are combined through a Gaussian copula (third) to produce the joint distribution (right). The copula determines the shape of the joint scatter, including the clustering and the tail behaviour, while the marginals determine the scale and shape of each individual variable.
 
 ## What a copula does
 

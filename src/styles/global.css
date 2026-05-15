@@ -1,4 +1,4 @@
-/* alfiemcglennon.com — site spec v2 */
+/* alfiemcglennon.com, site spec v3 */
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -7,25 +7,26 @@
 }
 
 :root {
-  /* Light, warm palette */
-  --bg: #faf7f0;
-  --bg-raised: #f3efe5;
-  --rule: #e3decf;
-  --rule-soft: #ece6d7;
+  /* Warm parchment palette */
+  --bg: #f0efe9;
+  --bg-raised: #f7f6f2;
+  --rule: #ddd8d0;
+  --rule-soft: #e8e3d8;
 
-  --ink: #1a1a1a;
-  --ink-dim: #4a4a4a;
-  --ink-muted: #6b6b6b;
-  --ink-faint: #8a8a85;
+  --ink: #1c1917;
+  --ink-dim: #44403c;
+  --ink-muted: #78716c;
+  --ink-faint: #a8a29e;
 
-  /* Accents: deep teal primary, warm amber secondary */
-  --teal: #2d6e7e;
-  --teal-deep: #1f5662;
-  --teal-soft: #d4e3e6;
+  /* Accents */
+  --teal: #0f766e;
+  --teal-deep: #0a554f;
+  --teal-soft: #d6ebe8;
 
-  --amber: #c97a3a;
-  --amber-soft: #f0d9bf;
+  --amber: #b45309;
+  --amber-soft: #f5dcb3;
 
+  /* Typography */
   --font-sans: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -80,6 +81,7 @@ main {
   letter-spacing: -0.01em;
   color: var(--ink);
   text-decoration: none;
+  border-bottom: 0;
   transition: color 0.2s ease;
 }
 
@@ -99,6 +101,7 @@ main {
   font-weight: 400;
   color: var(--ink-muted);
   text-decoration: none;
+  border-bottom: 0;
   transition: color 0.2s ease;
   letter-spacing: 0.005em;
 }
@@ -135,21 +138,18 @@ h1, h2, h3, h4 {
 h1 {
   font-size: clamp(2rem, 4.5vw, 2.6rem);
   margin-bottom: 1rem;
-  font-weight: 600;
 }
 
 h2 {
   font-size: 1.45rem;
   margin-top: 3rem;
   margin-bottom: 0.85rem;
-  font-weight: 600;
 }
 
 h3 {
   font-size: 1.18rem;
   margin-top: 2.25rem;
   margin-bottom: 0.5rem;
-  font-weight: 600;
 }
 
 p {
@@ -206,6 +206,7 @@ code {
   padding: 0.12em 0.4em;
   border-radius: 3px;
   color: var(--ink);
+  border: 1px solid var(--rule-soft);
 }
 
 pre {
@@ -222,6 +223,7 @@ pre code {
   padding: 0;
   font-size: 0.85rem;
   line-height: 1.65;
+  border: 0;
 }
 
 blockquote {
@@ -233,7 +235,28 @@ blockquote {
   font-style: italic;
 }
 
-/* ── Lede / subhead ─────────────────────────────────── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+  font-family: var(--font-serif);
+}
+
+th, td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+}
+
+th {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 0.88rem;
+}
+
+/* ── Lede / kicker ──────────────────────────────────── */
 
 .lede {
   font-family: var(--font-serif);
@@ -264,7 +287,7 @@ blockquote {
   outline-offset: 3px;
 }
 
-/* ── Tech / meta line (monospace tags) ──────────────── */
+/* ── Tech / meta line ───────────────────────────────── */
 
 .tech-line {
   font-family: var(--font-mono);

@@ -7,9 +7,9 @@ accent: "#7c3aed"
 tags: ["reinforcement-learning", "power-systems", "ppo", "gymnasium"]
 ---
 
-Can a reinforcement learning agent learn to dispatch the GB electricity grid?
+This is the RL chapter of the grid dispatch project. The grid environment, [a validated DC power flow model built from public NESO data](/writing/building-gb-grid-tool/), is the prerequisite. With that in place, the question became: can an RL agent learn dispatch from experience?
 
-The current approach relies on LP solvers with explicit cost models and full network topology. An RL agent that could learn a reasonable dispatch policy from experience alone would be useful where cost data is uncertain, the network is changing, or the optimisation needs to run faster than an LP solve.
+The current approach in industry relies on LP solvers with explicit cost models and full network topology. An RL agent that could learn a reasonable dispatch policy from experience alone would be useful where cost data is uncertain, the network is changing, or the optimisation needs to run faster than an LP solve.
 
 This post covers two rounds of experiments. The first trained four PPO agents with different reward functions on scalar observations. The second added a CNN for spatial weather patterns and multi-hour forecasts. Both used the same three-action dispatch space. That turned out to be the problem.
 
@@ -141,4 +141,4 @@ But the action space is the ceiling. Adding spatial observations (CNN, 72 weathe
 
 You cannot learn network-constrained dispatch without network topology in the action space.
 
-This motivated building a proper GB grid environment with validated network topology, per-zone generation, and DC power flow. That became [the GB Grid Scenario Tool](/blog/building-gb-grid-tool/), which turned out to be a bigger project than the RL work itself. The next post in this series will combine the spatial CNN features with a full 109-action topology-aware action space (27 zones × 4 dispatchable types + interconnector) and test whether the spatial observations that were wasted here become the agent's primary advantage.
+This motivated building a proper GB grid environment with validated network topology, per-zone generation, and DC power flow. That became [the GB Grid Scenario Tool](/writing/building-gb-grid-tool/), which turned out to be a bigger project than the RL work itself. The next step combines the spatial CNN features with a full 109-action topology-aware action space (27 zones × 4 dispatchable types + interconnector), testing whether the spatial observations that were wasted here become the agent's primary advantage. That work is ongoing.

@@ -1,0 +1,128 @@
+---
+import Base from './Base.astro';
+
+const { title, description, date, tags, image } = Astro.props;
+
+const formatted = new Date(date).toLocaleDateString('en-GB', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const ogTitle = `${title} | Alfie McGlennon`;
+const ogDescription = description;
+---
+
+<Base
+  title={ogTitle}
+  description={description}
+  ogTitle={ogTitle}
+  ogDescription={ogDescription}
+  image={image}
+>
+  <article class="page-narrow post">
+    <header class="post-head">
+      <p class="kicker">Writing</p>
+      <h1>{title}</h1>
+      <p class="post-meta">
+        <time datetime={new Date(date).toISOString()}>{formatted}</time>
+        {tags && tags.length > 0 && (
+          <>
+            <span class="sep">·</span>
+            <span class="post-tags">{tags.join(' · ')}</span>
+          </>
+        )}
+      </p>
+      {description && <p class="lede">{description}</p>}
+    </header>
+
+    {image && (
+      <figure class="post-hero">
+        <img src={image} alt={title} loading="eager" />
+      </figure>
+    )}
+
+    <div class="post-body">
+      <slot />
+    </div>
+
+    <footer class="post-foot">
+      <a href="/writing/" class="back-link">&larr; All writing</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post-head {
+    margin-bottom: 2.25rem;
+  }
+
+  .post-meta {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    margin: 0.6rem 0 1.4rem;
+    line-height: 1.6;
+  }
+
+  .post-meta .sep {
+    color: var(--ink-faint);
+    margin: 0 0.4rem;
+  }
+
+  .post-tags {
+    color: var(--ink-muted);
+  }
+
+  .post-hero {
+    margin: 0 0 2rem;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bg-raised);
+  }
+
+  .post-hero img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+  }
+
+  .post-body :global(h2) {
+    margin-top: 3rem;
+  }
+
+  .post-body :global(h3) {
+    margin-top: 2.25rem;
+  }
+
+  .post-body :global(img) {
+    margin: 1.75rem 0 0.75rem;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    width: 100%;
+    height: auto;
+  }
+
+  .post-body :global(table) {
+    font-size: 0.92rem;
+  }
+
+  .post-foot {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .back-link {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    border-bottom: 0;
+  }
+
+  .back-link:hover {
+    color: var(--teal);
+  }
+</style>

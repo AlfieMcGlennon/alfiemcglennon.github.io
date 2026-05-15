@@ -4,12 +4,14 @@ import '../styles/global.css';
 
 const {
   title = 'Alfie McGlennon | Climate Risk, ML & Compound Extremes',
-  description = 'Alfie McGlennon - MSc Climate Change & AI at the University of Reading. Researching compound heat stress risk across Europe using copula-based frameworks and machine learning.',
+  description = 'Alfie McGlennon. MSc Climate Change & AI at the University of Reading. Researching compound heat stress risk across Europe using copula-based frameworks and machine learning.',
   ogTitle = 'Alfie McGlennon | Climate Risk, ML & Compound Extremes',
   ogDescription = 'MSc Climate Change & AI researcher. Compound heat stress, copula methods, RL for grid dispatch, quantum ML for atmospheric regression.',
+  image,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image ? new URL(image, Astro.site) : new URL('/favicon.svg', Astro.site);
 ---
 
 <!doctype html>
@@ -19,11 +21,13 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="keywords" content="Alfie McGlennon, climate risk, compound heat stress, copula, XGBoost, ERA5, CMIP6, machine learning, reinsurance, ECMWF, University of Reading, meteorology, DestinE, Kendall tau, dependence estimation" />
+    <meta name="keywords" content="Alfie McGlennon, climate risk, compound heat stress, copula, XGBoost, ERA5, CMIP6, machine learning, reinsurance, ECMWF, University of Reading, meteorology, DestinE, Kendall tau" />
     <meta property="og:title" content={ogTitle} />
     <meta property="og:description" content={ogDescription} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://alfiemcglennon.com" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href={canonicalURL} />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -31,7 +35,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400&display=swap"
       rel="stylesheet"
     />
   </head>

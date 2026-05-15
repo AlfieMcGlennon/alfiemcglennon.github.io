@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base>
-  <!-- Hero: animated atmospheric sky -->
+  <!-- Hero: animated atmospheric sky (kept from v2 per spec) -->
   <section class="hero" aria-label="Introduction">
     <div class="sky" aria-hidden="true">
       <svg
@@ -39,7 +39,6 @@ import Base from '../layouts/Base.astro';
 
         <rect width="1200" height="600" fill="url(#sky-gradient)" />
 
-        <!-- High wisps, slow -->
         <g class="cloud-layer cloud-layer-slow" filter="url(#cloud-blur)">
           <use href="#cloud-a" x="-400" y="80" width="320" height="100" opacity="0.55" />
           <use href="#cloud-c" x="200" y="130" width="200" height="70" opacity="0.45" />
@@ -47,16 +46,14 @@ import Base from '../layouts/Base.astro';
           <use href="#cloud-a" x="1100" y="110" width="320" height="100" opacity="0.5" />
         </g>
 
-        <!-- Mid clouds, medium speed -->
         <g class="cloud-layer cloud-layer-medium" filter="url(#cloud-blur)">
           <use href="#cloud-b" x="-300" y="220" width="260" height="90" opacity="0.7" />
           <use href="#cloud-a" x="350" y="250" width="320" height="100" opacity="0.6" />
           <use href="#cloud-c" x="900" y="200" width="200" height="70" opacity="0.7" />
         </g>
 
-        <!-- Low ambers near horizon, fastest -->
         <g class="cloud-layer cloud-layer-fast" filter="url(#cloud-blur)">
-          <use href="#cloud-c" x="-200" y="400" width="200" height="70" opacity="0.75" style="--tint:#f3d6b3" />
+          <use href="#cloud-c" x="-200" y="400" width="200" height="70" opacity="0.75" />
           <use href="#cloud-b" x="500" y="430" width="260" height="90" opacity="0.7" />
           <use href="#cloud-a" x="950" y="410" width="320" height="100" opacity="0.7" />
         </g>
@@ -66,7 +63,10 @@ import Base from '../layouts/Base.astro';
     <div class="hero-content">
       <h1 class="hero-name">Alfie McGlennon</h1>
       <p class="hero-affiliation">MSc Climate Change &amp; AI // University of Reading</p>
-      <p class="hero-tag">Compound extremes, copula methods, and machine learning for climate risk.</p>
+      <p class="hero-tag">
+        Researching where compound climate extremes go wrong in models, and
+        building tools to fix them.
+      </p>
     </div>
   </section>
 
@@ -75,37 +75,32 @@ import Base from '../layouts/Base.astro';
     <div class="about-grid">
       <div class="about-text">
         <p>
-          I&rsquo;m doing the MSc in Climate Change and AI at the University of Reading.
-          My dissertation builds a copula-based framework for predicting compound heat
-          stress risk across European regions. The approach uses a multiplicative
-          decomposition that splits climate-model bias in compound extremes into a
-          marginal component and a dependence component. The ML angle is training
-          XGBoost to predict Kendall&rsquo;s tau, the dependence statistic, from
-          large-scale atmospheric circulation patterns. I work with ERA5 reanalysis,
-          CMIP6 projections, and Destination Earth climate digital-twin data.
+          Compound climate extremes are events where multiple hazards arrive
+          together: heat with humidity, drought followed by deluge, wind
+          storms with surge. They cause most real damage, and they are where
+          climate models fail worst. My MSc dissertation is about diagnosing
+          where those failures come from, and whether machine learning can
+          fix the dependence structure directly rather than bias-correcting
+          one variable at a time.
         </p>
         <p>
-          What I keep coming back to is where climate-model biases in multivariate
-          extremes actually come from, and whether ML can correct dependence
-          structures directly rather than bias-correcting one variable at a time.
-          Compound risk is where the gap between what climate models simulate and
-          what actually hits people on the ground tends to be widest. If you treat
-          hazards as independent, you systematically underestimate their joint
-          probability of occurring together. Most operational climate risk work
-          still does.
+          Beyond the dissertation, I build things. The
+          <a href="/projects/">GB Grid Scenario Tool</a> started as
+          curiosity about whether reinforcement learning could learn to
+          dispatch the national grid, and turned into a validated
+          public-data transmission network model along the way. The
+          <a href="/writing/copulas-compound-risk/">interactive copula
+          explainer</a> started as notes for myself and became a visual
+          guide to dependence structures for non-statisticians. I get
+          hooked on problems and follow them further than the brief asks
+          for. Longer pieces live on <a href="/writing/">Writing</a>; the
+          rest are on <a href="/projects/">Projects</a>.
         </p>
         <p>
-          I&rsquo;m targeting roles in climate risk analytics and reinsurance,
-          particularly at Swiss Re and Munich Re, or operational meteorology
-          adjacent to ECMWF. The through-line across my work is applying
-          statistical and machine-learning methods to climate data where the
-          outputs have operational or commercial value: quantifying compound
-          risk for an insurer, improving climate-model evaluation, or optimising
-          energy grid dispatch under weather uncertainty.
-        </p>
-        <p>
-          Background: BSc Meteorology and Climate, also at Reading. Based in the
-          Reading area.
+          I&rsquo;m targeting roles in climate risk analytics, reinsurance,
+          or operational meteorology. BSc Meteorology and Climate at
+          Reading, currently on the MSc in Climate Change and AI in the
+          same department. Based in the Reading area.
         </p>
       </div>
 
@@ -130,7 +125,19 @@ import Base from '../layouts/Base.astro';
       <li>
         <a href="/projects/" class="jump-card">
           <p class="jump-card-label">Projects</p>
-          <p class="jump-card-line">RL grid dispatch, quantum ML, climate data tooling, and more.</p>
+          <p class="jump-card-line">Grid dispatch, quantum ML, climate data tooling, and more.</p>
+        </a>
+      </li>
+      <li>
+        <a href="/writing/" class="jump-card">
+          <p class="jump-card-label">Writing</p>
+          <p class="jump-card-line">Long-form posts on copulas, grid dispatch, RL, and climate data.</p>
+        </a>
+      </li>
+      <li>
+        <a href="https://alfiemcglennon.github.io/gb-grid-tool/" class="jump-card" target="_blank" rel="noopener noreferrer">
+          <p class="jump-card-label">Grid Tool demo</p>
+          <p class="jump-card-line">An interactive transmission grid model of GB, in the browser.</p>
         </a>
       </li>
       <li>
@@ -178,9 +185,9 @@ import Base from '../layouts/Base.astro';
     will-change: transform;
   }
 
-  .cloud-layer-slow { animation: drift-slow 180s linear infinite; }
-  .cloud-layer-medium { animation: drift-medium 120s linear infinite; }
-  .cloud-layer-fast { animation: drift-fast 80s linear infinite; }
+  .cloud-layer-slow { animation: drift-slow 180s linear infinite alternate; }
+  .cloud-layer-medium { animation: drift-medium 120s linear infinite alternate; }
+  .cloud-layer-fast { animation: drift-fast 80s linear infinite alternate; }
 
   @keyframes drift-slow {
     from { transform: translateX(-8%); }
@@ -194,11 +201,6 @@ import Base from '../layouts/Base.astro';
     from { transform: translateX(-18%); }
     to   { transform: translateX(18%); }
   }
-
-  /* Alternate direction so layers move past each other */
-  .cloud-layer-medium { animation-direction: alternate; }
-  .cloud-layer-slow { animation-direction: alternate; }
-  .cloud-layer-fast { animation-direction: alternate; }
 
   @media (prefers-reduced-motion: reduce) {
     .cloud-layer { animation: none; }
@@ -239,7 +241,7 @@ import Base from '../layouts/Base.astro';
     font-style: italic;
     font-size: clamp(1rem, 1.7vw, 1.2rem);
     color: var(--ink-dim);
-    max-width: 32ch;
+    max-width: 42ch;
     line-height: 1.45;
   }
 
@@ -296,10 +298,12 @@ import Base from '../layouts/Base.astro';
     border-top: 1px solid var(--rule);
   }
 
-  @media (min-width: 640px) {
-    .jump-cards {
-      grid-template-columns: 1fr 1fr;
-    }
+  @media (min-width: 560px) {
+    .jump-cards { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (min-width: 900px) {
+    .jump-cards { grid-template-columns: 1fr 1fr 1fr; }
   }
 
   .jump-card {
@@ -318,14 +322,14 @@ import Base from '../layouts/Base.astro';
     background: var(--bg-raised);
   }
 
-  @media (min-width: 640px) {
-    .jump-cards li:nth-child(odd) .jump-card {
-      padding-right: 1.5rem;
-    }
-    .jump-cards li:nth-child(even) .jump-card {
-      padding-left: 1.5rem;
-      border-left: 1px solid var(--rule);
-    }
+  @media (min-width: 560px) and (max-width: 899px) {
+    .jump-cards li:nth-child(odd) .jump-card { padding-right: 1.5rem; }
+    .jump-cards li:nth-child(even) .jump-card { padding-left: 1.5rem; border-left: 1px solid var(--rule); }
+  }
+
+  @media (min-width: 900px) {
+    .jump-cards li .jump-card { padding-left: 1.25rem; padding-right: 1.25rem; border-left: 1px solid var(--rule); }
+    .jump-cards li:nth-child(3n+1) .jump-card { padding-left: 0.25rem; border-left: 0; }
   }
 
   .jump-card-label {
