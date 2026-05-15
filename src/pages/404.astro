@@ -5,30 +5,40 @@ import Base from '../layouts/Base.astro';
 <Base title="Not Found" description="Page not found.">
   <div class="not-found">
     <h1>404</h1>
-    <p>This page is currently not built or under construction.</p>
-    <p class="redirect-msg">Redirecting to home in <span id="countdown">3</span>s...</p>
+    <p>This page doesn&rsquo;t exist (yet).</p>
+    <p class="redirect-msg">Redirecting to home in <span id="countdown">3</span>s.</p>
+    <a href="/" class="back-link">&larr; Take me home</a>
   </div>
 </Base>
 
 <style>
   .not-found {
     text-align: center;
-    padding-top: 6rem;
+    padding-top: 5rem;
   }
 
   .not-found h1 {
     font-size: 4rem;
-    background: linear-gradient(135deg, var(--accent-deep), var(--accent-sky));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.5rem;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
   }
 
   .redirect-msg {
-    color: var(--text-muted);
+    color: var(--ink-faint);
     font-size: 0.9rem;
     margin-top: 1rem;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--ink-dim);
+    font-weight: 500;
+  }
+
+  .back-link:hover {
+    color: var(--accent);
   }
 </style>
 

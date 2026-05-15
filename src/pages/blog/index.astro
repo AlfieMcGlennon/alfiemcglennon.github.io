@@ -8,9 +8,14 @@ const posts = (await getCollection('blog'))
   .sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf());
 ---
 
-<Base title="Blog" description="Technical writing on power systems, reinforcement learning, and open-source tools.">
-  <h1>Blog</h1>
-  <p>Technical deep dives, project write-ups, and lessons learned.</p>
+<Base title="Blog" description="Technical write-ups on compound climate risk, power-system ML, and applied climate data.">
+  <header class="page-head">
+    <h1>Blog</h1>
+    <p class="lede">
+      Technical write-ups and project notes &mdash; compound climate risk,
+      reinforcement learning for power systems, and applied climate data.
+    </p>
+  </header>
 
   {posts.length === 0 ? (
     <div class="empty-state">
@@ -33,22 +38,27 @@ const posts = (await getCollection('blog'))
 </Base>
 
 <style>
+  .page-head {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 2rem;
+  }
+
   .posts-list {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
-    margin-top: 2rem;
   }
 
   .empty-state {
     margin-top: 3rem;
     padding: 2rem;
     text-align: center;
-    border: 1px dashed var(--border);
-    border-radius: 10px;
+    border: 1px dashed var(--rule);
+    border-radius: 8px;
   }
 
   .empty-state p {
-    color: var(--text-muted);
+    color: var(--ink-faint);
   }
 </style>

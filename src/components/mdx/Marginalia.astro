@@ -1,0 +1,69 @@
+---
+const { num, label } = Astro.props;
+---
+
+<aside class="marginalia">
+  {(num || label) && (
+    <p class="marg-label">
+      {num && <span class="marg-num">{num}</span>}
+      {label && <span>{label}</span>}
+    </p>
+  )}
+  <div class="marg-body">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .marginalia {
+    /* Inline default — sits within prose with an accent rule. */
+    margin: 2rem 0;
+    padding: 0 1.25rem;
+    border-left: 1px solid var(--accent);
+    background: transparent;
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* On wide viewports, pull into the right margin. */
+  @media (min-width: 1080px) {
+    .marginalia {
+      position: relative;
+      float: right;
+      clear: right;
+      width: 220px;
+      margin: 0.5rem -260px 1rem 1.5rem;
+      padding: 0 0 0 1rem;
+    }
+  }
+
+  .marg-label {
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    margin: 0 0 0.4rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+
+  .marg-num {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+  }
+
+  .marg-body :global(p) {
+    margin: 0 0 0.5rem;
+    color: var(--ink-dim);
+    font-size: 0.92rem;
+  }
+
+  .marg-body :global(p):last-child {
+    margin-bottom: 0;
+  }
+</style>

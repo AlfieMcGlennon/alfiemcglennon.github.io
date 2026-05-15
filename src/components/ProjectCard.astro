@@ -1,54 +1,55 @@
 ---
-const { title, description, project, tags, demoUrl, sourceUrl, blogUrl, image, status } = Astro.props;
+const {
+  title,
+  description,
+  project,
+  tags,
+  demoUrl,
+  sourceUrl,
+  blogUrl,
+  image,
+  status,
+} = Astro.props;
 ---
 
-<div class="project-card card" data-project={project}>
+<article class="project-card card" data-project={project}>
   {image && (
     <div class="project-image">
       <img src={image} alt={`${title} screenshot`} loading="lazy" />
     </div>
   )}
   <div class="project-body">
-    <h3 class="project-title">{title}</h3>
-    {status && <span class="project-status">{status}</span>}
+    <div class="project-head">
+      <h3 class="project-title">{title}</h3>
+      {status && <span class="project-status">{status}</span>}
+    </div>
     <p class="project-desc">{description}</p>
-    {tags && (
+    {tags && tags.length > 0 && (
       <div class="project-tags">
         {tags.map(t => <span class="tag">{t}</span>)}
       </div>
     )}
-    <div class="project-links">
-      {demoUrl && <a href={demoUrl} class="project-link" target="_blank" rel="noopener noreferrer">Live demo &rarr;</a>}
-      {sourceUrl && <a href={sourceUrl} class="project-link" target="_blank" rel="noopener noreferrer">Source</a>}
-      {blogUrl && <a href={blogUrl} class="project-link">Read more</a>}
-    </div>
+    {(demoUrl || sourceUrl || blogUrl) && (
+      <div class="project-links">
+        {demoUrl && <a href={demoUrl} class="project-link" target="_blank" rel="noopener noreferrer">Live demo &rarr;</a>}
+        {sourceUrl && <a href={sourceUrl} class="project-link" target="_blank" rel="noopener noreferrer">Source</a>}
+        {blogUrl && <a href={blogUrl} class="project-link">Write-up</a>}
+      </div>
+    )}
   </div>
-</div>
+</article>
 
 <style>
   .project-card {
     display: flex;
     flex-direction: column;
-    border-left-width: 3px;
     overflow: hidden;
-  }
-
-  .project-card[data-project="climate-stripes"] {
-    border-image: linear-gradient(to bottom, #2166ac, #67a9cf, #f7f7f7, #ef8a62, #b2182b) 1;
-    border-radius: 0;
-  }
-
-  .project-card[data-project="climate-stripes"] .project-title {
-    background: linear-gradient(90deg, #2166ac, #67a9cf 25%, #f7f7f7 50%, #ef8a62 75%, #b2182b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    width: fit-content;
   }
 
   .project-image {
     margin: -1.5rem -1.5rem 1.25rem -1.5rem;
     overflow: hidden;
+    border-bottom: 1px solid var(--rule);
   }
 
   .project-image img {
@@ -61,39 +62,52 @@ const { title, description, project, tags, demoUrl, sourceUrl, blogUrl, image, s
     transform: scale(1.02);
   }
 
+  .project-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
   .project-title {
-    color: var(--accent);
-    font-size: 1.3rem;
-    margin-bottom: 0.25rem;
+    color: var(--ink);
+    font-size: 1.2rem;
+    margin: 0;
+    font-weight: 600;
   }
 
   .project-status {
-    display: inline-block;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 500;
+    font-family: var(--font-mono);
     color: var(--accent);
-    background: var(--accent-subtle);
-    padding: 0.15em 0.6em;
-    border-radius: 9999px;
-    margin-bottom: 0.75rem;
+    background: var(--accent-soft);
+    padding: 0.15em 0.55em;
+    border-radius: 3px;
+    white-space: nowrap;
   }
 
   .project-desc {
-    font-size: 0.95rem;
+    font-size: 0.96rem;
+    color: var(--ink-dim);
     margin-bottom: 1rem;
+    line-height: 1.6;
   }
 
   .project-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
 
   .project-links {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+    border-top: 1px solid var(--rule);
+    padding-top: 1rem;
   }
 
   .project-link {
@@ -107,14 +121,13 @@ const { title, description, project, tags, demoUrl, sourceUrl, blogUrl, image, s
     color: var(--accent-sky);
   }
 
-  .project-card[data-project="climate-stripes"] .project-links {
+  /* Climate stripes signature */
+  .project-card[data-project="climate-stripes"] .project-title {
     background: linear-gradient(90deg, #2166ac, #67a9cf 25%, #f7f7f7 50%, #ef8a62 75%, #b2182b);
     -webkit-background-clip: text;
-    background-clip: text;
-    width: fit-content;
-  }
-
-  .project-card[data-project="climate-stripes"] .project-link {
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    width: fit-content;
   }
 </style>

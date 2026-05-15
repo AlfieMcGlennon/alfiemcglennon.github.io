@@ -152,5 +152,6 @@ Thumbs.db
 # Drafts
 src/content/blog/_drafts/
 
-# Private context docs
-docs/ABOUT_ALFIE.md
+# Private context docs and planning notes (kept local, not pushed)
+docs/
+CLAUDE.md

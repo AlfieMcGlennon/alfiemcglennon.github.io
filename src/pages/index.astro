@@ -1,129 +1,311 @@
 ---
 import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 ---
 
-<Base title="About" description="Climate risk, energy systems, and applied machine learning.">
-  <div class="hero">
-    <div class="hero-content">
-      <p class="hero-greeting">Hi, I'm</p>
-      <h1 class="hero-name"><span class="accent-gradient">Alfie</span></h1>
-      <p class="hero-tagline">Climate risk, energy systems, and applied ML</p>
-      <p class="hero-sub">
-        Building tools for compound extremes, grid constraints, and
-        reinforcement learning — from ERA5 reanalysis to LP dispatch
-        in the browser.
-      </p>
-      <div class="hero-links">
-        <a href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        </a>
-        <a href="https://www.linkedin.com/in/alfiemcglennon" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-        </a>
-        <a href="mailto:alfie.mcglennon@outlook.com" aria-label="Email">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
-        </a>
-        <a href="/cv/" aria-label="CV">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        </a>
-      </div>
+<Base
+  title=""
+  description="Alfie McGlennon — MSc Climate Change and AI, University of Reading. Building copula-based compound heat stress risk models for European climate projections using XGBoost, ERA5, CMIP6, and Destination Earth digital-twin data."
+>
+  <!-- ── HERO ─────────────────────────────────────────── -->
+  <section class="hero">
+    <p class="role">Climate scientist &amp; ML engineer</p>
+    <h1 class="hero-name">Alfie McGlennon</h1>
+    <p class="hero-affiliation">
+      MSc Climate Change and Artificial Intelligence &middot; University of Reading
+    </p>
+
+    <p class="lede">
+      Building <strong>copula-based compound heat stress risk models</strong> for
+      European climate projections, using XGBoost, ERA5 reanalysis, and
+      CMIP6 / Destination Earth digital-twin data.
+    </p>
+
+    <p class="subtitle">
+      Targeting roles in climate risk (reinsurance), operational weather and
+      climate (ECMWF), and climate-risk consultancy.
+    </p>
+
+    <div class="hero-links">
+      <a class="btn btn-primary" href="/projects/">Projects &rarr;</a>
+      <a class="btn" href="/cv/">CV</a>
+      <a class="btn" href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a class="btn" href="https://www.linkedin.com/in/alfiemcglennon" target="_blank" rel="noopener noreferrer">LinkedIn</a>
     </div>
-  </div>
+  </section>
+
+  <!-- ── ABOUT ────────────────────────────────────────── -->
+  <section class="block">
+    <h2>About</h2>
+    <p>
+      MSc student at the University of Reading on the Climate Change and
+      Artificial Intelligence programme, after a BSc in Meteorology and Climate
+      at the same department. My dissertation develops a multiplicative
+      decomposition for compound climate extremes &mdash; <code>M_total = M_marginal &times; M_dependence</code>
+      &mdash; with an ML angle using XGBoost to predict Kendall&rsquo;s tau
+      dependence from large-scale atmospheric circulation. The aim is to
+      separate sources of climate-model error in multivariate extremes like
+      simultaneous high temperature and high humidity.
+    </p>
+    <p>
+      Alongside the dissertation I build practical tools at the climate / ML /
+      operations boundary: a browser-based GB transmission grid model validated
+      against NESO published data, reinforcement-learning agents for grid
+      dispatch, and a quantum-machine-learning study of weather and chaotic
+      systems.
+    </p>
+  </section>
+
+  <!-- ── SELECTED PROJECTS ────────────────────────────── -->
+  <section class="block">
+    <h2>Selected projects</h2>
+
+    <div class="project-grid">
+      <ProjectCard
+        title="Compound heat stress risk (MSc dissertation)"
+        description="A copula-based framework for predicting compound heat stress risk across Europe. Multiplicative decomposition (M_total = M_marginal × M_dependence) separates climate-model error in multivariate extremes; XGBoost predicts Kendall's tau dependence from large-scale atmospheric circulation, testing whether ML can correct the dependence structure of climate models directly rather than just bias-correcting marginals."
+        project="compound-risk"
+        status="MSc 2026"
+        tags={['copulas', 'XGBoost', 'ERA5', 'CMIP6', 'DestinE', 'Kendall’s tau', 'extremes']}
+      />
+
+      <ProjectCard
+        title="GB Grid Scenario Tool"
+        description="An interactive browser-based DC power flow model of the GB transmission network, built from public NESO data — 27 TNUoS zones, 82 FLOP zones, 43 transmission links, 18 ETYS boundaries. Three dispatch modes including an LP solver compiled to WebAssembly. Weather driven by 34 years of ERA5 reanalysis. Validated against NESO ETYS transfer capabilities (B6F within 2%) and cross-checked with PyPSA-GB."
+        project="grid-tool"
+        tags={['Python', 'Pyomo', 'HiGHS', 'WebAssembly', 'TypeScript', 'Leaflet', 'ERA5', 'NESO']}
+        demoUrl="https://alfiemcglennon.github.io/gb-grid-tool/"
+        sourceUrl="https://github.com/AlfieMcGlennon/gb-grid-tool"
+        blogUrl="/blog/building-gb-grid-tool/"
+        image="/images/grid-tool/hero.png"
+      />
+
+      <ProjectCard
+        title="RL Grid Dispatch"
+        description="PPO reinforcement-learning agents trained to dispatch the GB grid under real network constraints, on 9 years of generation data, Elexon wholesale prices, and ERA5 weather. Compared MLP, CNN, and 27-zone zonal architectures (448k parameters, 72 ERA5 weather channels). Iterative reward design moved agents from £30B/year cost to within 6% of real grid operations."
+        project="rl-dispatch"
+        status="Series in progress"
+        tags={['PPO', 'Stable-Baselines3', 'PyTorch', 'CNN', 'SLURM/HPC', 'Elexon', 'ERA5']}
+        blogUrl="/blog/rl-grid-dispatch-baseline/"
+      />
+    </div>
+
+    <p class="see-more">
+      <a href="/projects/">See all projects &rarr;</a>
+    </p>
+  </section>
+
+  <!-- ── TECH STACK ───────────────────────────────────── -->
+  <section class="block">
+    <h2>Tech stack</h2>
+    <dl class="stack">
+      <div>
+        <dt>Languages</dt>
+        <dd>Python &middot; TypeScript &middot; JavaScript &middot; SQL &middot; HTML/CSS</dd>
+      </div>
+      <div>
+        <dt>ML &amp; stats</dt>
+        <dd>PyTorch &middot; XGBoost &middot; scikit-learn &middot; Stable-Baselines3 &middot; PennyLane &middot; scipy &middot; statsmodels</dd>
+      </div>
+      <div>
+        <dt>Climate &amp; geo data</dt>
+        <dd>xarray &middot; netCDF4 &middot; cdsapi &middot; ERA5 &middot; CMIP6 &middot; UKCP18 &middot; HadCET &middot; Destination Earth &middot; GloFAS &middot; Berkeley Earth</dd>
+      </div>
+      <div>
+        <dt>Infrastructure</dt>
+        <dd>SLURM (Reading RACC, <code>gpuscavenger</code>) &middot; Git &middot; WebAssembly &middot; GitHub Pages &middot; Astro</dd>
+      </div>
+      <div>
+        <dt>Web &amp; viz</dt>
+        <dd>React &middot; D3.js &middot; Leaflet &middot; Plotly &middot; matplotlib &middot; seaborn</dd>
+      </div>
+      <div>
+        <dt>Tools</dt>
+        <dd>Obsidian + Git &middot; Zotero &middot; VS Code &middot; Linux</dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- ── CONTACT ──────────────────────────────────────── -->
+  <section class="block">
+    <h2>Get in touch</h2>
+    <p>
+      Open to roles in climate risk, reinsurance, operational forecasting, and
+      climate / weather ML. Based in Reading, UK.
+    </p>
+    <ul class="contact-list">
+      <li><strong>Email</strong> &middot; <a href="mailto:alfie.mcglennon@outlook.com">alfie.mcglennon@outlook.com</a></li>
+      <li><strong>GitHub</strong> &middot; <a href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer">github.com/AlfieMcGlennon</a></li>
+      <li><strong>LinkedIn</strong> &middot; <a href="https://www.linkedin.com/in/alfiemcglennon" target="_blank" rel="noopener noreferrer">linkedin.com/in/alfiemcglennon</a></li>
+      <li><strong>CV</strong> &middot; <a href="/cv/">Full CV</a> &middot; <a href="/Alfie_McGlennon_CV.pdf" target="_blank" rel="noopener noreferrer">Download PDF</a></li>
+    </ul>
+  </section>
 </Base>
 
 <style>
+  /* ── Hero ─────────────────────────────────────────── */
+
   .hero {
-    position: relative;
-    min-height: calc(100vh - 3.5rem);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1.5rem;
+    padding-top: 1rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 1rem;
   }
 
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background:
-      radial-gradient(ellipse at 20% 50%, rgba(43, 124, 212, 0.06) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 30%, rgba(56, 189, 248, 0.04) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 80%, rgba(124, 58, 237, 0.03) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    max-width: 600px;
-  }
-
-  .hero-greeting {
-    font-size: 1.1rem;
-    font-weight: 400;
-    color: var(--text-muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 0.25rem;
+  .role {
     font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
   }
 
   .hero-name {
-    font-size: clamp(3.5rem, 10vw, 6rem);
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 1.25rem;
-    letter-spacing: -0.03em;
+    font-size: clamp(2.2rem, 6vw, 3rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
   }
 
-  .hero-tagline {
-    font-size: 1.15rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 0.75rem;
-  }
-
-  .hero-sub {
-    font-size: 0.92rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 2rem;
-    max-width: 480px;
-    margin-left: auto;
-    margin-right: auto;
+  .hero-affiliation {
+    color: var(--ink-dim);
+    font-size: 0.98rem;
+    margin-bottom: 1.5rem;
   }
 
   .hero-links {
     display: flex;
-    justify-content: center;
-    gap: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
   }
 
-  .hero-links a {
-    color: var(--text-muted);
-    transition: color 0.25s ease, transform 0.25s ease;
-    display: flex;
-    align-items: center;
+  .btn {
+    display: inline-block;
+    padding: 0.55rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--rule-strong);
+    border-radius: 5px;
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
   }
 
-  .hero-links a:hover {
+  .btn:hover {
+    border-color: var(--accent);
     color: var(--accent);
-    transform: translateY(-2px);
   }
 
-  .hero-links svg {
-    width: 24px;
-    height: 24px;
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0f1523;
   }
 
-  @media (max-width: 480px) {
-    .hero-greeting { font-size: 0.9rem; }
-    .hero-tagline { font-size: 1rem; }
-    .hero-sub { font-size: 0.85rem; }
+  .btn-primary:hover {
+    background: var(--accent-sky);
+    border-color: var(--accent-sky);
+    color: #0f1523;
+  }
+
+  /* ── Sections ─────────────────────────────────────── */
+
+  .block {
+    padding: 2rem 0;
+  }
+
+  .block h2 {
+    font-size: 1.35rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--ink);
+  }
+
+  /* ── Project grid ─────────────────────────────────── */
+
+  .project-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .see-more {
+    margin: 0;
+    font-size: 0.92rem;
+  }
+
+  .see-more a {
+    font-weight: 500;
+  }
+
+  /* ── Tech stack ───────────────────────────────────── */
+
+  .stack {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.9rem 2rem;
+    margin: 0;
+  }
+
+  @media (min-width: 600px) {
+    .stack {
+      grid-template-columns: 180px 1fr;
+    }
+    .stack > div {
+      display: contents;
+    }
+  }
+
+  .stack > div {
+    border-top: 1px solid var(--rule);
+    padding-top: 0.8rem;
+  }
+
+  .stack dt {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+    font-family: var(--font-mono);
+  }
+
+  .stack dd {
+    font-size: 0.92rem;
+    color: var(--ink-dim);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .stack dd code {
+    font-size: 0.85em;
+  }
+
+  /* ── Contact list ─────────────────────────────────── */
+
+  .contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .contact-list li {
+    padding: 0.4rem 0;
+    border-top: 1px solid var(--rule);
+    font-size: 0.95rem;
+  }
+
+  .contact-list li:first-child {
+    border-top: none;
+  }
+
+  .contact-list strong {
+    color: var(--ink);
+    font-weight: 500;
+    margin-right: 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
   }
 </style>

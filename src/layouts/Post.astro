@@ -1,7 +1,7 @@
 ---
 import Base from './Base.astro';
 
-const { title, description, date, project, accent, tags, image } = Astro.props;
+const { title, description, date, project, tags, image } = Astro.props;
 
 const formatted = new Date(date).toLocaleDateString('en-GB', {
   year: 'numeric',
@@ -9,7 +9,6 @@ const formatted = new Date(date).toLocaleDateString('en-GB', {
   day: 'numeric',
 });
 
-// Estimate reading time from the slot content
 const html = await Astro.slots.render('default');
 const words = html.replace(/<[^>]*>/g, '').split(/\s+/).length;
 const readingTime = Math.max(1, Math.ceil(words / 230));
@@ -21,11 +20,11 @@ const readingTime = Math.max(1, Math.ceil(words / 230));
       <h1>{title}</h1>
       <div class="post-meta">
         <time datetime={new Date(date).toISOString()}>{formatted}</time>
-        <span class="meta-sep">&middot;</span>
+        <span class="sep">&middot;</span>
         <span>{readingTime} min read</span>
         {tags && tags.length > 0 && (
           <>
-            <span class="meta-sep">&middot;</span>
+            <span class="sep">&middot;</span>
             <div class="post-tags">
               {tags.map(t => <span class="tag">{t}</span>)}
             </div>
@@ -41,6 +40,10 @@ const readingTime = Math.max(1, Math.ceil(words / 230));
     )}
 
     <div class="post-content" set:html={html} />
+
+    <footer class="post-footer">
+      <a href="/blog/" class="back-link">&larr; All posts</a>
+    </footer>
   </article>
 </Base>
 
@@ -59,12 +62,12 @@ const readingTime = Math.max(1, Math.ceil(words / 230));
     align-items: center;
     flex-wrap: wrap;
     gap: 0.5rem;
-    color: var(--text-muted);
+    color: var(--ink-faint);
     font-size: 0.85rem;
     font-family: var(--font-mono);
   }
 
-  .meta-sep {
+  .sep {
     opacity: 0.4;
   }
 
@@ -76,9 +79,9 @@ const readingTime = Math.max(1, Math.ceil(words / 230));
 
   .post-hero {
     margin-bottom: 2rem;
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: 1px solid var(--rule);
   }
 
   .post-hero img {
@@ -99,7 +102,23 @@ const readingTime = Math.max(1, Math.ceil(words / 230));
     color: var(--accent-sky);
   }
 
-  /* Climate stripes gradient overrides */
+  .post-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .back-link {
+    font-size: 0.9rem;
+    color: var(--ink-dim);
+    font-weight: 500;
+  }
+
+  .back-link:hover {
+    color: var(--accent);
+  }
+
+  /* Climate stripes signature */
   :global([data-project="climate-stripes"]) .post-header h1,
   :global([data-project="climate-stripes"]) .post-content :global(h2),
   :global([data-project="climate-stripes"]) .post-content :global(h3) {
@@ -107,19 +126,7 @@ const readingTime = Math.max(1, Math.ceil(words / 230));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    color: transparent;
     width: fit-content;
-  }
-
-  :global([data-project="climate-stripes"]) .post-content :global(a) {
-    color: var(--accent);
-  }
-
-  :global([data-project="climate-stripes"]) .post-content :global(a:hover) {
-    color: var(--accent-sky);
-  }
-
-  :global([data-project="climate-stripes"]) .post-tags .tag {
-    color: var(--accent);
-    background: var(--accent-subtle);
   }
 </style>
