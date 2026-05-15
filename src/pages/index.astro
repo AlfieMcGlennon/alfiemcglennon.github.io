@@ -3,8 +3,8 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base>
-  <!-- Hero: animated atmospheric sky (kept from v2 per spec) -->
-  <section class="hero" aria-label="Introduction">
+  <!-- Hero: animated atmospheric sky, reflects live Reading weather where the API is reachable -->
+  <section class="hero" data-hero aria-label="Introduction">
     <div class="sky" aria-hidden="true">
       <svg
         class="sky-svg"
@@ -14,9 +14,9 @@ import Base from '../layouts/Base.astro';
       >
         <defs>
           <linearGradient id="sky-gradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#d8e8eb" />
-            <stop offset="55%" stop-color="#ece8dc" />
-            <stop offset="100%" stop-color="#f3e1c8" />
+            <stop offset="0%" class="sky-stop-top" />
+            <stop offset="55%" class="sky-stop-mid" />
+            <stop offset="100%" class="sky-stop-bot" />
           </linearGradient>
           <filter id="cloud-blur" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="5" />
@@ -35,6 +35,11 @@ import Base from '../layouts/Base.astro';
             <ellipse cx="60" cy="40" rx="56" ry="18" fill="#ffffff" />
             <ellipse cx="130" cy="34" rx="62" ry="22" fill="#ffffff" />
           </symbol>
+          <pattern id="rain-pattern" x="0" y="0" width="60" height="100" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+            <line x1="10" y1="0" x2="10" y2="22" stroke="#7a8896" stroke-width="1.1" stroke-linecap="round" opacity="0.7" />
+            <line x1="34" y1="40" x2="34" y2="64" stroke="#7a8896" stroke-width="1.1" stroke-linecap="round" opacity="0.55" />
+            <line x1="50" y1="70" x2="50" y2="90" stroke="#7a8896" stroke-width="1.1" stroke-linecap="round" opacity="0.6" />
+          </pattern>
         </defs>
 
         <rect width="1200" height="600" fill="url(#sky-gradient)" />
@@ -57,6 +62,8 @@ import Base from '../layouts/Base.astro';
           <use href="#cloud-b" x="500" y="430" width="260" height="90" opacity="0.7" />
           <use href="#cloud-a" x="950" y="410" width="320" height="100" opacity="0.7" />
         </g>
+
+        <rect class="rain-layer" width="1200" height="600" fill="url(#rain-pattern)" />
       </svg>
     </div>
 
@@ -69,7 +76,101 @@ import Base from '../layouts/Base.astro';
         national grid.
       </p>
     </div>
+
+    <p class="weather-attr" data-weather-attr>
+      <span data-weather-summary>Live conditions</span> at Reading, UK
+      &middot;
+      <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a>
+    </p>
   </section>
+
+  <script>
+    (async function initWeatherHero() {
+      const hero = document.querySelector('[data-hero]');
+      if (!hero) return;
+
+      const CACHE_KEY = 'weather-reading-v1';
+      const TTL_MS = 30 * 60 * 1000;
+      const URL = 'https://api.open-meteo.com/v1/forecast?latitude=51.4543&longitude=-0.9781&current=temperature_2m,relative_humidity_2m,wind_speed_10m,cloud_cover,weather_code,is_day&timezone=Europe/London';
+
+      const codeToLabel = (c, isDay) => {
+        if (c === 0) return isDay ? 'Clear sky' : 'Clear night';
+        if (c === 1) return 'Mostly clear';
+        if (c === 2) return 'Partly cloudy';
+        if (c === 3) return 'Overcast';
+        if (c === 45 || c === 48) return 'Fog';
+        if (c >= 51 && c <= 57) return 'Drizzle';
+        if (c >= 61 && c <= 67) return 'Rain';
+        if (c >= 71 && c <= 77) return 'Snow';
+        if (c >= 80 && c <= 82) return 'Rain showers';
+        if (c === 85 || c === 86) return 'Snow showers';
+        if (c >= 95 && c <= 99) return 'Thunderstorm';
+        return 'Live conditions';
+      };
+
+      function applyWeather(payload) {
+        const c = payload.current || payload;
+        const code = c.weather_code ?? 2;
+        const isDay = c.is_day ?? 1;
+        const cloudCover = c.cloud_cover ?? 50;
+        const windSpeed = c.wind_speed_10m ?? 10;
+        const temp = c.temperature_2m ?? 15;
+
+        let state = 'partly-cloudy';
+        if (isDay === 0) state = 'night';
+        else if (code === 0 || code === 1) state = 'clear';
+        else if (code === 2) state = 'partly-cloudy';
+        else if (code === 3 || code === 45 || code === 48) state = 'overcast';
+        else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) state = 'rain';
+        else if ((code >= 71 && code <= 77) || code === 85 || code === 86) state = 'snow';
+        else if (code >= 95 && code <= 99) state = 'storm';
+        hero.dataset.weather = state;
+
+        let density = 'mid';
+        if (cloudCover < 25) density = 'low';
+        else if (cloudCover > 70) density = 'high';
+        hero.dataset.cloudDensity = density;
+
+        let speed = 'mid';
+        if (windSpeed < 10) speed = 'slow';
+        else if (windSpeed > 30) speed = 'fast';
+        hero.dataset.windSpeed = speed;
+
+        let warmth = 'neutral';
+        if (temp < 5) warmth = 'cool';
+        else if (temp > 25) warmth = 'warm';
+        hero.dataset.warmth = warmth;
+
+        hero.classList.add('weather-live');
+        const summary = hero.querySelector('[data-weather-summary]');
+        if (summary) summary.textContent = `${codeToLabel(code, isDay)}, ${Math.round(temp)}°C`;
+      }
+
+      try {
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Date.now() - parsed.timestamp < TTL_MS) {
+            applyWeather(parsed.data);
+            return;
+          }
+        }
+      } catch (e) { /* ignore */ }
+
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch(URL, { signal: controller.signal });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error('bad response');
+        const data = await res.json();
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() })); } catch (e) { /* ignore quota */ }
+        applyWeather(data);
+      } catch (e) {
+        // Silent fallback: hero stays on default sky.
+      }
+    })();
+  </script>
 
   <!-- About -->
   <section class="page about">
@@ -170,7 +271,7 @@ import Base from '../layouts/Base.astro';
 </Base>
 
 <style>
-  /* ── Hero ─────────────────────────────────────────── */
+  /* ── Hero (weather-aware) ──────────────────────────── */
 
   .hero {
     position: relative;
@@ -178,6 +279,80 @@ import Base from '../layouts/Base.astro';
     height: clamp(440px, 75vh, 640px);
     overflow: hidden;
     border-bottom: 1px solid var(--rule);
+
+    /* Default (partly-cloudy) sky stops. Weather classes override. */
+    --sky-top: #d8e8eb;
+    --sky-mid: #ece8dc;
+    --sky-bot: #f3e1c8;
+
+    --cloud-density: 1;
+    --cloud-speed-mult: 1;
+    --rain-opacity: 0;
+
+    transition: background 0.6s ease;
+  }
+
+  .sky-stop-top { stop-color: var(--sky-top); }
+  .sky-stop-mid { stop-color: var(--sky-mid); }
+  .sky-stop-bot { stop-color: var(--sky-bot); }
+
+  /* Weather states */
+  .hero[data-weather="clear"] {
+    --sky-top: #c8dde8;
+    --sky-mid: #f0e6cf;
+    --sky-bot: #f6d4a0;
+  }
+  .hero[data-weather="partly-cloudy"] {
+    --sky-top: #d8e8eb;
+    --sky-mid: #ece8dc;
+    --sky-bot: #f3e1c8;
+  }
+  .hero[data-weather="overcast"] {
+    --sky-top: #b8c2c6;
+    --sky-mid: #c8cdce;
+    --sky-bot: #d4d4ce;
+  }
+  .hero[data-weather="rain"] {
+    --sky-top: #8b95a3;
+    --sky-mid: #9ea3ab;
+    --sky-bot: #b4b2a8;
+    --rain-opacity: 0.14;
+  }
+  .hero[data-weather="snow"] {
+    --sky-top: #d8e4ed;
+    --sky-mid: #e8eaec;
+    --sky-bot: #ecebe3;
+  }
+  .hero[data-weather="storm"] {
+    --sky-top: #4a525c;
+    --sky-mid: #6a6e75;
+    --sky-bot: #847f7a;
+    --rain-opacity: 0.18;
+  }
+  .hero[data-weather="night"] {
+    --sky-top: #14222c;
+    --sky-mid: #1d3540;
+    --sky-bot: #213038;
+  }
+
+  /* Temperature shift (subtle warmth at horizon) */
+  .hero[data-warmth="warm"][data-weather="clear"] { --sky-bot: #f0bf80; }
+  .hero[data-warmth="warm"][data-weather="partly-cloudy"] { --sky-bot: #efc995; }
+  .hero[data-warmth="cool"][data-weather="clear"] { --sky-bot: #d6dbd8; }
+  .hero[data-warmth="cool"][data-weather="partly-cloudy"] { --sky-bot: #dadcd0; }
+
+  /* Cloud density (parent group opacity multiplier) */
+  .hero[data-cloud-density="low"] .cloud-layer { opacity: 0.55; }
+  .hero[data-cloud-density="high"] .cloud-layer { opacity: 1.15; }
+
+  /* Wind speed */
+  .hero[data-wind-speed="slow"] { --cloud-speed-mult: 1.4; }
+  .hero[data-wind-speed="fast"] { --cloud-speed-mult: 0.55; }
+
+  /* Rain pattern overlay */
+  .rain-layer {
+    opacity: var(--rain-opacity, 0);
+    transition: opacity 0.6s ease;
   }
 
   .sky {
@@ -196,11 +371,18 @@ import Base from '../layouts/Base.astro';
   .cloud-layer {
     transform-origin: center;
     will-change: transform;
+    transition: opacity 0.6s ease;
   }
 
-  .cloud-layer-slow { animation: drift-slow 180s linear infinite alternate; }
-  .cloud-layer-medium { animation: drift-medium 120s linear infinite alternate; }
-  .cloud-layer-fast { animation: drift-fast 80s linear infinite alternate; }
+  .cloud-layer-slow {
+    animation: drift-slow calc(180s * var(--cloud-speed-mult)) linear infinite alternate;
+  }
+  .cloud-layer-medium {
+    animation: drift-medium calc(120s * var(--cloud-speed-mult)) linear infinite alternate;
+  }
+  .cloud-layer-fast {
+    animation: drift-fast calc(80s * var(--cloud-speed-mult)) linear infinite alternate;
+  }
 
   @keyframes drift-slow {
     from { transform: translateX(-8%); }
@@ -218,6 +400,43 @@ import Base from '../layouts/Base.astro';
   @media (prefers-reduced-motion: reduce) {
     .cloud-layer { animation: none; }
   }
+
+  /* Attribution, shown only when live weather is applied */
+  .weather-attr {
+    position: absolute;
+    right: 1rem;
+    bottom: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--ink-muted);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    margin: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .hero.weather-live .weather-attr {
+    opacity: 0.55;
+    pointer-events: auto;
+  }
+  .weather-attr a {
+    color: inherit;
+    border-bottom: 0;
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
+    text-underline-offset: 2px;
+  }
+  .weather-attr a:hover { color: var(--teal); }
+
+  /* When night sky, lift hero text for contrast */
+  .hero[data-weather="night"] .hero-name,
+  .hero[data-weather="storm"] .hero-name { color: #f3efe9; }
+  .hero[data-weather="night"] .hero-affiliation,
+  .hero[data-weather="storm"] .hero-affiliation { color: #9bd0c8; }
+  .hero[data-weather="night"] .hero-tag,
+  .hero[data-weather="storm"] .hero-tag { color: #d6d1c4; }
+  .hero[data-weather="night"] .weather-attr,
+  .hero[data-weather="storm"] .weather-attr { color: #c8c4ba; }
 
   .hero-content {
     position: absolute;

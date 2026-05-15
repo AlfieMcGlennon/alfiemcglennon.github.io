@@ -91,7 +91,9 @@ Added an unconditional import bonus and a quadratic gas dominance penalty (trigg
 
 **Result:** Gas 70%, Imports 61%, Cost +44%, 50 TWh curtailed.
 
-The agent found the loophole. It stacked gas AND imports simultaneously to collect the import bonus, dumping the excess as curtailment. It optimised the reward, not the grid.
+The agent found the loophole. It stacked gas AND imports simultaneously to collect the import bonus, dumping the excess as curtailment.
+
+> It optimised the reward, not the grid.
 
 ### Anticipatory reward
 Same as composite, plus a bonus for reducing gas when wind forecasts show increasing generation.
@@ -139,6 +141,6 @@ RL can learn dispatch fundamentals from experience. Demand matching, cost-minimi
 
 But the action space is the ceiling. Adding spatial observations (CNN, 72 weather channels, 7-day forecasts) and sophisticated reward engineering could not overcome the fundamental limitation of three national dispatch levers. The agent can see that Scottish wind is high. It cannot reduce Scottish gas while increasing English gas. It can only adjust the national mix.
 
-You cannot learn network-constrained dispatch without network topology in the action space.
+> You cannot learn network-constrained dispatch without network topology in the action space.
 
 This motivated building a proper GB grid environment with validated network topology, per-zone generation, and DC power flow. That became [the GB Grid Scenario Tool](/writing/building-gb-grid-tool/), which turned out to be a bigger project than the RL work itself. The next step combines the spatial CNN features with a full 109-action topology-aware action space (27 zones × 4 dispatchable types + interconnector), testing whether the spatial observations that were wasted here become the agent's primary advantage. That work is ongoing.

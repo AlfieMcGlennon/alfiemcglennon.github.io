@@ -1,7 +1,8 @@
 ---
 import Base from './Base.astro';
+import Banner from '../components/Banner.astro';
 
-const { title, description, date, tags, image } = Astro.props;
+const { title, description, date, tags, image, project } = Astro.props;
 
 const formatted = new Date(date).toLocaleDateString('en-GB', {
   year: 'numeric',
@@ -21,6 +22,8 @@ const ogDescription = description;
   image={image}
 >
   <article class="page-narrow post">
+    {project && <Banner project={project} size="large" />}
+
     <header class="post-head">
       <p class="kicker">Writing</p>
       <h1>{title}</h1>
@@ -35,12 +38,6 @@ const ogDescription = description;
       </p>
       {description && <p class="lede">{description}</p>}
     </header>
-
-    {image && (
-      <figure class="post-hero">
-        <img src={image} alt={title} loading="eager" />
-      </figure>
-    )}
 
     <div class="post-body">
       <slot />
@@ -95,6 +92,30 @@ const ogDescription = description;
 
   .post-body :global(h3) {
     margin-top: 2.25rem;
+  }
+
+  .post-body :global(blockquote) {
+    margin: 2.5rem 0 2.5rem -0.5rem;
+    padding: 0.4rem 0 0.4rem 1.5rem;
+    border-left: 3px solid var(--amber);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.22rem;
+    line-height: 1.55;
+    color: var(--ink-dim);
+    background: linear-gradient(to right, rgba(180, 83, 9, 0.04), transparent 60%);
+  }
+
+  .post-body :global(blockquote p) {
+    margin-bottom: 0.6rem;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+    font-style: inherit;
+  }
+
+  .post-body :global(blockquote p:last-child) {
+    margin-bottom: 0;
   }
 
   .post-body :global(img) {

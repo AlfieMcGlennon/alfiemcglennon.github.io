@@ -44,7 +44,9 @@ My first 10 configurations all had the same problem: every flow was 30-35% too h
 
 The root cause was embarrassingly simple. I was using ACS peak demand (47,940 MW), the design maximum that the grid is built to handle, instead of typical winter demand (~36,000 MW). One field in one JSON file. It inflated every injection by 34%, which inflated every flow proportionally.
 
-The fix was one line. The investigation to find it took days. **Check your demand baseline before you optimise anything else.**
+The fix was one line. The investigation to find it took days.
+
+> Check your demand baseline before you optimise anything else.
 
 ### 16 configurations tested
 
@@ -92,7 +94,9 @@ I built this tool because I needed a validated environment for RL dispatch resea
 
 With the full 27-zone topology, the agent gets 109 continuous actions: per-zone per-type dispatch fractions with physical constraints. The same reward-focused agents, but now they can see the network and act on it. The next step is to test whether topology-aware actions let the agent learn what the LP solver computes analytically.
 
-The environment, the data, and the baselines are ready. The training infrastructure is the easy part. The hard part was building a validated environment from public data. That's done.
+> The hard part was building a validated environment from public data. That's done.
+
+The environment, the data, and the baselines are ready. The training infrastructure is the easy part.
 
 ## Links
 

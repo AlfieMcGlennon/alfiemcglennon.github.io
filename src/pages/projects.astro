@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Banner from '../components/Banner.astro';
 ---
 
 <Base
@@ -20,7 +21,8 @@ import Base from '../layouts/Base.astro';
     </header>
 
     <!-- ── Project 1: GB Grid Scenario Tool ─────────────── -->
-    <section class="project">
+    <section class="project" data-project="grid-tool">
+      <Banner project="grid-tool" size="small" />
       <h2>GB Grid Scenario Tool</h2>
       <p>
         I was drawn to reinforcement learning through the demos of agents
@@ -62,7 +64,9 @@ import Base from '../layouts/Base.astro';
         could not improve on MLPs without topology-aware action spaces.
         The action space was the bottleneck, not the observation space.
       </p>
-      <p class="tech-line">JavaScript, React, Leaflet, WebAssembly (HiGHS), Python, Stable-Baselines3, SLURM, ERA5</p>
+      <ul class="tech-pills">
+        <li>JavaScript</li><li>React</li><li>Leaflet</li><li>WebAssembly (HiGHS)</li><li>Python</li><li>Stable-Baselines3</li><li>SLURM</li><li>ERA5</li>
+      </ul>
       <p class="project-links">
         <a href="/writing/building-gb-grid-tool/">Read the full build story</a>
         <span class="links-sep">·</span>
@@ -73,7 +77,8 @@ import Base from '../layouts/Base.astro';
     </section>
 
     <!-- ── Project 2: Quantum ML for atmospheric regression ─ -->
-    <section class="project">
+    <section class="project" data-project="quantum-ml">
+      <Banner project="quantum-ml" size="small" />
       <h2>Quantum ML for atmospheric regression</h2>
       <p>
         Quantum computing as a research direction is interesting precisely
@@ -98,11 +103,14 @@ import Base from '../layouts/Base.astro';
         experiments and the VQC versus MLP gap explicitly in the handoff
         notes.
       </p>
-      <p class="tech-line">Python, PennyLane, ERA5, Lorenz &rsquo;63</p>
+      <ul class="tech-pills">
+        <li>Python</li><li>PennyLane</li><li>ERA5</li><li>Lorenz &rsquo;63</li>
+      </ul>
     </section>
 
     <!-- ── Project 3: Climate Data Quickstart ───────────── -->
-    <section class="project">
+    <section class="project" data-project="climate-data-quickstart">
+      <Banner project="climate-data-quickstart" size="small" />
       <h2>Climate Data Quickstart</h2>
       <p>
         Climate data is fragmented. Every dataset has its own access
@@ -129,14 +137,17 @@ import Base from '../layouts/Base.astro';
         extraction, code generation, then validation against each
         provider&rsquo;s actual API.
       </p>
-      <p class="tech-line">Python, Streamlit, xarray, cdsapi, NetCDF/GRIB/Zarr</p>
+      <ul class="tech-pills">
+        <li>Python</li><li>Streamlit</li><li>xarray</li><li>cdsapi</li><li>NetCDF/GRIB/Zarr</li>
+      </ul>
       <p class="project-links">
         <a href="https://github.com/AlfieMcGlennon/climate-data-quickstart" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
       </p>
     </section>
 
     <!-- ── Project 4: City Climate Stripes ──────────────── -->
-    <section class="project">
+    <section class="project" data-project="climate-stripes">
+      <Banner project="climate-stripes" size="small" />
       <h2>City Climate Stripes</h2>
       <p>
         Ed Hawkins&rsquo; warming stripes are one of the most effective
@@ -149,7 +160,9 @@ import Base from '../layouts/Base.astro';
         entirely client-side, exports PNGs. A small exploratory thing, not
         a scientific dataset.
       </p>
-      <p class="tech-line">HTML, JavaScript, D3, Berkeley Earth, GeoNames</p>
+      <ul class="tech-pills">
+        <li>HTML</li><li>JavaScript</li><li>D3</li><li>Berkeley Earth</li><li>GeoNames</li>
+      </ul>
       <p class="project-links">
         <a href="/writing/city-climate-stripes/">Read more</a>
         <span class="links-sep">·</span>
@@ -160,7 +173,8 @@ import Base from '../layouts/Base.astro';
     </section>
 
     <!-- ── Project 5: Climate Playbook ──────────────────── -->
-    <section class="project">
+    <section class="project" data-project="climate-playbook">
+      <Banner project="climate-playbook" size="small" />
       <h2>Climate Playbook</h2>
       <p>
         Climate Playbook is an interactive climate education platform aimed
@@ -179,11 +193,14 @@ import Base from '../layouts/Base.astro';
         work in progress. British English throughout, no edutainment, no
         gamification for its own sake.
       </p>
-      <p class="tech-line">Astro, MDX, D3, vanilla JavaScript</p>
+      <ul class="tech-pills">
+        <li>Astro</li><li>MDX</li><li>D3</li><li>vanilla JavaScript</li>
+      </ul>
     </section>
 
     <!-- ── Project 6: Electricity demand forecasting (India) ─ -->
-    <section class="project">
+    <section class="project" data-project="india-demand">
+      <Banner project="india-demand" size="small" />
       <h2>Electricity demand forecasting (India)</h2>
       <p>
         An MSc module sub-project. State-level electricity demand
@@ -197,7 +214,9 @@ import Base from '../layouts/Base.astro';
         A short exercise in building the whole pipeline end to end on a
         non-UK grid.
       </p>
-      <p class="tech-line">Python, scikit-learn, XGBoost, PyTorch, ERA5</p>
+      <ul class="tech-pills">
+        <li>Python</li><li>scikit-learn</li><li>XGBoost</li><li>PyTorch</li><li>ERA5</li>
+      </ul>
     </section>
   </article>
 </Base>
