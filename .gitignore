@@ -154,4 +154,4 @@ src/content/blog/_drafts/
 
 # Private context docs and planning notes (kept local, not pushed)
 docs/
-CLAUDE.md
+/*.md

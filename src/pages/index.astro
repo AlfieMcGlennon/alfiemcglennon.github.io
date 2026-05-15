@@ -1,311 +1,108 @@
 ---
 import Base from '../layouts/Base.astro';
-import ProjectCard from '../components/ProjectCard.astro';
 ---
 
-<Base
-  title=""
-  description="Alfie McGlennon — MSc Climate Change and AI, University of Reading. Building copula-based compound heat stress risk models for European climate projections using XGBoost, ERA5, CMIP6, and Destination Earth digital-twin data."
->
-  <!-- ── HERO ─────────────────────────────────────────── -->
-  <section class="hero">
-    <p class="role">Climate scientist &amp; ML engineer</p>
+<Base>
+  <section class="section hero">
     <h1 class="hero-name">Alfie McGlennon</h1>
-    <p class="hero-affiliation">
-      MSc Climate Change and Artificial Intelligence &middot; University of Reading
-    </p>
+    <p class="hero-sub">MSc Climate Change &amp; AI // University of Reading</p>
+  </section>
 
-    <p class="lede">
-      Building <strong>copula-based compound heat stress risk models</strong> for
-      European climate projections, using XGBoost, ERA5 reanalysis, and
-      CMIP6 / Destination Earth digital-twin data.
+  <section class="section about">
+    <p>
+      My MSc dissertation builds a copula-based framework for predicting
+      compound heat stress risk across European regions. The approach uses a
+      multiplicative decomposition that separates compound hazard bias in
+      climate models into a marginal component and a dependence component,
+      then trains XGBoost to predict Kendall&rsquo;s tau dependence from
+      large-scale atmospheric circulation patterns. The data comes from ERA5
+      reanalysis, CMIP6 projections, and the Destination Earth climate digital
+      twin.
     </p>
-
-    <p class="subtitle">
-      Targeting roles in climate risk (reinsurance), operational weather and
-      climate (ECMWF), and climate-risk consultancy.
+    <p>
+      I&rsquo;m targeting roles in climate risk analytics and reinsurance,
+      particularly at Swiss Re and Munich Re, or in operational meteorology
+      adjacent to ECMWF. The through-line across my work is applying machine
+      learning and statistical methods to climate data where the outputs have
+      operational or commercial value.
     </p>
+  </section>
 
-    <div class="hero-links">
-      <a class="btn btn-primary" href="/projects/">Projects &rarr;</a>
-      <a class="btn" href="/cv/">CV</a>
-      <a class="btn" href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer">GitHub</a>
-      <a class="btn" href="https://www.linkedin.com/in/alfiemcglennon" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+  <section class="section">
+    <h2 class="section-heading">Projects</h2>
+
+    <article class="project">
+      <h3 class="project-title">Compound heat stress risk modelling</h3>
+      <p class="project-desc">
+        Copula-based bivariate framework for temperature and humidity extremes
+        across European regions. Multiplicative decomposition of compound
+        hazard bias with ML-driven dependence correction.
+      </p>
+      <p class="project-tech">Python, xarray, scipy, XGBoost, ERA5, CMIP6, DestinE</p>
+    </article>
+
+    <article class="project">
+      <h3 class="project-title">
+        <a href="https://alfiemcglennon.github.io/gb-grid-tool/" target="_blank" rel="noopener noreferrer">GB Grid Scenario Tool</a>
+      </h3>
+      <p class="project-desc">
+        Interactive transmission grid model built from public NESO data. 27
+        TNUoS zones, DC power flow with real backbone reactances, three
+        dispatch modes. Validated against NESO transfer capabilities (B6F
+        within 2%).
+      </p>
+      <p class="project-tech">JavaScript, Leaflet, WebAssembly, ERA5</p>
+    </article>
+
+    <article class="project">
+      <h3 class="project-title">RL grid dispatch agents</h3>
+      <p class="project-desc">
+        PPO agents trained on 9 years of GB generation data to learn dispatch
+        strategies from scratch. MLP, CNN, and 27-zone zonal architectures.
+        Went from spending 30B/year to within 6% of real grid operations.
+      </p>
+      <p class="project-tech">Python, Stable Baselines3, SLURM, ERA5</p>
+    </article>
+
+    <article class="project">
+      <h3 class="project-title">Quantum ML for atmospheric regression</h3>
+      <p class="project-desc">
+        Variational quantum circuits applied to ERA5 temperature fields and
+        the Lorenz &rsquo;63 system. Fourier decomposition as an
+        interpretability tool for per-qubit structured VQC regression.
+      </p>
+      <p class="project-tech">Python, PennyLane, ERA5</p>
+    </article>
+  </section>
+
+  <section class="section">
+    <h2 class="section-heading">Stack</h2>
+    <div class="stack">
+      <p class="stack-row">
+        <span class="stack-label">Languages:</span>
+        <span class="stack-value">Python, JavaScript/TypeScript, Bash</span>
+      </p>
+      <p class="stack-row">
+        <span class="stack-label">ML &amp; stats:</span>
+        <span class="stack-value">XGBoost, scikit-learn, Stable Baselines3, PyTorch, PennyLane, copula methods, scipy</span>
+      </p>
+      <p class="stack-row">
+        <span class="stack-label">Climate &amp; geo:</span>
+        <span class="stack-value">xarray, ERA5, CMIP6, UKCP18, DestinE, cartopy, cdsapi</span>
+      </p>
+      <p class="stack-row">
+        <span class="stack-label">Infrastructure:</span>
+        <span class="stack-value">SLURM, Linux, Git, LaTeX</span>
+      </p>
+      <p class="stack-row">
+        <span class="stack-label">Web:</span>
+        <span class="stack-value">Astro, Leaflet, D3.js, WebAssembly</span>
+      </p>
     </div>
   </section>
 
-  <!-- ── ABOUT ────────────────────────────────────────── -->
-  <section class="block">
-    <h2>About</h2>
-    <p>
-      MSc student at the University of Reading on the Climate Change and
-      Artificial Intelligence programme, after a BSc in Meteorology and Climate
-      at the same department. My dissertation develops a multiplicative
-      decomposition for compound climate extremes &mdash; <code>M_total = M_marginal &times; M_dependence</code>
-      &mdash; with an ML angle using XGBoost to predict Kendall&rsquo;s tau
-      dependence from large-scale atmospheric circulation. The aim is to
-      separate sources of climate-model error in multivariate extremes like
-      simultaneous high temperature and high humidity.
-    </p>
-    <p>
-      Alongside the dissertation I build practical tools at the climate / ML /
-      operations boundary: a browser-based GB transmission grid model validated
-      against NESO published data, reinforcement-learning agents for grid
-      dispatch, and a quantum-machine-learning study of weather and chaotic
-      systems.
-    </p>
-  </section>
-
-  <!-- ── SELECTED PROJECTS ────────────────────────────── -->
-  <section class="block">
-    <h2>Selected projects</h2>
-
-    <div class="project-grid">
-      <ProjectCard
-        title="Compound heat stress risk (MSc dissertation)"
-        description="A copula-based framework for predicting compound heat stress risk across Europe. Multiplicative decomposition (M_total = M_marginal × M_dependence) separates climate-model error in multivariate extremes; XGBoost predicts Kendall's tau dependence from large-scale atmospheric circulation, testing whether ML can correct the dependence structure of climate models directly rather than just bias-correcting marginals."
-        project="compound-risk"
-        status="MSc 2026"
-        tags={['copulas', 'XGBoost', 'ERA5', 'CMIP6', 'DestinE', 'Kendall’s tau', 'extremes']}
-      />
-
-      <ProjectCard
-        title="GB Grid Scenario Tool"
-        description="An interactive browser-based DC power flow model of the GB transmission network, built from public NESO data — 27 TNUoS zones, 82 FLOP zones, 43 transmission links, 18 ETYS boundaries. Three dispatch modes including an LP solver compiled to WebAssembly. Weather driven by 34 years of ERA5 reanalysis. Validated against NESO ETYS transfer capabilities (B6F within 2%) and cross-checked with PyPSA-GB."
-        project="grid-tool"
-        tags={['Python', 'Pyomo', 'HiGHS', 'WebAssembly', 'TypeScript', 'Leaflet', 'ERA5', 'NESO']}
-        demoUrl="https://alfiemcglennon.github.io/gb-grid-tool/"
-        sourceUrl="https://github.com/AlfieMcGlennon/gb-grid-tool"
-        blogUrl="/blog/building-gb-grid-tool/"
-        image="/images/grid-tool/hero.png"
-      />
-
-      <ProjectCard
-        title="RL Grid Dispatch"
-        description="PPO reinforcement-learning agents trained to dispatch the GB grid under real network constraints, on 9 years of generation data, Elexon wholesale prices, and ERA5 weather. Compared MLP, CNN, and 27-zone zonal architectures (448k parameters, 72 ERA5 weather channels). Iterative reward design moved agents from £30B/year cost to within 6% of real grid operations."
-        project="rl-dispatch"
-        status="Series in progress"
-        tags={['PPO', 'Stable-Baselines3', 'PyTorch', 'CNN', 'SLURM/HPC', 'Elexon', 'ERA5']}
-        blogUrl="/blog/rl-grid-dispatch-baseline/"
-      />
-    </div>
-
-    <p class="see-more">
-      <a href="/projects/">See all projects &rarr;</a>
-    </p>
-  </section>
-
-  <!-- ── TECH STACK ───────────────────────────────────── -->
-  <section class="block">
-    <h2>Tech stack</h2>
-    <dl class="stack">
-      <div>
-        <dt>Languages</dt>
-        <dd>Python &middot; TypeScript &middot; JavaScript &middot; SQL &middot; HTML/CSS</dd>
-      </div>
-      <div>
-        <dt>ML &amp; stats</dt>
-        <dd>PyTorch &middot; XGBoost &middot; scikit-learn &middot; Stable-Baselines3 &middot; PennyLane &middot; scipy &middot; statsmodels</dd>
-      </div>
-      <div>
-        <dt>Climate &amp; geo data</dt>
-        <dd>xarray &middot; netCDF4 &middot; cdsapi &middot; ERA5 &middot; CMIP6 &middot; UKCP18 &middot; HadCET &middot; Destination Earth &middot; GloFAS &middot; Berkeley Earth</dd>
-      </div>
-      <div>
-        <dt>Infrastructure</dt>
-        <dd>SLURM (Reading RACC, <code>gpuscavenger</code>) &middot; Git &middot; WebAssembly &middot; GitHub Pages &middot; Astro</dd>
-      </div>
-      <div>
-        <dt>Web &amp; viz</dt>
-        <dd>React &middot; D3.js &middot; Leaflet &middot; Plotly &middot; matplotlib &middot; seaborn</dd>
-      </div>
-      <div>
-        <dt>Tools</dt>
-        <dd>Obsidian + Git &middot; Zotero &middot; VS Code &middot; Linux</dd>
-      </div>
-    </dl>
-  </section>
-
-  <!-- ── CONTACT ──────────────────────────────────────── -->
-  <section class="block">
-    <h2>Get in touch</h2>
-    <p>
-      Open to roles in climate risk, reinsurance, operational forecasting, and
-      climate / weather ML. Based in Reading, UK.
-    </p>
-    <ul class="contact-list">
-      <li><strong>Email</strong> &middot; <a href="mailto:alfie.mcglennon@outlook.com">alfie.mcglennon@outlook.com</a></li>
-      <li><strong>GitHub</strong> &middot; <a href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer">github.com/AlfieMcGlennon</a></li>
-      <li><strong>LinkedIn</strong> &middot; <a href="https://www.linkedin.com/in/alfiemcglennon" target="_blank" rel="noopener noreferrer">linkedin.com/in/alfiemcglennon</a></li>
-      <li><strong>CV</strong> &middot; <a href="/cv/">Full CV</a> &middot; <a href="/Alfie_McGlennon_CV.pdf" target="_blank" rel="noopener noreferrer">Download PDF</a></li>
-    </ul>
+  <section class="section links">
+    <a href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="https://www.linkedin.com/in/alfred-mcglennon-927589253/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
   </section>
 </Base>
-
-<style>
-  /* ── Hero ─────────────────────────────────────────── */
-
-  .hero {
-    padding-top: 1rem;
-    padding-bottom: 2.5rem;
-    border-bottom: 1px solid var(--rule);
-    margin-bottom: 1rem;
-  }
-
-  .role {
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.02em;
-  }
-
-  .hero-name {
-    font-size: clamp(2.2rem, 6vw, 3rem);
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-    margin-bottom: 0.4rem;
-  }
-
-  .hero-affiliation {
-    color: var(--ink-dim);
-    font-size: 0.98rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .hero-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-top: 0.5rem;
-  }
-
-  .btn {
-    display: inline-block;
-    padding: 0.55rem 1rem;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--ink);
-    background: transparent;
-    border: 1px solid var(--rule-strong);
-    border-radius: 5px;
-    text-decoration: none;
-    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
-  }
-
-  .btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #0f1523;
-  }
-
-  .btn-primary:hover {
-    background: var(--accent-sky);
-    border-color: var(--accent-sky);
-    color: #0f1523;
-  }
-
-  /* ── Sections ─────────────────────────────────────── */
-
-  .block {
-    padding: 2rem 0;
-  }
-
-  .block h2 {
-    font-size: 1.35rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
-    color: var(--ink);
-  }
-
-  /* ── Project grid ─────────────────────────────────── */
-
-  .project-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .see-more {
-    margin: 0;
-    font-size: 0.92rem;
-  }
-
-  .see-more a {
-    font-weight: 500;
-  }
-
-  /* ── Tech stack ───────────────────────────────────── */
-
-  .stack {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.9rem 2rem;
-    margin: 0;
-  }
-
-  @media (min-width: 600px) {
-    .stack {
-      grid-template-columns: 180px 1fr;
-    }
-    .stack > div {
-      display: contents;
-    }
-  }
-
-  .stack > div {
-    border-top: 1px solid var(--rule);
-    padding-top: 0.8rem;
-  }
-
-  .stack dt {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--ink);
-    font-family: var(--font-mono);
-  }
-
-  .stack dd {
-    font-size: 0.92rem;
-    color: var(--ink-dim);
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  .stack dd code {
-    font-size: 0.85em;
-  }
-
-  /* ── Contact list ─────────────────────────────────── */
-
-  .contact-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .contact-list li {
-    padding: 0.4rem 0;
-    border-top: 1px solid var(--rule);
-    font-size: 0.95rem;
-  }
-
-  .contact-list li:first-child {
-    border-top: none;
-  }
-
-  .contact-list strong {
-    color: var(--ink);
-    font-weight: 500;
-    margin-right: 0.3rem;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-  }
-</style>
