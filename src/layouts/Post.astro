@@ -1,6 +1,5 @@
 ---
 import Base from './Base.astro';
-import Banner from '../components/Banner.astro';
 
 const { title, description, date, tags, image, project } = Astro.props;
 
@@ -22,8 +21,6 @@ const ogDescription = description;
   image={image}
 >
   <article class="page-narrow post">
-    {project && <Banner project={project} size="large" />}
-
     <header class="post-head">
       <p class="kicker">Writing</p>
       <h1>{title}</h1>
