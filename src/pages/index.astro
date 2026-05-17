@@ -71,17 +71,28 @@ import Base from '../layouts/Base.astro';
       <h1 class="hero-name">Alfie McGlennon</h1>
       <p class="hero-affiliation">MSc Climate Change &amp; AI // University of Reading</p>
       <p class="hero-tag">
-        Climate science, machine learning, and compound risk. From
-        copula-based dependence modelling to reinforcement learning on the
-        national grid.
+        Climate science, machine learning, quantum, and compound risk.
+        From copula-based dependence modelling to reinforcement learning on
+        the national grid.
       </p>
     </div>
 
-    <p class="weather-attr" data-weather-attr>
-      <span data-weather-summary>Live conditions</span> at Reading, UK
-      &middot;
-      <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a>
-    </p>
+    <div class="weather-readout" data-weather-readout aria-label="Live weather telemetry">
+      <span class="wr-dot" aria-hidden="true"></span>
+      <span class="wr-label">LIVE</span>
+      <span class="wr-sep" aria-hidden="true">&middot;</span>
+      <span class="wr-loc">READING</span>
+      <span class="wr-sep" aria-hidden="true">&middot;</span>
+      <span class="wr-segment" data-readout-temp>--.-&deg;C</span>
+      <span class="wr-sep wr-sep-rh" aria-hidden="true">&middot;</span>
+      <span class="wr-segment wr-rh" data-readout-rh>-- %RH</span>
+      <span class="wr-sep" aria-hidden="true">&middot;</span>
+      <span class="wr-segment wr-cond" data-readout-cond>&hellip;</span>
+      <span class="wr-sep wr-sep-time" aria-hidden="true">&middot;</span>
+      <span class="wr-segment wr-time" data-readout-time>UPDATED --:--</span>
+      <span class="wr-sep" aria-hidden="true">&middot;</span>
+      <a class="wr-link" href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">OPEN-METEO</a>
+    </div>
   </section>
 
   <script>
@@ -94,19 +105,23 @@ import Base from '../layouts/Base.astro';
       const URL = 'https://api.open-meteo.com/v1/forecast?latitude=51.4543&longitude=-0.9781&current=temperature_2m,relative_humidity_2m,wind_speed_10m,cloud_cover,weather_code,is_day&timezone=Europe/London';
 
       const codeToLabel = (c, isDay) => {
-        if (c === 0) return isDay ? 'Clear sky' : 'Clear night';
-        if (c === 1) return 'Mostly clear';
-        if (c === 2) return 'Partly cloudy';
-        if (c === 3) return 'Overcast';
-        if (c === 45 || c === 48) return 'Fog';
-        if (c >= 51 && c <= 57) return 'Drizzle';
-        if (c >= 61 && c <= 67) return 'Rain';
-        if (c >= 71 && c <= 77) return 'Snow';
-        if (c >= 80 && c <= 82) return 'Rain showers';
-        if (c === 85 || c === 86) return 'Snow showers';
-        if (c >= 95 && c <= 99) return 'Thunderstorm';
-        return 'Live conditions';
+        if (c === 0) return isDay ? 'CLEAR SKY' : 'CLEAR NIGHT';
+        if (c === 1) return 'MOSTLY CLEAR';
+        if (c === 2) return 'PARTLY CLOUDY';
+        if (c === 3) return 'OVERCAST';
+        if (c === 45 || c === 48) return 'FOG';
+        if (c >= 51 && c <= 57) return 'DRIZZLE';
+        if (c >= 61 && c <= 67) return 'RAIN';
+        if (c >= 71 && c <= 77) return 'SNOW';
+        if (c >= 80 && c <= 82) return 'RAIN SHOWERS';
+        if (c === 85 || c === 86) return 'SNOW SHOWERS';
+        if (c >= 95 && c <= 99) return 'THUNDERSTORM';
+        return 'LIVE';
       };
+
+      function fmtClock(d) {
+        return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
+      }
 
       function applyWeather(payload) {
         const c = payload.current || payload;
@@ -142,8 +157,19 @@ import Base from '../layouts/Base.astro';
         hero.dataset.warmth = warmth;
 
         hero.classList.add('weather-live');
-        const summary = hero.querySelector('[data-weather-summary]');
-        if (summary) summary.textContent = `${codeToLabel(code, isDay)}, ${Math.round(temp)}°C`;
+
+        const humidity = c.relative_humidity_2m ?? null;
+        const fetchedAt = payload.fetchedAt ? new Date(payload.fetchedAt) : new Date();
+
+        const tempEl = hero.querySelector('[data-readout-temp]');
+        const rhEl = hero.querySelector('[data-readout-rh]');
+        const condEl = hero.querySelector('[data-readout-cond]');
+        const timeEl = hero.querySelector('[data-readout-time]');
+
+        if (tempEl) tempEl.textContent = `${temp.toFixed(1)}°C`;
+        if (rhEl) rhEl.textContent = humidity != null ? `${Math.round(humidity)} %RH` : '— %RH';
+        if (condEl) condEl.textContent = codeToLabel(code, isDay);
+        if (timeEl) timeEl.textContent = `UPDATED ${fmtClock(fetchedAt)}`;
       }
 
       try {
@@ -151,7 +177,7 @@ import Base from '../layouts/Base.astro';
         if (cached) {
           const parsed = JSON.parse(cached);
           if (Date.now() - parsed.timestamp < TTL_MS) {
-            applyWeather(parsed.data);
+            applyWeather({ ...parsed.data, fetchedAt: parsed.timestamp });
             return;
           }
         }
@@ -164,8 +190,9 @@ import Base from '../layouts/Base.astro';
         clearTimeout(timer);
         if (!res.ok) throw new Error('bad response');
         const data = await res.json();
-        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() })); } catch (e) { /* ignore quota */ }
-        applyWeather(data);
+        const fetchedAt = Date.now();
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: fetchedAt })); } catch (e) { /* ignore quota */ }
+        applyWeather({ ...data, fetchedAt });
       } catch (e) {
         // Silent fallback: hero stays on default sky.
       }
@@ -268,21 +295,45 @@ import Base from '../layouts/Base.astro';
   .hero {
     position: relative;
     width: 100%;
-    height: clamp(440px, 75vh, 640px);
+    height: clamp(340px, 58vh, 520px);
     overflow: hidden;
     border-bottom: 1px solid var(--rule);
 
     /* Default (partly-cloudy) sky stops. Weather classes override. */
-    --sky-top: #d8e8eb;
-    --sky-mid: #ece8dc;
-    --sky-bot: #f3e1c8;
+    --sky-top: #b6cfdc;
+    --sky-mid: #e8d4a8;
+    --sky-bot: #ecb37a;
 
     --cloud-density: 1;
     --cloud-speed-mult: 1;
     --rain-opacity: 0;
+    --sun-opacity: 1;
 
     transition: background 0.6s ease;
   }
+
+  /* Sun glow, hidden by weather states that override --sun-opacity */
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 6%;
+    right: 10%;
+    width: clamp(220px, 32vw, 380px);
+    height: clamp(220px, 32vw, 380px);
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 218, 150, 0.65) 0%,
+      rgba(255, 200, 130, 0.32) 35%,
+      rgba(255, 200, 130, 0) 70%
+    );
+    pointer-events: none;
+    z-index: 0;
+    opacity: var(--sun-opacity, 1);
+    transition: opacity 0.6s ease;
+    will-change: opacity;
+  }
+
 
   .sky-stop-top { stop-color: var(--sky-top); }
   .sky-stop-mid { stop-color: var(--sky-mid); }
@@ -290,41 +341,48 @@ import Base from '../layouts/Base.astro';
 
   /* Weather states */
   .hero[data-weather="clear"] {
-    --sky-top: #c8dde8;
-    --sky-mid: #f0e6cf;
-    --sky-bot: #f6d4a0;
+    --sky-top: #9ec4dc;
+    --sky-mid: #f0d4a0;
+    --sky-bot: #f3b270;
+    --sun-opacity: 1;
   }
   .hero[data-weather="partly-cloudy"] {
-    --sky-top: #d8e8eb;
-    --sky-mid: #ece8dc;
-    --sky-bot: #f3e1c8;
+    --sky-top: #b6cfdc;
+    --sky-mid: #e8d4a8;
+    --sky-bot: #ecb37a;
+    --sun-opacity: 0.85;
   }
   .hero[data-weather="overcast"] {
-    --sky-top: #b8c2c6;
-    --sky-mid: #c8cdce;
-    --sky-bot: #d4d4ce;
+    --sky-top: #97a4ae;
+    --sky-mid: #b3bbbf;
+    --sky-bot: #d4c8b4;
+    --sun-opacity: 0.25;
   }
   .hero[data-weather="rain"] {
-    --sky-top: #8b95a3;
-    --sky-mid: #9ea3ab;
-    --sky-bot: #b4b2a8;
-    --rain-opacity: 0.14;
+    --sky-top: #6f7c8a;
+    --sky-mid: #8c95a0;
+    --sky-bot: #aba99e;
+    --rain-opacity: 0.22;
+    --sun-opacity: 0;
   }
   .hero[data-weather="snow"] {
-    --sky-top: #d8e4ed;
-    --sky-mid: #e8eaec;
-    --sky-bot: #ecebe3;
+    --sky-top: #c5d3df;
+    --sky-mid: #dde2e6;
+    --sky-bot: #e7e4d8;
+    --sun-opacity: 0.3;
   }
   .hero[data-weather="storm"] {
-    --sky-top: #4a525c;
-    --sky-mid: #6a6e75;
-    --sky-bot: #847f7a;
-    --rain-opacity: 0.18;
+    --sky-top: #3a4252;
+    --sky-mid: #5a5e68;
+    --sky-bot: #767168;
+    --rain-opacity: 0.28;
+    --sun-opacity: 0;
   }
   .hero[data-weather="night"] {
-    --sky-top: #14222c;
-    --sky-mid: #1d3540;
-    --sky-bot: #213038;
+    --sky-top: #0e1924;
+    --sky-mid: #16293a;
+    --sky-bot: #1d2c38;
+    --sun-opacity: 0;
   }
 
   /* Temperature shift (subtle warmth at horizon) */
@@ -367,58 +425,165 @@ import Base from '../layouts/Base.astro';
   }
 
   .cloud-layer-slow {
-    animation: drift-slow calc(180s * var(--cloud-speed-mult)) linear infinite alternate;
+    animation: drift-slow calc(70s * var(--cloud-speed-mult)) linear infinite alternate;
   }
   .cloud-layer-medium {
-    animation: drift-medium calc(120s * var(--cloud-speed-mult)) linear infinite alternate;
+    animation: drift-medium calc(44s * var(--cloud-speed-mult)) linear infinite alternate;
   }
   .cloud-layer-fast {
-    animation: drift-fast calc(80s * var(--cloud-speed-mult)) linear infinite alternate;
+    animation: drift-fast calc(28s * var(--cloud-speed-mult)) linear infinite alternate;
   }
 
   @keyframes drift-slow {
-    from { transform: translateX(-8%); }
-    to   { transform: translateX(8%); }
+    from { transform: translateX(-14%); }
+    to   { transform: translateX(14%); }
   }
   @keyframes drift-medium {
-    from { transform: translateX(-12%); }
-    to   { transform: translateX(12%); }
+    from { transform: translateX(-22%); }
+    to   { transform: translateX(22%); }
   }
   @keyframes drift-fast {
-    from { transform: translateX(-18%); }
-    to   { transform: translateX(18%); }
+    from { transform: translateX(-32%); }
+    to   { transform: translateX(32%); }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .cloud-layer { animation: none; }
   }
 
-  /* Attribution, shown only when live weather is applied */
-  .weather-attr {
+  /* Live weather readout, shown once the API responds. No panel; text sits
+     directly on the sky with a soft halo for legibility. */
+  .weather-readout {
     position: absolute;
-    right: 1rem;
-    bottom: 0.7rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    padding: 0.7rem 1rem 0.85rem;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
-    color: var(--ink-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    text-shadow:
+      0 1px 1px rgba(255, 255, 255, 0.45),
+      0 0 6px rgba(255, 255, 255, 0.2);
     opacity: 0;
-    transition: opacity 0.4s ease;
-    margin: 0;
+    transform: translateY(6px);
+    transition: opacity 0.45s ease, transform 0.45s ease, color 0.4s ease;
     pointer-events: none;
-    z-index: 2;
   }
-  .hero.weather-live .weather-attr {
-    opacity: 0.55;
+
+  .hero.weather-live .weather-readout {
+    opacity: 1;
+    transform: translateY(0);
     pointer-events: auto;
   }
-  .weather-attr a {
-    color: inherit;
-    border-bottom: 0;
-    text-decoration: underline;
-    text-decoration-color: var(--rule);
-    text-underline-offset: 2px;
+
+  .wr-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow:
+      0 0 10px rgba(15, 118, 110, 0.55),
+      0 0 2px rgba(255, 255, 255, 0.4);
+    animation: wr-pulse 2s ease-in-out infinite;
   }
-  .weather-attr a:hover { color: var(--teal); }
+
+  @keyframes wr-pulse {
+    0%, 100% { opacity: 0.5; transform: scale(0.85); }
+    50%      { opacity: 1;   transform: scale(1.18); }
+  }
+
+  .wr-label,
+  .wr-loc {
+    color: var(--teal-deep);
+    font-weight: 600;
+  }
+
+  .wr-sep {
+    color: var(--ink-faint);
+    opacity: 0.6;
+  }
+
+  .wr-segment {
+    color: var(--ink-dim);
+  }
+
+  .wr-link {
+    color: var(--teal-deep);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--teal);
+    padding-bottom: 1px;
+  }
+
+  .wr-link:hover {
+    color: var(--teal);
+    border-bottom-color: var(--teal);
+  }
+
+  /* Dark sky states: invert text contrast and drop the white halo */
+  .hero[data-weather="night"] .weather-readout,
+  .hero[data-weather="storm"] .weather-readout,
+  .hero[data-weather="rain"] .weather-readout {
+    color: #ece8de;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.45),
+      0 0 6px rgba(0, 0, 0, 0.25);
+  }
+
+  .hero[data-weather="night"] .wr-segment,
+  .hero[data-weather="storm"] .wr-segment,
+  .hero[data-weather="rain"] .wr-segment {
+    color: #ece8de;
+  }
+
+  .hero[data-weather="night"] .wr-label,
+  .hero[data-weather="night"] .wr-loc,
+  .hero[data-weather="storm"] .wr-label,
+  .hero[data-weather="storm"] .wr-loc,
+  .hero[data-weather="rain"] .wr-label,
+  .hero[data-weather="rain"] .wr-loc,
+  .hero[data-weather="night"] .wr-link,
+  .hero[data-weather="storm"] .wr-link,
+  .hero[data-weather="rain"] .wr-link {
+    color: #7fd3c4;
+  }
+
+  .hero[data-weather="night"] .wr-link,
+  .hero[data-weather="storm"] .wr-link,
+  .hero[data-weather="rain"] .wr-link {
+    border-bottom-color: rgba(127, 211, 196, 0.55);
+  }
+
+  .hero[data-weather="night"] .wr-sep,
+  .hero[data-weather="storm"] .wr-sep,
+  .hero[data-weather="rain"] .wr-sep {
+    color: rgba(236, 232, 222, 0.5);
+  }
+
+  @media (max-width: 720px) {
+    .weather-readout {
+      font-size: 0.66rem;
+      gap: 0.4rem;
+      padding: 0.55rem 0.6rem 0.7rem;
+    }
+    .wr-rh, .wr-sep-rh, .wr-time, .wr-sep-time {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wr-dot { animation: none; opacity: 0.85; }
+    .weather-readout { transition: opacity 0.3s ease; transform: none; }
+  }
 
   /* When night sky, lift hero text for contrast */
   .hero[data-weather="night"] .hero-name,
@@ -427,12 +592,11 @@ import Base from '../layouts/Base.astro';
   .hero[data-weather="storm"] .hero-affiliation { color: #9bd0c8; }
   .hero[data-weather="night"] .hero-tag,
   .hero[data-weather="storm"] .hero-tag { color: #d6d1c4; }
-  .hero[data-weather="night"] .weather-attr,
-  .hero[data-weather="storm"] .weather-attr { color: #c8c4ba; }
 
   .hero-content {
     position: absolute;
     inset: 0;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     justify-content: center;
