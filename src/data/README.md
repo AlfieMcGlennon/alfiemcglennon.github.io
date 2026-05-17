@@ -48,9 +48,16 @@ push.
 | Field     | Type     | Notes                                                       |
 |-----------|----------|-------------------------------------------------------------|
 | `name`    | string   | Project name as you'd want it on the CV.                    |
+| `tech[]`  | string[] | Stack labels. Rendered as `(label, label, label)` inline next to the name. Optional. |
+| `dates`   | string   | Free-form date string, e.g. `"2025-2026"` or `"2026"`. Right-aligned in the entry header. Optional. |
 | `link`    | string   | Bare URL, no `https://`. Optional. Rendered as a link.      |
 | `summary` | string   | One short sentence. Optional.                               |
 | `notes[]` | string[] | Bullets. Optional.                                          |
+
+### `volunteering[]`
+
+Same shape as `experience[]`: `role`, `organisation`, `location`, `start`,
+`end`, `notes[]`. Rendered in its own section after Experience.
 
 ### `skills`
 
@@ -76,6 +83,19 @@ Example:
 | `venue`   | string   | Journal, conference, or preprint server.                  |
 | `year`    | string   | Year.                                                     |
 | `link`    | string   | Bare URL, no `https://`. Optional.                        |
+
+## Section order
+
+Both the HTML page and the PDF render sections in this order, skipping any
+that are empty:
+
+1. Summary
+2. Skills
+3. Projects
+4. Education
+5. Experience
+6. Volunteering
+7. Publications
 
 ## Local PDF build
 

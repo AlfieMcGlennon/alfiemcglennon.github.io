@@ -5,51 +5,203 @@
   "website": "alfiemcglennon.com",
   "linkedin": "linkedin.com/in/alfred-mcglennon-927589253",
   "github": "github.com/AlfieMcGlennon",
-  "summary": "",
-  "education": [
-    {
-      "degree": "MSc Climate Change & AI",
-      "institution": "University of Reading",
-      "location": "Reading, UK",
-      "start": "2024",
-      "end": "Present",
-      "notes": []
-    },
-    {
-      "degree": "BSc Meteorology and Climate",
-      "institution": "University of Reading",
-      "location": "Reading, UK",
-      "start": "",
-      "end": "",
-      "notes": []
-    }
-  ],
-  "experience": [],
+  "summary": "MSc Climate Change and AI student at the University of Reading, with a BSc in Meteorology and Climate. Experienced in analysing large-scale climate datasets (ERA5, CMIP6, Berkeley Earth) using Python, and in applying machine learning and statistical methods to climate risk, compound extremes, and energy systems.",
+  "skills": {
+    "Core analytical and data": [
+      "Data analysis and preprocessing",
+      "Time-series analysis (multivariate, seasonal data)",
+      "Statistical analysis and anomaly detection",
+      "Copula-based dependence modelling",
+      "Quantitative and predictive modelling"
+    ],
+    "Climate and environmental data": [
+      "Climate data analysis (gridded datasets, reanalysis, projections)",
+      "ERA5, CMIP6, UKCP18, GloFAS, HadCET, HadCRUT5, Berkeley Earth, DestinE",
+      "Climate anomalies, trends, and extremes",
+      "Compound event risk assessment",
+      "Interpretation of large-scale atmospheric circulation patterns"
+    ],
+    "Programming and tools": [
+      "Python (pandas, NumPy, xarray, matplotlib, seaborn, scikit-learn, scipy)",
+      "JavaScript/TypeScript, HTML/CSS, Bash, SQL",
+      "Data visualisation (D3.js, Power BI, DAX, Streamlit)",
+      "Git, JupyterLab, LaTeX, Obsidian"
+    ],
+    "Machine learning and AI": [
+      "XGBoost, scikit-learn, Stable Baselines3 (PPO)",
+      "PyTorch (LSTM), PennyLane (quantum ML)",
+      "Feature engineering (temporal, categorical, cyclical, circulation-derived)",
+      "Model interpretation (SHAP, Fourier decomposition)",
+      "SLURM (HPC job scheduling, University of Reading RACC cluster)"
+    ],
+    "Web and deployment": [
+      "React, Leaflet, WebAssembly, Astro, MDX, GitHub Pages"
+    ]
+  },
   "projects": [
     {
       "name": "GB Grid Scenario Tool",
+      "tech": ["JavaScript", "React", "WebAssembly", "Python", "SB3", "ERA5"],
+      "dates": "2025-2026",
       "link": "alfiemcglennon.github.io/gb-grid-tool",
       "summary": "",
-      "notes": []
+      "notes": [
+        "Built a browser-based DC power flow model of the GB transmission network from public NESO data.",
+        "Implemented three dispatch modes including LP-optimal dispatch using HiGHS compiled to WebAssembly.",
+        "Validated B6F boundary flow to within 2% of NESO published ETYS transfer capabilities.",
+        "Trained PPO reinforcement learning agents on 9 years of real generation, demand, and weather data.",
+        "Agents achieved dispatch costs within 6% of real grid operations through iterative reward design.",
+        "Compared MLP, CNN (72 ERA5 weather channels), and 27-zone zonal architectures on the RACC HPC cluster."
+      ]
     },
     {
-      "name": "Quantum ML for atmospheric regression",
+      "name": "Quantum ML for Atmospheric Regression",
+      "tech": ["Python", "PennyLane", "ERA5"],
+      "dates": "2026",
       "link": "",
       "summary": "",
-      "notes": []
+      "notes": [
+        "Experimenting with variational quantum circuits on ERA5 temperature field regression.",
+        "Exploring per-qubit Fourier decomposition as an interpretability tool for structured VQC regression. Ongoing."
+      ]
     },
     {
       "name": "Climate Data Quickstart",
+      "tech": ["Python", "Streamlit", "xarray", "cdsapi"],
+      "dates": "2026",
       "link": "github.com/AlfieMcGlennon/climate-data-quickstart",
       "summary": "",
+      "notes": [
+        "Built an open-source desktop app and script library covering 19 climate datasets across five categories.",
+        "Includes ERA5 variants, CMIP6, HadCET, UKCP18, GloFAS, and ECMWF Open Data.",
+        "Streamlit interface for downloading and exploring data with cross-platform setup scripts.",
+        "Built using a three-stage agentic pipeline: schema extraction, code generation, API validation."
+      ]
+    },
+    {
+      "name": "City Climate Bars and Stripes",
+      "tech": ["HTML", "JavaScript", "D3.js", "Berkeley Earth"],
+      "dates": "2025",
+      "link": "alfiemcglennon.github.io/city-climate-stripes",
+      "summary": "",
+      "notes": [
+        "Built an interactive browser-based temperature anomaly visualisation for 6,000+ cities, 1850 to present.",
+        "Annual and seasonal views, two baseline periods, three colour scaling modes, PNG export.",
+        "Entirely client-side, single index.html file, ~230MB of Berkeley Earth data."
+      ]
+    },
+    {
+      "name": "Climate Playbook",
+      "tech": ["Astro", "MDX", "D3.js"],
+      "dates": "2025-2026",
+      "link": "",
+      "summary": "",
+      "notes": [
+        "Designing an interactive climate education platform for UK schools, Key Stage 1 through Key Stage 5.",
+        "Modular lessons with interactive figures showing climate mechanisms rather than static diagrams.",
+        "Informed by research into the National Climate Education Action Plan and teacher pain points.",
+        "In progress, not yet publicly visible."
+      ]
+    },
+    {
+      "name": "Electricity Demand Forecasting, India",
+      "tech": ["Python", "XGBoost", "PyTorch", "ERA5"],
+      "dates": "2026",
+      "link": "",
+      "summary": "",
+      "notes": [
+        "State-level electricity demand prediction using ERA5 weather variables.",
+        "Implemented linear regression, XGBoost, and LSTM with temporal cross-validation.",
+        "Per-state R-squared choropleth revealing geography of weather-driven vs non-weather demand."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "MSc Climate Change and Artificial Intelligence",
+      "institution": "University of Reading",
+      "location": "Reading, UK",
+      "start": "2025",
+      "end": "2026 (expected)",
+      "notes": [
+        "Dissertation: Predicting Compound Heat Stress Risk in Europe using copula-based frameworks and ML-driven dependence estimation.",
+        "Key modules: Applied Data Science with Python, Artificial Intelligence and Machine Learning, Climate Change Causes and Consequences, Data Science and Climate Services, Causality and Decision Making in Climate Change."
+      ]
+    },
+    {
+      "degree": "BSc Meteorology and Climate, 2:1",
+      "institution": "University of Reading",
+      "location": "Reading, UK",
+      "start": "2021",
+      "end": "2025",
+      "notes": [
+        "Dissertation: Investigating an Equilibrium Approximation for the Bowen Ratio (First Class).",
+        "Key modules: Data Science and Climate Services, Numerical Modelling, Boundary Layer Meteorology."
+      ]
+    },
+    {
+      "degree": "A-Levels",
+      "institution": "The Forest School",
+      "location": "Wokingham",
+      "start": "",
+      "end": "2021",
+      "notes": [
+        "Mathematics (A), Geography (A), Physics (B)."
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "role": "Data Analyst Intern",
+      "organisation": "Safestore",
+      "location": "Borehamwood",
+      "start": "July 2024",
+      "end": "",
+      "notes": [
+        "Analysed customer data to identify behaviour trends and retention metrics.",
+        "Used Python (pandas, matplotlib, seaborn) to create data visualisations supporting retention strategies.",
+        "Delivered concise presentations to senior management."
+      ]
+    },
+    {
+      "role": "Swim Teacher (Level 2)",
+      "organisation": "Places Leisure",
+      "location": "Reading",
+      "start": "November 2020",
+      "end": "Present",
+      "notes": [
+        "Delivered structured instruction to students of all levels, adapting methods to diverse learning styles.",
+        "Developed clear communication, patience, and management skills."
+      ]
+    },
+    {
+      "role": "Lifeguard",
+      "organisation": "Places Leisure",
+      "location": "Reading",
+      "start": "August 2019",
+      "end": "Present",
+      "notes": [
+        "Worked as part of a team to maintain safety standards, respond to incidents, and support an inclusive environment."
+      ]
+    }
+  ],
+  "volunteering": [
+    {
+      "role": "Coach",
+      "organisation": "TVTristars Triathlon Club",
+      "location": "",
+      "start": "2018",
+      "end": "2021",
+      "notes": []
+    },
+    {
+      "role": "Swim Instructor Support",
+      "organisation": "Bulmershe Leisure Centre and Reading Swim Club",
+      "location": "",
+      "start": "2016",
+      "end": "2019",
       "notes": []
     }
   ],
-  "skills": {
-    "Languages": [],
-    "ML & data": [],
-    "Climate & weather": [],
-    "Tools": []
-  },
   "publications": []
 }

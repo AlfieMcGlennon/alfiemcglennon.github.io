@@ -3,13 +3,15 @@ import Base from '../layouts/Base.astro';
 import cv from '../data/cv.json';
 
 function dateRange(start, end) {
-  const e = end || 'Present';
-  if (!start) return e;
-  return `${start} – ${e}`;
+  if (!start && !end) return '';
+  if (!start) return end;
+  if (!end) return start;
+  return `${start} to ${end}`;
 }
 
+// Email intentionally omitted from the HTML CV so it stays out of web
+// scrapers. The email lives in cv.json and goes into the downloadable PDF.
 const contactLinks = [
-  cv.email && { href: `mailto:${cv.email}`, label: cv.email },
   cv.website && { href: `https://${cv.website}`, label: cv.website },
   cv.linkedin && { href: `https://${cv.linkedin}`, label: 'LinkedIn' },
   cv.github && { href: `https://${cv.github}`, label: 'GitHub' },
@@ -20,6 +22,22 @@ const hasSkills =
   Object.values(cv.skills).some(
     (arr) => Array.isArray(arr) && arr.length > 0
   );
+
+const skillEntries = hasSkills
+  ? Object.entries(cv.skills).filter(
+      ([, items]) => Array.isArray(items) && items.length > 0
+    )
+  : [];
+
+const tocItems = [
+  cv.summary && { id: 'summary', label: 'Summary' },
+  hasSkills && { id: 'skills', label: 'Skills' },
+  cv.projects?.length > 0 && { id: 'projects', label: 'Projects' },
+  cv.education?.length > 0 && { id: 'education', label: 'Education' },
+  cv.experience?.length > 0 && { id: 'experience', label: 'Experience' },
+  cv.volunteering?.length > 0 && { id: 'volunteering', label: 'Volunteering' },
+  cv.publications?.length > 0 && { id: 'publications', label: 'Publications' },
+].filter(Boolean);
 ---
 
 <Base
@@ -28,149 +46,316 @@ const hasSkills =
   ogTitle={`CV | ${cv.name}`}
   ogDescription={cv.summary || `${cv.name}: CV.`}
 >
-  <article class="page-narrow cv">
-    <header class="cv-head">
-      <h1>{cv.name}</h1>
-      <p class="cv-contact">
-        {cv.location && <span class="cv-location">{cv.location}</span>}
-        {cv.location && contactLinks.length > 0 && (
-          <span class="cv-dot" aria-hidden="true">·</span>
-        )}
-        {contactLinks.map((c, i) => (
-          <>
-            {i > 0 && <span class="cv-dot" aria-hidden="true">·</span>}
-            <a href={c.href} rel="noopener">{c.label}</a>
-          </>
-        ))}
-      </p>
-      <p class="cv-download">
-        <a href="/cv.pdf" download>Download PDF</a>
-      </p>
-    </header>
-
-    {cv.summary && (
-      <section class="cv-section">
-        <h2>Summary</h2>
-        <p>{cv.summary}</p>
-      </section>
+  <div class="cv-layout">
+    {tocItems.length > 1 && (
+      <nav class="cv-toc" aria-label="CV sections">
+        <ul>
+          {tocItems.map((t) => (
+            <li>
+              <a href={`#${t.id}`} data-toc-link={t.id}>{t.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
     )}
 
-    {cv.education?.length > 0 && (
-      <section class="cv-section">
-        <h2>Education</h2>
-        {cv.education.map((e) => (
-          <article class="cv-entry">
-            <header class="cv-entry-head">
-              <p class="cv-entry-title">
-                <strong>{e.degree}</strong>
-                {e.institution && <span>, <em>{e.institution}</em></span>}
-              </p>
-              <p class="cv-entry-meta">
-                {[e.location, dateRange(e.start, e.end)].filter(Boolean).join(' · ')}
-              </p>
-            </header>
-            {e.notes?.length > 0 && (
-              <ul class="cv-bullets">
-                {e.notes.map((n) => <li>{n}</li>)}
-              </ul>
-            )}
-          </article>
-        ))}
-      </section>
-    )}
+    <article class="cv">
+      <header class="cv-head">
+        <h1>{cv.name}</h1>
+        <p class="cv-contact">
+          {cv.location && <span class="cv-location">{cv.location}</span>}
+          {cv.location && contactLinks.length > 0 && (
+            <span class="cv-dot" aria-hidden="true">·</span>
+          )}
+          {contactLinks.map((c, i) => (
+            <>
+              {i > 0 && <span class="cv-dot" aria-hidden="true">·</span>}
+              <a href={c.href} rel="noopener">{c.label}</a>
+            </>
+          ))}
+        </p>
+        <p class="cv-download">
+          <a href="/cv.pdf" download>Download PDF</a>
+        </p>
+      </header>
 
-    {cv.experience?.length > 0 && (
-      <section class="cv-section">
-        <h2>Experience</h2>
-        {cv.experience.map((x) => (
-          <article class="cv-entry">
-            <header class="cv-entry-head">
-              <p class="cv-entry-title">
-                <strong>{x.role}</strong>
-                {x.organisation && <span>, <em>{x.organisation}</em></span>}
-              </p>
-              <p class="cv-entry-meta">
-                {[x.location, dateRange(x.start, x.end)].filter(Boolean).join(' · ')}
-              </p>
-            </header>
-            {x.notes?.length > 0 && (
-              <ul class="cv-bullets">
-                {x.notes.map((n) => <li>{n}</li>)}
-              </ul>
-            )}
-          </article>
-        ))}
-      </section>
-    )}
+      {cv.summary && (
+        <section class="cv-section" id="summary">
+          <h2>Summary</h2>
+          <p>{cv.summary}</p>
+        </section>
+      )}
 
-    {cv.projects?.length > 0 && (
-      <section class="cv-section">
-        <h2>Projects</h2>
-        {cv.projects.map((p) => (
-          <article class="cv-entry">
-            <p class="cv-entry-title">
-              <strong>{p.name}</strong>
-              {p.link && (
-                <a class="cv-project-link" href={`https://${p.link}`} rel="noopener">
-                  {p.link}
-                </a>
-              )}
-            </p>
-            {p.summary && <p class="cv-project-summary">{p.summary}</p>}
-            {p.notes?.length > 0 && (
-              <ul class="cv-bullets">
-                {p.notes.map((n) => <li>{n}</li>)}
-              </ul>
-            )}
-          </article>
-        ))}
-      </section>
-    )}
-
-    {hasSkills && (
-      <section class="cv-section">
-        <h2>Skills</h2>
-        <dl class="cv-skills">
-          {Object.entries(cv.skills)
-            .filter(([, items]) => Array.isArray(items) && items.length > 0)
-            .map(([category, items]) => (
+      {hasSkills && (
+        <section class="cv-section" id="skills">
+          <h2>Skills</h2>
+          <dl class="cv-skills">
+            {skillEntries.map(([category, items]) => (
               <>
                 <dt>{category}</dt>
                 <dd>{items.join(', ')}</dd>
               </>
             ))}
-        </dl>
-      </section>
-    )}
+          </dl>
+        </section>
+      )}
 
-    {cv.publications?.length > 0 && (
-      <section class="cv-section">
-        <h2>Publications</h2>
-        <ul class="cv-pubs">
-          {cv.publications.map((p) => (
-            <li>
-              <span class="cv-pub-authors">{p.authors}.</span>{' '}
-              <em>{p.title}</em>.{' '}
-              <span class="cv-pub-venue">
-                {[p.venue, p.year].filter(Boolean).join(', ')}
-              </span>
+      {cv.projects?.length > 0 && (
+        <section class="cv-section" id="projects">
+          <h2>Projects</h2>
+          {cv.projects.map((p) => (
+            <article class="cv-entry">
+              <header class="cv-entry-head">
+                <p class="cv-entry-title">
+                  <strong>{p.name}</strong>
+                  {p.tech?.length > 0 && (
+                    <span class="cv-tech"> ({p.tech.join(', ')})</span>
+                  )}
+                </p>
+                {p.dates && (
+                  <p class="cv-entry-meta">{p.dates}</p>
+                )}
+              </header>
               {p.link && (
-                <>
-                  {'. '}
-                  <a href={`https://${p.link}`} rel="noopener">link</a>
-                </>
+                <p class="cv-project-link-line">
+                  <a href={`https://${p.link}`} rel="noopener">{p.link}</a>
+                </p>
               )}
-            </li>
+              {p.summary && <p class="cv-project-summary">{p.summary}</p>}
+              {p.notes?.length > 0 && (
+                <ul class="cv-bullets">
+                  {p.notes.map((n) => <li>{n}</li>)}
+                </ul>
+              )}
+            </article>
           ))}
-        </ul>
-      </section>
-    )}
-  </article>
+        </section>
+      )}
+
+      {cv.education?.length > 0 && (
+        <section class="cv-section" id="education">
+          <h2>Education</h2>
+          {cv.education.map((e) => (
+            <article class="cv-entry">
+              <header class="cv-entry-head">
+                <p class="cv-entry-title">
+                  <strong>{e.degree}</strong>
+                  {e.institution && <span>, <em>{e.institution}</em></span>}
+                </p>
+                <p class="cv-entry-meta">
+                  {[e.location, dateRange(e.start, e.end)].filter(Boolean).join(' · ')}
+                </p>
+              </header>
+              {e.notes?.length > 0 && (
+                <ul class="cv-bullets">
+                  {e.notes.map((n) => <li>{n}</li>)}
+                </ul>
+              )}
+            </article>
+          ))}
+        </section>
+      )}
+
+      {cv.experience?.length > 0 && (
+        <section class="cv-section" id="experience">
+          <h2>Experience</h2>
+          {cv.experience.map((x) => (
+            <article class="cv-entry">
+              <header class="cv-entry-head">
+                <p class="cv-entry-title">
+                  <strong>{x.role}</strong>
+                  {x.organisation && <span>, <em>{x.organisation}</em></span>}
+                </p>
+                <p class="cv-entry-meta">
+                  {[x.location, dateRange(x.start, x.end)].filter(Boolean).join(' · ')}
+                </p>
+              </header>
+              {x.notes?.length > 0 && (
+                <ul class="cv-bullets">
+                  {x.notes.map((n) => <li>{n}</li>)}
+                </ul>
+              )}
+            </article>
+          ))}
+        </section>
+      )}
+
+      {cv.volunteering?.length > 0 && (
+        <section class="cv-section" id="volunteering">
+          <h2>Volunteering</h2>
+          {cv.volunteering.map((v) => (
+            <article class="cv-entry">
+              <header class="cv-entry-head">
+                <p class="cv-entry-title">
+                  <strong>{v.role}</strong>
+                  {v.organisation && <span>, <em>{v.organisation}</em></span>}
+                </p>
+                <p class="cv-entry-meta">
+                  {[v.location, dateRange(v.start, v.end)].filter(Boolean).join(' · ')}
+                </p>
+              </header>
+              {v.notes?.length > 0 && (
+                <ul class="cv-bullets">
+                  {v.notes.map((n) => <li>{n}</li>)}
+                </ul>
+              )}
+            </article>
+          ))}
+        </section>
+      )}
+
+      {cv.publications?.length > 0 && (
+        <section class="cv-section" id="publications">
+          <h2>Publications</h2>
+          <ul class="cv-pubs">
+            {cv.publications.map((p) => (
+              <li>
+                <span class="cv-pub-authors">{p.authors}.</span>{' '}
+                <em>{p.title}</em>.{' '}
+                <span class="cv-pub-venue">
+                  {[p.venue, p.year].filter(Boolean).join(', ')}
+                </span>
+                {p.link && (
+                  <>
+                    {'. '}
+                    <a href={`https://${p.link}`} rel="noopener">link</a>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </article>
+  </div>
+
+  <script>
+    (function initCvToc() {
+      const links = Array.from(document.querySelectorAll('.cv-toc a[data-toc-link]'));
+      if (links.length === 0) return;
+
+      const sections = links
+        .map((link) => document.getElementById(link.dataset.tocLink))
+        .filter(Boolean);
+      if (sections.length === 0) return;
+
+      const linkFor = (id) =>
+        links.find((l) => l.dataset.tocLink === id);
+
+      function setActive(id) {
+        links.forEach((l) => l.classList.toggle('active', l.dataset.tocLink === id));
+      }
+
+      // Default: first section
+      setActive(sections[0].id);
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          // Pick the entry closest to the top of the band that is intersecting
+          const visible = entries
+            .filter((e) => e.isIntersecting)
+            .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          if (visible.length > 0) {
+            setActive(visible[0].target.id);
+          }
+        },
+        {
+          rootMargin: '-20% 0px -65% 0px',
+          threshold: 0,
+        }
+      );
+
+      sections.forEach((s) => observer.observe(s));
+
+      // Smooth click-scroll, account for fixed nav via CSS scroll-margin-top
+      links.forEach((link) => {
+        link.addEventListener('click', (ev) => {
+          const id = link.dataset.tocLink;
+          const target = document.getElementById(id);
+          if (!target) return;
+          ev.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          history.replaceState(null, '', `#${id}`);
+          setActive(id);
+        });
+      });
+    })();
+  </script>
 </Base>
 
 <style>
+  .cv-layout {
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+    max-width: 760px;
+  }
+
+  @media (min-width: 960px) {
+    .cv-layout {
+      max-width: none;
+      display: grid;
+      grid-template-columns: 160px 760px;
+      column-gap: 3rem;
+      justify-content: center;
+      align-items: start;
+    }
+  }
+
+  .cv-toc {
+    display: none;
+  }
+
+  @media (min-width: 960px) {
+    .cv-toc {
+      display: block;
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+      max-height: calc(100vh - 3rem);
+      overflow-y: auto;
+    }
+  }
+
+  .cv-toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .cv-toc li + li {
+    margin-top: 0.15rem;
+  }
+
+  .cv-toc a {
+    display: block;
+    padding: 0.4rem 0 0.4rem 0.85rem;
+    color: var(--ink-muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .cv-toc a:hover {
+    color: var(--ink);
+  }
+
+  .cv-toc a.active {
+    color: var(--teal-deep);
+    border-left-color: var(--teal);
+    font-weight: 600;
+  }
+
   .cv {
     max-width: 760px;
+    min-width: 0;
+  }
+
+  .cv-section {
+    scroll-margin-top: 1.5rem;
   }
 
   .cv-head {
@@ -292,6 +477,13 @@ const hasSkills =
     font-weight: 400;
   }
 
+  .cv-tech {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    font-weight: 400;
+  }
+
   .cv-entry-meta {
     margin: 0;
     font-family: var(--font-mono);
@@ -324,17 +516,19 @@ const hasSkills =
     color: var(--teal);
   }
 
-  .cv-project-link {
-    display: inline-block;
-    margin-left: 0.6rem;
+  .cv-project-link-line {
+    margin: 0 0 0.25rem;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
+  }
+
+  .cv-project-link-line a {
     color: var(--teal-deep);
     text-decoration: none;
     border-bottom: 1px solid var(--teal-soft);
   }
 
-  .cv-project-link:hover {
+  .cv-project-link-line a:hover {
     color: var(--amber);
     border-bottom-color: var(--amber);
   }
@@ -351,7 +545,7 @@ const hasSkills =
     margin: 0;
     display: grid;
     grid-template-columns: max-content 1fr;
-    gap: 0.4rem 1.2rem;
+    gap: 0.5rem 1.2rem;
   }
 
   .cv-skills dt {
