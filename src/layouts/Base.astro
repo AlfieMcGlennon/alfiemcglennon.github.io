@@ -12,6 +12,41 @@ const {
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImage = image ? new URL(image, Astro.site) : new URL('/favicon.svg', Astro.site);
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Alfie McGlennon',
+  alternateName: 'Alfred McGlennon',
+  url: 'https://alfiemcglennon.com',
+  image: new URL('/favicon.svg', Astro.site).toString(),
+  jobTitle: 'MSc Climate Change & AI researcher',
+  description:
+    'Climate-risk researcher working on compound heat-stress risk across Europe using copula-based frameworks and machine learning.',
+  knowsAbout: [
+    'Compound climate risk',
+    'Copula methods',
+    'Heat stress',
+    'Machine learning',
+    'XGBoost',
+    'ERA5',
+    'CMIP6',
+    'Reinforcement learning',
+    'Quantum machine learning',
+    'Quantum computing',
+    'Power systems',
+    'Reinsurance',
+  ],
+  alumniOf: {
+    '@type': 'CollegeOrUniversity',
+    name: 'University of Reading',
+    url: 'https://www.reading.ac.uk/',
+  },
+  sameAs: [
+    'https://github.com/AlfieMcGlennon',
+    'https://www.linkedin.com/in/alfred-mcglennon-927589253/',
+  ],
+};
 ---
 
 <!doctype html>
@@ -21,7 +56,7 @@ const ogImage = image ? new URL(image, Astro.site) : new URL('/favicon.svg', Ast
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="keywords" content="Alfie McGlennon, climate risk, compound heat stress, copula, XGBoost, ERA5, CMIP6, machine learning, reinsurance, ECMWF, University of Reading, meteorology, DestinE, Kendall tau" />
+    <meta name="keywords" content="Alfie McGlennon, climate risk, compound heat stress, copula, XGBoost, ERA5, CMIP6, machine learning, quantum, quantum machine learning, quantum ML, reinsurance, ECMWF, University of Reading, meteorology, DestinE, Kendall tau" />
     <meta property="og:title" content={ogTitle} />
     <meta property="og:description" content={ogDescription} />
     <meta property="og:type" content="website" />
@@ -29,6 +64,10 @@ const ogImage = image ? new URL(image, Astro.site) : new URL('/favicon.svg', Ast
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href={canonicalURL} />
+
+    <meta name="google-site-verification" content="REPLACE_WITH_GOOGLE_TOKEN" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
