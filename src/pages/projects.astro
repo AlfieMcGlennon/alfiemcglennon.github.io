@@ -31,36 +31,20 @@ import Base from '../layouts/Base.astro';
         grew quickly. What began as &lsquo;can an agent learn merit
         order?&rsquo; turned into a serious exercise in data assimilation
         from public sources, and a test of how far you can get with
-        human-led architecture and AI execution. The question that drove
-        the whole project was simple: how much real skill can you get from
-        only public data?
+        human-led architecture and AI execution.
       </p>
       <p>
         What I ended up with is a browser-based DC power flow model of the
-        GB transmission network, built from NESO open data. It runs at two
-        resolutions: 27 TNUoS zones, and 82 FLOP zones that match
-        NESO&rsquo;s internal boundary analysis resolution. Three dispatch
-        modes show the progression from naive to realistic. A simple all-on
-        dispatch. A cost-merit-order dispatch with minimum stable level
-        constraints. And a full LOPF that minimises system cost subject to
-        boundary flow limits, solved using HiGHS compiled to WebAssembly.
-        Weather scenarios are driven by 34 years of ERA5 climatology, and
-        you can drag a slider from 2024 to 2035 to see planned network
-        reinforcements appear. The B6F boundary flow validates within 2% of
-        NESO&rsquo;s published ETYS transfer capabilities at the 27-zone
-        resolution.
-      </p>
-      <p>
-        The RL layer sits on top of that. I trained PPO agents on nine years
-        of real GB generation and demand data, plus Elexon wholesale prices
-        and ERA5 weather, with the grid model as the environment. I
-        compared MLP, CNN, and 27-zone zonal architectures, the largest
-        with 448 thousand parameters reading 72 ERA5 weather channels.
-        Iterative reward design moved agents from spending around £30
+        GB transmission network, built entirely from public NESO data,
+        validated to within 2% of published boundary transfer capabilities.
+        The RL agents trained on top of it went from spending around &pound;30
         billion a year on dispatch to operating within 6% of real grid
         costs. The interesting finding was that spatial CNN observations
         could not improve on MLPs without topology-aware action spaces.
         The action space was the bottleneck, not the observation space.
+        The full build story, including 16 validation configurations and
+        the demand baseline mistake that cost me days, is on the
+        <a href="/writing/building-gb-grid-tool/">Writing page</a>.
       </p>
       <ul class="tech-pills">
         <li>JavaScript</li><li>React</li><li>Leaflet</li><li>WebAssembly (HiGHS)</li><li>Python</li><li>Stable-Baselines3</li><li>SLURM</li><li>ERA5</li>
@@ -106,17 +90,14 @@ import Base from '../layouts/Base.astro';
       </p>
       <p>
         Climate Data Quickstart is a local desktop app and script library
-        covering 19 datasets across five categories. Reanalysis (ERA5
-        variants and ARCO-ERA5), climate projections (CMIP6 via CDS and
-        ESGF), observational temperature (HadCET, HadCRUT5), precipitation
-        and station observations (GHCNd, CHIRPS, E-OBS), and specialised
-        products like UKCP18, GloFAS, GPWv4, and ECMWF Open Data. It
-        bundles setup scripts for Windows, macOS, Linux, and conda, exposes
-        a Streamlit interface for downloading and exploring data, and
-        supports lazy loading via Earth Data Hub for the larger products.
-        It was built using a three-stage agentic pipeline: dataset schema
-        extraction, code generation, then validation against each
-        provider&rsquo;s actual API.
+        covering 19 datasets including ERA5 variants, CMIP6, HadCET,
+        HadCRUT5, UKCP18, GloFAS, and ECMWF Open Data. It bundles setup
+        scripts for Windows, macOS, Linux, and conda, exposes a Streamlit
+        interface for downloading and exploring data, and supports lazy
+        loading via Earth Data Hub for the larger products. Built using a
+        three-stage agentic pipeline: dataset schema extraction, code
+        generation, then validation against each provider&rsquo;s actual
+        API.
       </p>
       <ul class="tech-pills">
         <li>Python</li><li>Streamlit</li><li>xarray</li><li>cdsapi</li><li>NetCDF/GRIB/Zarr</li>
@@ -164,15 +145,15 @@ import Base from '../layouts/Base.astro';
         broadly.
       </p>
       <p>
-        From research and an email exchange with some lecturers, I found
+        From research and an email exchange with Andrew Charlton-Perez, I found
         that the main pain points sit with teachers: limited time,
         fragmented resources, and a curriculum that touches climate across
         multiple subjects (geography, physics, biology, citizenship)
         without a unified framework connecting them. I also learned more
         about the incredible work the National Climate Education Action
         Plan (NCEAP) is doing to advance climate literacy in UK schools,
-        which reinforced the reality of the gap and its serious
-        national-level attention.
+        which reinforced that the gap is real and being taken
+        seriously.
       </p>
       <p>
         Climate Playbook is my attempt to build a demo of what interactive

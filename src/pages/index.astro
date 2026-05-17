@@ -194,23 +194,27 @@ import Base from '../layouts/Base.astro';
           quantum computing, and statistical climatology. Lately I&rsquo;ve
           been working with more hands-off workflows: I design the research
           brief, the data pipeline, and the architecture, and use AI tools
-          to build the code and front-end around it. Some of the projects
-          that came out of that are on <a href="/projects/">Projects</a>.
-          The longer stories behind them are on <a href="/writing/">Writing</a>.
+          to build the code and front-end around it.
+          <a href="/projects/">Projects</a> has the builds.
+          <a href="/writing/">Writing</a> has the full write-ups.
         </p>
         <p>
-          I&rsquo;m always looking for the next problem to pull apart. If
-          you work in climate risk, reinsurance, operational meteorology,
-          or anywhere that statistical and ML methods meet real-world data,
-          I&rsquo;d like to hear from you. Based in the Reading area.
+          If you work in climate risk, reinsurance, operational
+          meteorology, or anywhere that statistical and ML methods meet
+          real-world data, I&rsquo;d like to hear from you. Based in the
+          Reading area.
         </p>
       </div>
 
-      <!-- TODO: replace src below with the actual photo path once supplied (e.g. /images/alfie.jpg) -->
-      <figure class="about-photo" aria-hidden="true">
-        <div class="photo-placeholder">
-          <span>Photo</span>
-        </div>
+      <figure class="about-photo">
+        <img
+          src="/images/alfie.jpg"
+          alt="Alfie McGlennon"
+          width="220"
+          height="275"
+          loading="eager"
+          decoding="async"
+        />
       </figure>
     </div>
   </section>
@@ -233,7 +237,7 @@ import Base from '../layouts/Base.astro';
       <li>
         <a href="/writing/" class="jump-card">
           <p class="jump-card-label">Writing</p>
-          <p class="jump-card-line">Long-form posts on the work above.</p>
+          <p class="jump-card-line">Full project write-ups, and the thinking behind them.</p>
         </a>
       </li>
       <li>
@@ -487,19 +491,15 @@ import Base from '../layouts/Base.astro';
     max-width: 220px;
   }
 
-  .photo-placeholder {
+  .about-photo img {
+    display: block;
     width: 100%;
     aspect-ratio: 4 / 5;
-    background: var(--bg-raised);
+    object-fit: cover;
+    object-position: center top;
     border: 1px solid var(--rule);
     border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--ink-faint);
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
+    background: var(--bg-raised);
   }
 
   /* ── Jump cards ───────────────────────────────────── */
