@@ -12,9 +12,9 @@ import TrivariateCopula from '../../components/TrivariateCopula.astro';
 
 A storm hits the coast. Wind speeds are high but not record-breaking. Rainfall is heavy but not unprecedented. Neither hazard alone would trigger a catastrophic loss. But they arrive together, and the combination produces flooding that neither marginal distribution predicted.
 
-This is compound risk. Events that are individually manageable become catastrophic in combination. It is arguably the central problem in catastrophe modelling, climate adaptation, and reinsurance pricing. And the standard statistical toolkit, fitting marginal distributions to individual hazards, handles it badly.
+This is compound risk. Events that are individually manageable become catastrophic in combination. Catastrophe modelling, climate adaptation, and reinsurance pricing all have to deal with it, and the standard approach of fitting marginal distributions to individual hazards handles it badly.
 
-This post is a visual introduction to **copulas**, the mathematical framework for modelling dependence between variables. No measure theory, no proofs. If you work in climate risk, catastrophe modelling, or reinsurance, this is the tool you use to answer "how likely are these hazards to happen together?" If you're coming from climate science, engineering, or just want to understand compound risk better, this should give you the intuition and vocabulary to read the technical literature without getting lost.
+This post is a visual introduction to **copulas**, the mathematical framework for modelling dependence between variables. No measure theory, no proofs. If you work in climate risk, catastrophe modelling, or reinsurance, this is the tool you use to answer "how likely are these hazards to happen together?" If you're coming from climate science or engineering, or just want to understand compound risk better, this should give you the intuition and vocabulary to read the technical literature without getting lost.
 
 ## The problem with marginals
 
@@ -70,7 +70,7 @@ In this uniform space, independence looks like a uniform scatter across the unit
 
 ![Copula samples in uniform space showing independence, moderate, and strong dependence](/images/copulas/02-copula-uniform-space.png)
 
-This is the core insight. By working in [0,1]², we separate *how much* of each variable we observe (the marginals) from *how they co-occur* (the copula). The copula density *c*(*u*₁, *u*₂) tells us where in the unit square probability mass concentrates.
+By working in [0,1]², we separate *how much* of each variable we observe (the marginals) from *how they co-occur* (the copula). The copula density *c*(*u*₁, *u*₂) tells us where in the unit square probability mass concentrates.
 
 ## Diagonal convergence
 
@@ -132,7 +132,7 @@ Most of the time, it doesn't matter which copula you use. The body of the distri
 
 ![Zoomed view of upper tail: Gaussian vs upper-tail dependent](/images/copulas/07-tail-dependence.png)
 
-Same overall correlation, same marginals, but fundamentally different behaviour in the upper tail. The Gaussian copula produces far fewer joint extreme events than the upper-tail dependent structure. In a 1-in-100-year analysis, this difference is the difference between "rare but manageable" and "we needed more reinsurance."
+Same overall correlation, same marginals, but fundamentally different behaviour in the upper tail. The Gaussian copula produces far fewer joint extreme events than the upper-tail dependent structure. In a 1-in-100-year analysis, this difference is the gap between "rare but manageable" and "we needed more reinsurance."
 
 The effect compounds as you move deeper into the tail:
 
@@ -140,7 +140,7 @@ The effect compounds as you move deeper into the tail:
 
 At the 95th percentile, the three structures differ by a factor of 2-3. At the 99th, by an order of magnitude. The independent assumption (dashed grey) is catastrophically wrong: it underestimates joint exceedance by 10x or more compared to the tail-dependent case.
 
-This is why copula choice matters for reinsurance pricing. The difference between a Gaussian and a Gumbel copula, applied to the same marginals with the same correlation, can shift an aggregate loss estimate by billions.
+The choice between a Gaussian and a Gumbel copula, applied to the same marginals with the same correlation, can shift an aggregate loss estimate by billions.
 
 ## Compound events in climate
 
@@ -150,7 +150,7 @@ The compound risk problem is not theoretical. European windstorms routinely prod
 
 The left panel shows simulated wind-precipitation events drawn from an upper-tail dependent copula (survival Clayton, calibrated to be roughly consistent with observed winter storm co-occurrence). The red cluster in the upper right represents compound extremes where both hazards simultaneously exceed their 95th percentiles.
 
-The right panel is the punchline. A 20-year wind event and a 20-year precipitation event, if independent, should co-occur once in 400 years. With realistic upper-tail dependence, the compound event has a return period closer to 55 years. Assuming independence underestimates the frequency by a factor of 7.
+The right panel is where it gets concrete. A 20-year wind event and a 20-year precipitation event, if independent, should co-occur once in 400 years. With realistic upper-tail dependence, the compound event has a return period closer to 55 years. Assuming independence underestimates the frequency by a factor of 7.
 
 ## A typology of compound events
 
@@ -184,7 +184,7 @@ The three pairwise scatter plots on the right show the marginal copula for each 
 
 <TrivariateCopula />
 
-The trivariate case makes the compound risk argument viscerally clear. With three independent variables at the 90th percentile, joint exceedance is a 1-in-1000 event. With realistic dependence (&rho;=0.6), it can be 1-in-50. That is a factor of 20 in risk that disappears if you assume independence.
+With three independent variables at the 90th percentile, joint exceedance is a 1-in-1000 event. With realistic dependence (&rho;=0.6), it can be 1-in-50. A factor of 20 in risk that disappears if you assume independence.
 
 ## What this means for risk modelling
 
@@ -192,9 +192,9 @@ Three practical implications:
 
 **Marginal analysis is necessary but not sufficient.** Fitting marginal distributions to individual hazards tells you about the behaviour of each variable in isolation. It tells you nothing about co-occurrence. Any risk assessment that multiplies marginal exceedance probabilities is assuming independence, whether explicitly or not.
 
-**Copula choice is a modelling decision with large consequences.** The Gaussian copula is the default in many applications (including, famously, pre-2008 CDO pricing). For climate risk, where upper-tail dependence is physically motivated (extreme wind drives extreme surge; atmospheric rivers produce both precipitation and wind), a symmetric copula systematically underestimates compound event frequency.
+**Copula choice has large consequences.** The Gaussian copula is the default in many applications (including, famously, pre-2008 CDO pricing). For climate risk, where upper-tail dependence is physically motivated (extreme wind drives extreme surge; atmospheric rivers produce both precipitation and wind), a symmetric copula systematically underestimates compound event frequency.
 
-**Data limitations are real.** Fitting copulas to the tail requires tail data. By definition, extreme events are rare. Short observational records (50-100 years for most climate stations) provide limited information about joint tail behaviour. This is where physical understanding, reanalysis data (ERA5 provides 80+ years of gridded fields), and climate model ensembles become essential for constraining dependence in the tail.
+**Fitting to the tail is hard.** Fitting copulas to the tail requires tail data. By definition, extreme events are rare. Short observational records (50-100 years for most climate stations) provide limited information about joint tail behaviour. This is where physical understanding, reanalysis data (ERA5 provides 80+ years of gridded fields), and climate model ensembles become essential for constraining dependence in the tail.
 
 ---
 

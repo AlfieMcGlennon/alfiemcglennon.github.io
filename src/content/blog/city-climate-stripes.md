@@ -9,9 +9,9 @@ image: "/images/climate-stripes-hero.png"
 draft: false
 ---
 
-You've probably seen Ed Hawkins' [Climate Stripes](https://showyourstripes.info). Those bands of blue-to-red show how global temperatures have shifted over time. Hawkins created them at the University of Reading, where I did my undergrad and where I'm doing my MSc now. The concept has been in my periphery for a while.
+You've probably seen Ed Hawkins' [Climate Stripes](https://showyourstripes.info). Those bands of blue-to-red show how global temperatures have shifted over time. Hawkins created them at the University of Reading, where I did my undergrad and where I'm doing my MSc now. I've been aware of them for years.
 
-At some point I thought: wouldn't it be useful if you could see climate stripes for *your* city? Not national or global averages, but the actual temperature history of individual cities, with seasonal breakdowns and different baselines.
+I came at this from a climate science background with no prior web development experience. But at some point the question stuck: wouldn't it be useful if you could see climate stripes for *your* city? Not national or global averages, but the actual temperature history of individual cities, with seasonal breakdowns and different baselines.
 
 So I built it. **City Climate Bars & Stripes** is an interactive tool that lets you explore temperature anomalies for over 6,000 cities worldwide, from 1850 to present.
 
@@ -19,7 +19,7 @@ So I built it. **City Climate Bars & Stripes** is an interactive tool that lets 
 
 ## What it does
 
-Pick a city and get a visualisation of its temperature history. There's more flexibility than you'd expect:
+Pick a city and get a visualisation of its temperature history:
 
 - **Annual and seasonal views.** Full year, or drill into winter (DJF), spring (MAM), summer (JJA), or autumn (SON). Seasonal patterns can be dramatically different from annual averages.
 - **Bars and stripes modes.** Bars give you a proper axis with a zero line for exact anomaly values; stripes give the clean Hawkins-style view.
@@ -49,17 +49,15 @@ The renderer computes colour domains based on the active scaling mode, maps each
 
 **Colour domain logic.** Fixed domains need to be wide enough to not clip most cities. Auto-symmetric needs to always include zero and be symmetric around it. Auto min-max needs to span the actual data range while still including zero. Each mode also has a floor so it never collapses to a useless narrow band.
 
-**Column name inconsistencies.** Rather than preprocessing everything into a uniform format, I wrote a flexible parser that maps multiple naming conventions to the same internal fields. Pragmatic, if not elegant.
+**Column name inconsistencies.** Rather than preprocessing everything into a uniform format, I wrote a flexible parser that maps multiple naming conventions to the same internal fields. Pragmatic, not elegant.
 
 **Performance at scale.** 6,000+ cities with 170 years of data across 5 seasonal views adds up. Splitting the CSVs, using canvas instead of SVG, and debouncing renders with `requestAnimationFrame` keeps it responsive.
 
 ## What I learned
 
-Climate data is fascinating at the city level. Global averages smooth out so much. Individual cities show wildly different seasonal patterns, some warming far faster than others, winter trends that look nothing like summer ones. The tool makes this explorable in a way that raw CSV data doesn't.
+Climate data is fascinating at the city level. Global averages smooth out so much. Individual cities show wildly different seasonal patterns. Some warming far faster than others, winter trends that look nothing like summer ones. The tool makes this explorable in a way that raw CSV data doesn't.
 
-> I came at this from a climate science background with no prior web development experience.
-
-Having a clear vision of what the end product should look and feel like mattered more than knowing the framework ecosystem. The domain knowledge (which features are useful, what baselines to offer, why seasonal views tell a different story) drove the design. The implementation followed from there.
+Having a clear vision of what the end product should look and feel like mattered more than knowing the framework ecosystem. The domain knowledge (which features are useful, what baselines to offer, why seasonal views tell a different story) drove the design.
 
 This is an exploratory visualisation, not a scientific tool. The Berkeley Earth city data involves interpolation, and the geographic matching isn't perfect. For rigorous analysis, the [official Climate Stripes project](https://showyourstripes.info) is the place to go. But as a way to see and feel how temperatures have changed in cities you know, it does the job.
 

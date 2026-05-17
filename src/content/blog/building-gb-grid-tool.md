@@ -25,9 +25,9 @@ Three dispatch modes show the progression from naive to optimal:
 - **Merit order**: generation dispatched cheapest-first until demand is met. Wind and solar run first, then gas fills the gap. Realistic cost ordering but ignores network constraints.
 - **LP-optimal (LOPF)**: cost-minimised dispatch subject to boundary flow limits and per-link thermal constraints, solved using HiGHS compiled to WebAssembly. Closest to what NESO actually does operationally.
 
-Under merit order dispatch at p73 wind, 9 of 18 mapped boundaries exceed their secure capability. Switch to LOPF and zero do. Same generation fleet, different allocation. That gap between unconstrained and constrained dispatch is what NESO spends billions managing every year through the Balancing Mechanism.
+Under merit order dispatch at 73rd percentile wind conditions, 9 of 18 mapped boundaries exceed their secure capability. Switch to LOPF and zero do. Same generation fleet, different allocation. That gap between unconstrained and constrained dispatch is what NESO spends billions managing every year through the Balancing Mechanism.
 
-Everything runs client-side. No backend, no API calls, no account. Open a URL and start exploring.
+Everything runs client-side with no backend, no API calls, and no account required. Open a URL and start exploring.
 
 **[Live demo](https://alfiemcglennon.github.io/gb-grid-tool/)** (desktop recommended)
 
@@ -35,7 +35,7 @@ Everything runs client-side. No backend, no API calls, no account. Open a URL an
 
 ## The validation journey
 
-This is the part that doesn't fit in a LinkedIn post but is where most of the engineering happened.
+Most of the engineering time went here, not the front end.
 
 I validated against NESO's published ETYS boundary transfer data: 75th and 95th percentile expected power flows across each boundary, by year and scenario. The target was B6F because it carries the dominant north-south transfer and has the most comparison data.
 
@@ -51,7 +51,7 @@ The fix was one line. The investigation to find it took days.
 
 ### 16 configurations tested
 
-After fixing demand, I tested systematically:
+After fixing demand, I tested systematically. GOOD/FAIR/POOR ratings are based on how many of the 10 mapped non-edge boundaries fell within 25% of NESO's published flows.
 
 | Resolution | Dispatch | IC mode | B6F error | Overall |
 |-----------|----------|---------|-----------|---------|
@@ -68,7 +68,7 @@ NESO uses PLEXOS, a commercial LP-based dispatch tool that distributes power usi
 
 DC power flow does the opposite: it distributes power inversely proportional to impedance. Physically correct but produces different flow patterns from NESO's LP.
 
-Neither approach is wrong. DC power flow shows where power would flow if the network operated unconstrained. NESO's model shows where power flows after active constraint management. The tool is most accurate for relative comparisons between scenarios ("what happens to B6 if Scottish wind doubles?") where systematic biases cancel.
+Both approaches are valid for different purposes. DC power flow shows where power would flow if the network operated unconstrained. NESO's model shows where power flows after active constraint management. The tool is most accurate for relative comparisons between scenarios ("what happens to B6 if Scottish wind doubles?") where systematic biases cancel.
 
 ### What I discovered along the way
 
@@ -79,13 +79,13 @@ Neither approach is wrong. DC power flow shows where power would flow if the net
 
 ## Technical decisions
 
-**Why DC power flow, not AC?** At 27-node zonal resolution, each node represents dozens of substations. Voltage magnitude and reactive power within a zone are meaningless at this aggregation. DC approximation captures the dominant physics (MW distribution by impedance) and is the same approximation NESO uses for boundary transfer analysis. AC would add complexity with no accuracy benefit.
+I went with DC power flow over AC because at 27-node zonal resolution, each node represents dozens of substations. Voltage magnitude and reactive power within a zone are meaningless at this aggregation. DC approximation captures the dominant physics (MW distribution by impedance) and is the same approximation NESO uses for boundary transfer analysis. AC would add complexity with no accuracy benefit.
 
-**Why merit order, not unit commitment?** The tool runs single-timestep snapshots. Unit commitment requires temporal coupling: which generators were on last hour, start-up costs, ramp rates, minimum up/down times. That needs a backend or a fundamentally different architecture. Merit order with minimum stable level constraints is the best static approximation.
+Merit order over unit commitment was a similar call. The tool runs single-timestep snapshots. Unit commitment requires temporal coupling: which generators were on last hour, start-up costs, ramp rates, minimum up/down times. That needs a backend or a fundamentally different architecture. Merit order with minimum stable level constraints is the best static approximation.
 
-**Why HiGHS in the browser?** LOPF dispatch requires an LP solver. The alternatives: (a) send the problem to a backend server, (b) use a JavaScript LP library, (c) compile a production LP solver to WebAssembly. Option (a) adds infrastructure and latency. Option (b): the pure-JS solvers I tested couldn't handle the problem size reliably. Option (c): HiGHS is a world-class open-source LP solver and compiles cleanly to WASM. Solve time is ~10ms for the 27-node problem. Instant feedback with no server dependency.
+For the LP solver I needed something that could run in the browser. The pure-JS solvers I tested couldn't handle the problem size reliably, and sending the problem to a backend server would add infrastructure and latency. HiGHS is a world-class open-source LP solver and compiles cleanly to WebAssembly. Solve time is ~10ms for the 27-node problem. Instant feedback with no server dependency.
 
-**Why the SCADA theme?** Every portfolio project uses Tailwind blue-on-white. The amber-on-black SCADA aesthetic communicates "this person understands how grids are operated" to anyone in the energy sector. It's also more functional: high contrast, monospace fonts for data readability, flat panels matching real control room displays.
+The SCADA theme was a deliberate choice. Every portfolio project uses Tailwind blue-on-white. The amber-on-black aesthetic communicates "this person understands how grids are operated" to anyone in the energy sector. It's also more functional: high contrast, monospace fonts for data readability, flat panels matching real control room displays.
 
 ## Why this tool exists, and what's next
 
@@ -95,9 +95,7 @@ I built this tool because I needed a validated environment for RL dispatch resea
 
 With the full 27-zone topology, the agent gets 109 continuous actions: per-zone per-type dispatch fractions with physical constraints. The same reward-focused agents, but now they can see the network and act on it. The next step is to test whether topology-aware actions let the agent learn what the LP solver computes analytically.
 
-> The hard part was building a validated environment from public data. That's done.
-
-The environment, the data, and the baselines are ready. The training infrastructure is the easy part.
+The hard part was building a validated environment from public data. That's done. The environment, the data, and the baselines are ready. The training infrastructure is the easy part.
 
 ## Links
 
