@@ -167,7 +167,7 @@ import Base from '../layouts/Base.astro';
         const timeEl = hero.querySelector('[data-readout-time]');
 
         if (tempEl) tempEl.textContent = `${temp.toFixed(1)}°C`;
-        if (rhEl) rhEl.textContent = humidity != null ? `${Math.round(humidity)} %RH` : '— %RH';
+        if (rhEl) rhEl.textContent = humidity != null ? `${Math.round(humidity)} %RH` : '-- %RH';
         if (condEl) condEl.textContent = codeToLabel(code, isDay);
         if (timeEl) timeEl.textContent = `UPDATED ${fmtClock(fetchedAt)}`;
       }

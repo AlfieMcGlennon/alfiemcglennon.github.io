@@ -77,33 +77,6 @@ import Base from '../layouts/Base.astro';
       can be used, not just cited.
     </p>
 
-    <h2>Approach</h2>
-    <p>The framework is built on three layers.</p>
-    <ol class="rq">
-      <li>
-        A multiplicative decomposition of compound hazard bias:
-        <code>M_total = M_marginal &times; M_dependence</code>. This
-        separates errors that come from getting individual variables wrong
-        (marginal bias) from errors that come from getting their
-        co-occurrence wrong (dependence bias).
-      </li>
-      <li>
-        Copula-based modelling of the dependence structure, fitted to ERA5
-        reanalysis as ground truth and evaluated against CMIP6 projections.
-      </li>
-      <li>
-        ML-driven dependence estimation using XGBoost to predict
-        Kendall&rsquo;s tau from large-scale circulation features (Z500,
-        MSLP, jet-stream indices), enabling dependence prediction under
-        future climate scenarios.
-      </li>
-    </ol>
-    <p>
-      A detailed visual introduction to copulas, and why they matter for
-      compound risk, is coming soon on the
-      <a href="/writing/">Writing page</a>.
-    </p>
-
     <h2>Data</h2>
     <p>
       ERA5 reanalysis (1981 to 2020) as the ground-truth dependence
