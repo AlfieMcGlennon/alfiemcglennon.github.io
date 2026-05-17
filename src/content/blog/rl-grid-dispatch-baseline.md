@@ -5,6 +5,7 @@ date: 2026-03-15
 project: "rl-dispatch"
 accent: "#7c3aed"
 tags: ["reinforcement-learning", "power-systems", "ppo", "gymnasium"]
+draft: false
 ---
 
 This is the RL chapter of the grid dispatch project. The grid environment, [a validated DC power flow model built from public NESO data](/writing/building-gb-grid-tool/), is the prerequisite. With that in place, the question became: can an RL agent learn dispatch from experience?

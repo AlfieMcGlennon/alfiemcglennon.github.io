@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import ComingSoon from '../../components/ComingSoon.astro';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog'))
@@ -13,24 +14,30 @@ function fmt(d) {
 
 <Base
   title="Writing | Alfie McGlennon"
-  description="Long-form writing on copulas in climate risk, GB grid dispatch, reinforcement learning, and climate data visualisation."
+  description="Long-form writing on climate risk, the GB grid environment, RL dispatch, quantum ML, and climate data visualisation. Coming soon."
   ogTitle="Writing | Alfie McGlennon"
-  ogDescription="Long-form posts on compound risk, grid dispatch, RL, and climate data."
+  ogDescription="Long-form posts coming soon."
 >
-  <article class="page writing-index">
-    <header class="writing-head">
-      <p class="kicker">Writing</p>
-      <h1>Long-form</h1>
-      <p class="lede">
-        Posts on the work I keep coming back to: copulas in climate risk,
-        building the GB grid environment, training RL agents on it, and
-        climate data visualisation.
-      </p>
-    </header>
+  {posts.length === 0 ? (
+    <ComingSoon
+      kicker="Writing"
+      title="Coming soon"
+      body="Long-form posts on the work behind the projects: copulas in climate risk, the GB grid environment, RL dispatch, quantum ML, and climate data visualisation. Released one at a time."
+    />
+  ) : (
+    <article class="page writing-index">
+      <header class="writing-head">
+        <p class="kicker">Writing</p>
+        <h1>Long-form</h1>
+        <p class="lede">
+          Project write-ups and blog posts on and around my work. The
+          longer story behind each build &mdash; the decisions, dead ends,
+          and details that don&rsquo;t fit on a project card &mdash; plus
+          shorter posts on the methods and ideas that keep showing up
+          across them.
+        </p>
+      </header>
 
-    {posts.length === 0 ? (
-      <p class="empty">Posts coming soon.</p>
-    ) : (
       <ul class="post-list">
         {posts.map(post => (
           <li class="post-item">
@@ -50,8 +57,8 @@ function fmt(d) {
           </li>
         ))}
       </ul>
-    )}
-  </article>
+    </article>
+  )}
 </Base>
 
 <style>
@@ -120,10 +127,5 @@ function fmt(d) {
     line-height: 1.6;
     color: var(--ink-muted);
     margin: 0;
-  }
-
-  .empty {
-    color: var(--ink-muted);
-    font-style: italic;
   }
 </style>

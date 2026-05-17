@@ -6,6 +6,7 @@ project: "climate-stripes"
 accent: "#d73027"
 tags: ["climate", "visualisation", "d3js", "open-data"]
 image: "/images/climate-stripes-hero.png"
+draft: false
 ---
 
 You've probably seen Ed Hawkins' [Climate Stripes](https://showyourstripes.info). Those bands of blue-to-red show how global temperatures have shifted over time. Hawkins created them at the University of Reading, where I did my undergrad and where I'm doing my MSc now. The concept has been in my periphery for a while.

@@ -6,6 +6,7 @@ project: "grid-tool"
 accent: "#ffb000"
 tags: ["power-systems", "dc-power-flow", "open-data", "neso", "era5"]
 image: "/images/grid-tool/hero.png"
+draft: false
 ---
 
 Scotland generates more wind power than its transmission grid can carry south. The Scotland-England boundary (B6F in industry shorthand) is the single most constrained corridor in the GB network, and it gets worse every year as offshore wind capacity grows faster than reinforcement.
