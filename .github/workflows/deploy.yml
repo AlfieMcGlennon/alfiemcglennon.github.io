@@ -18,6 +18,32 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+
+      # ── CV PDF ────────────────────────────────────────────────────
+      # Non-blocking: if the PDF build fails the site still deploys.
+      - name: Generate CV LaTeX from cv.json
+        id: cv-tex
+        continue-on-error: true
+        run: node scripts/build-cv.mjs
+
+      - name: Compile CV PDF
+        id: cv-pdf
+        if: steps.cv-tex.outcome == 'success'
+        continue-on-error: true
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: cv.tex
+          working_directory: build/cv
+
+      - name: Stage CV PDF into public/
+        if: steps.cv-pdf.outcome == 'success'
+        continue-on-error: true
+        run: |
+          mkdir -p public
+          cp build/cv/cv.pdf public/cv.pdf
+          ls -la public/cv.pdf
+
+      # ── Astro site ────────────────────────────────────────────────
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

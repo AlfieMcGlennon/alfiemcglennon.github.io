@@ -141,6 +141,10 @@ vite.config.ts.timestamp-*
 # Astro
 .astro/
 
+# CV build artifacts (LaTeX intermediates and generated PDF)
+build/
+public/cv.pdf
+
 # OS
 .DS_Store
 Thumbs.db

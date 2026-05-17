@@ -1,0 +1,401 @@
+---
+import Base from '../layouts/Base.astro';
+import cv from '../data/cv.json';
+
+function dateRange(start, end) {
+  const e = end || 'Present';
+  if (!start) return e;
+  return `${start} – ${e}`;
+}
+
+const contactLinks = [
+  cv.email && { href: `mailto:${cv.email}`, label: cv.email },
+  cv.website && { href: `https://${cv.website}`, label: cv.website },
+  cv.linkedin && { href: `https://${cv.linkedin}`, label: 'LinkedIn' },
+  cv.github && { href: `https://${cv.github}`, label: 'GitHub' },
+].filter(Boolean);
+
+const hasSkills =
+  cv.skills &&
+  Object.values(cv.skills).some(
+    (arr) => Array.isArray(arr) && arr.length > 0
+  );
+---
+
+<Base
+  title={`CV | ${cv.name}`}
+  description={cv.summary || `${cv.name}: CV.`}
+  ogTitle={`CV | ${cv.name}`}
+  ogDescription={cv.summary || `${cv.name}: CV.`}
+>
+  <article class="page-narrow cv">
+    <header class="cv-head">
+      <h1>{cv.name}</h1>
+      <p class="cv-contact">
+        {cv.location && <span class="cv-location">{cv.location}</span>}
+        {cv.location && contactLinks.length > 0 && (
+          <span class="cv-dot" aria-hidden="true">·</span>
+        )}
+        {contactLinks.map((c, i) => (
+          <>
+            {i > 0 && <span class="cv-dot" aria-hidden="true">·</span>}
+            <a href={c.href} rel="noopener">{c.label}</a>
+          </>
+        ))}
+      </p>
+      <p class="cv-download">
+        <a href="/cv.pdf" download>Download PDF</a>
+      </p>
+    </header>
+
+    {cv.summary && (
+      <section class="cv-section">
+        <h2>Summary</h2>
+        <p>{cv.summary}</p>
+      </section>
+    )}
+
+    {cv.education?.length > 0 && (
+      <section class="cv-section">
+        <h2>Education</h2>
+        {cv.education.map((e) => (
+          <article class="cv-entry">
+            <header class="cv-entry-head">
+              <p class="cv-entry-title">
+                <strong>{e.degree}</strong>
+                {e.institution && <span>, <em>{e.institution}</em></span>}
+              </p>
+              <p class="cv-entry-meta">
+                {[e.location, dateRange(e.start, e.end)].filter(Boolean).join(' · ')}
+              </p>
+            </header>
+            {e.notes?.length > 0 && (
+              <ul class="cv-bullets">
+                {e.notes.map((n) => <li>{n}</li>)}
+              </ul>
+            )}
+          </article>
+        ))}
+      </section>
+    )}
+
+    {cv.experience?.length > 0 && (
+      <section class="cv-section">
+        <h2>Experience</h2>
+        {cv.experience.map((x) => (
+          <article class="cv-entry">
+            <header class="cv-entry-head">
+              <p class="cv-entry-title">
+                <strong>{x.role}</strong>
+                {x.organisation && <span>, <em>{x.organisation}</em></span>}
+              </p>
+              <p class="cv-entry-meta">
+                {[x.location, dateRange(x.start, x.end)].filter(Boolean).join(' · ')}
+              </p>
+            </header>
+            {x.notes?.length > 0 && (
+              <ul class="cv-bullets">
+                {x.notes.map((n) => <li>{n}</li>)}
+              </ul>
+            )}
+          </article>
+        ))}
+      </section>
+    )}
+
+    {cv.projects?.length > 0 && (
+      <section class="cv-section">
+        <h2>Projects</h2>
+        {cv.projects.map((p) => (
+          <article class="cv-entry">
+            <p class="cv-entry-title">
+              <strong>{p.name}</strong>
+              {p.link && (
+                <a class="cv-project-link" href={`https://${p.link}`} rel="noopener">
+                  {p.link}
+                </a>
+              )}
+            </p>
+            {p.summary && <p class="cv-project-summary">{p.summary}</p>}
+            {p.notes?.length > 0 && (
+              <ul class="cv-bullets">
+                {p.notes.map((n) => <li>{n}</li>)}
+              </ul>
+            )}
+          </article>
+        ))}
+      </section>
+    )}
+
+    {hasSkills && (
+      <section class="cv-section">
+        <h2>Skills</h2>
+        <dl class="cv-skills">
+          {Object.entries(cv.skills)
+            .filter(([, items]) => Array.isArray(items) && items.length > 0)
+            .map(([category, items]) => (
+              <>
+                <dt>{category}</dt>
+                <dd>{items.join(', ')}</dd>
+              </>
+            ))}
+        </dl>
+      </section>
+    )}
+
+    {cv.publications?.length > 0 && (
+      <section class="cv-section">
+        <h2>Publications</h2>
+        <ul class="cv-pubs">
+          {cv.publications.map((p) => (
+            <li>
+              <span class="cv-pub-authors">{p.authors}.</span>{' '}
+              <em>{p.title}</em>.{' '}
+              <span class="cv-pub-venue">
+                {[p.venue, p.year].filter(Boolean).join(', ')}
+              </span>
+              {p.link && (
+                <>
+                  {'. '}
+                  <a href={`https://${p.link}`} rel="noopener">link</a>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </article>
+</Base>
+
+<style>
+  .cv {
+    max-width: 760px;
+  }
+
+  .cv-head {
+    margin-bottom: 2.5rem;
+  }
+
+  .cv-head h1 {
+    margin: 0 0 0.6rem;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: clamp(2rem, 4.5vw, 2.6rem);
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+
+  .cv-contact {
+    margin: 0 0 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  .cv-contact a {
+    color: var(--teal-deep);
+    text-decoration: none;
+    border-bottom: 1px solid var(--teal-soft);
+  }
+
+  .cv-contact a:hover {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+  }
+
+  .cv-dot {
+    color: var(--ink-faint);
+    margin: 0 0.4rem;
+  }
+
+  .cv-download {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .cv-download a {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    color: var(--teal-deep);
+    border: 1px solid var(--teal);
+    border-radius: 3px;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .cv-download a:hover {
+    background: var(--teal);
+    color: var(--bg);
+  }
+
+  .cv-section {
+    margin-top: 2.25rem;
+  }
+
+  .cv-section h2 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--teal-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 0.85rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .cv-section p {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    margin: 0 0 0.6rem;
+  }
+
+  .cv-entry {
+    margin-bottom: 1.25rem;
+  }
+
+  .cv-entry:last-child {
+    margin-bottom: 0;
+  }
+
+  .cv-entry-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .cv-entry-title {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    color: var(--ink);
+    line-height: 1.45;
+  }
+
+  .cv-entry-title strong {
+    font-weight: 600;
+  }
+
+  .cv-entry-title em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--ink-dim);
+    font-weight: 400;
+  }
+
+  .cv-entry-meta {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .cv-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0.2rem 0 0;
+  }
+
+  .cv-bullets li {
+    font-family: var(--font-serif);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    position: relative;
+    margin-bottom: 0.25rem;
+  }
+
+  .cv-bullets li::before {
+    content: '\2022';
+    position: absolute;
+    left: 0;
+    color: var(--teal);
+  }
+
+  .cv-project-link {
+    display: inline-block;
+    margin-left: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--teal-deep);
+    text-decoration: none;
+    border-bottom: 1px solid var(--teal-soft);
+  }
+
+  .cv-project-link:hover {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+  }
+
+  .cv-project-summary {
+    font-family: var(--font-serif);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: var(--ink-dim);
+    margin: 0.2rem 0 0;
+  }
+
+  .cv-skills {
+    margin: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 1.2rem;
+  }
+
+  .cv-skills dt {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .cv-skills dd {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: var(--ink-dim);
+  }
+
+  .cv-pubs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .cv-pubs li {
+    font-family: var(--font-serif);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: var(--ink-dim);
+    margin-bottom: 0.7rem;
+  }
+
+  .cv-pub-venue {
+    color: var(--ink-muted);
+    font-style: normal;
+  }
+
+  .cv-pubs a {
+    color: var(--teal-deep);
+    border-bottom: 1px solid var(--teal-soft);
+    text-decoration: none;
+  }
+
+  .cv-pubs a:hover {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+  }
+</style>

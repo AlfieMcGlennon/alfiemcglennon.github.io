@@ -1,0 +1,55 @@
+{
+  "name": "Alfie McGlennon",
+  "email": "alfie@alfiemcglennon.com",
+  "location": "Reading, UK",
+  "website": "alfiemcglennon.com",
+  "linkedin": "linkedin.com/in/alfred-mcglennon-927589253",
+  "github": "github.com/AlfieMcGlennon",
+  "summary": "",
+  "education": [
+    {
+      "degree": "MSc Climate Change & AI",
+      "institution": "University of Reading",
+      "location": "Reading, UK",
+      "start": "2024",
+      "end": "Present",
+      "notes": []
+    },
+    {
+      "degree": "BSc Meteorology and Climate",
+      "institution": "University of Reading",
+      "location": "Reading, UK",
+      "start": "",
+      "end": "",
+      "notes": []
+    }
+  ],
+  "experience": [],
+  "projects": [
+    {
+      "name": "GB Grid Scenario Tool",
+      "link": "alfiemcglennon.github.io/gb-grid-tool",
+      "summary": "",
+      "notes": []
+    },
+    {
+      "name": "Quantum ML for atmospheric regression",
+      "link": "",
+      "summary": "",
+      "notes": []
+    },
+    {
+      "name": "Climate Data Quickstart",
+      "link": "github.com/AlfieMcGlennon/climate-data-quickstart",
+      "summary": "",
+      "notes": []
+    }
+  ],
+  "skills": {
+    "Languages": [],
+    "ML & data": [],
+    "Climate & weather": [],
+    "Tools": []
+  },
+  "publications": []
+}
