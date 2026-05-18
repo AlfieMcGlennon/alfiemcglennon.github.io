@@ -27,6 +27,8 @@ Three dispatch modes show the progression from naive to optimal:
 
 Under merit order dispatch at 73rd percentile wind conditions, 9 of 18 mapped boundaries exceed their secure capability. Switch to LOPF and zero do. Same generation fleet, different allocation. That gap between unconstrained and constrained dispatch is what NESO spends billions managing every year through the Balancing Mechanism.
 
+![LP-optimal dispatch view: the HiGHS solver, compiled to WebAssembly, balances flows across all 27 zones with no boundary breaches](/images/grid-tool/lopf.png)
+
 Everything runs client-side with no backend, no API calls, and no account required. Open a URL and start exploring.
 
 **[Live demo](https://alfiemcglennon.github.io/gb-grid-tool/)** (desktop recommended)

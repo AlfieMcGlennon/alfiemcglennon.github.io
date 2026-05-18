@@ -17,6 +17,8 @@ So I built it. **City Climate Bars & Stripes** is an interactive tool that lets 
 
 **[Live demo](https://alfiemcglennon.github.io/city-climate-stripes/)** · **[Source code](https://github.com/AlfieMcGlennon/city-climate-stripes)**
 
+![City Climate Stripes interface: London annual temperature anomalies, 1850 to 2024, baseline 1850 to 1900, auto-symmetric colour scale](/images/climate-stripes.png)
+
 ## What it does
 
 Pick a city and get a visualisation of its temperature history:
