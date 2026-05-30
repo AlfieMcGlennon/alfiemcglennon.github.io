@@ -27,6 +27,7 @@ math: true
 
 import QubitBloch from '../../components/QubitBloch.astro';
 import BlochFlatten from '../../components/BlochFlatten.astro';
+import RotationSim from '../../components/RotationSim.astro';
 
 **[PROSE: Alfie]** _Opening hook, recruiter-first. Brief: one or two sentences on what a quantum computer is actually for, before any mechanism. Lead with the use, not the mystique. Then a single line placing this as the front door to the series "Quantum Processes in Weather and Climate", and that the maths and simulations here are built and checked, while the framing is yours._
 
@@ -116,7 +117,9 @@ The phase is not gone; it is waiting for a change of basis. A Hadamard is exactl
 
 The middle column never moves: phase is invisible to $Z$. The right column is a clean sweep: phase is fully visible once you change basis. That sweep is interference, the two amplitudes made to add in phase or in anti-phase at the output.
 
-**Interactive (added in a later build step).** A single-qubit simulator. Build a short sequence of $R_X$, $R_Y$, $R_Z$ gates; watch the Bloch point move and the $\langle X\rangle$, $\langle Y\rangle$, $\langle Z\rangle$ bars respond. A basis toggle lets you confirm by hand that $R_Z$ does nothing visible until a Hadamard turns the hidden phase into a measurable swing.
+<RotationSim />
+
+Build a short sequence of $R_X$, $R_Y$, $R_Z$ gates from $\ket{0}$ and watch the Bloch point and the $\langle X\rangle$, $\langle Y\rangle$, $\langle Z\rangle$ bars respond. Add an $R_Z$ and read the measurement panel: in the $Z$ basis, nothing changes. Switch the basis to $X$, or add a Hadamard, and the hidden phase swings into view.
 
 **Common traps.**
 

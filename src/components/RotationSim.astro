@@ -1,0 +1,243 @@
+---
+// Toy 3 — single-qubit rotation simulator. Build a short sequence of RX/RY/RZ/H
+// gates from |0>, watch the Bloch point and the three expectation bars respond,
+// and use the Z/X measurement-basis toggle to see the load-bearing lesson: RZ
+// leaves the Z-basis outcomes untouched until a Hadamard turns the hidden phase
+// into a measurable swing. Physics from qsim.js.
+---
+
+<div class="rsim" data-rotation-sim>
+  <div class="rsim-grid">
+    <div class="rsim-stage">
+      <canvas class="rsim-canvas" role="img"
+        aria-label="A Bloch sphere showing the qubit state after the chosen sequence of gates. Drag to rotate the view."></canvas>
+      <p class="rsim-hint">Drag to rotate the view</p>
+    </div>
+
+    <div class="rsim-side">
+      <div class="rs-build">
+        <div class="rs-angle">
+          <label for="rs-angle">Rotation angle</label>
+          <div class="rs-angle-row">
+            <input id="rs-angle" type="range" min="-180" max="180" value="90" step="5" />
+            <output id="rs-angle-val" class="rs-angle-val">90&deg;</output>
+          </div>
+        </div>
+        <div class="rs-gatebtns">
+          <button type="button" data-gate="RX">+ R<sub>x</sub></button>
+          <button type="button" data-gate="RY">+ R<sub>y</sub></button>
+          <button type="button" data-gate="RZ">+ R<sub>z</sub></button>
+          <button type="button" data-gate="H" class="rs-h">+ H</button>
+        </div>
+        <div class="rs-seq-row">
+          <div class="rs-seq" id="rs-seq" aria-label="Gate sequence">|0&rang;</div>
+          <div class="rs-seq-actions">
+            <button type="button" id="rs-undo">Undo</button>
+            <button type="button" id="rs-reset">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="rs-exp" aria-hidden="true">
+        <div class="rs-exp-row"><span class="rs-exp-lab">&lang;X&rang;</span><div class="rs-track"><i id="rs-x"></i></div><span class="rs-exp-val" id="rs-xv">+0.00</span></div>
+        <div class="rs-exp-row"><span class="rs-exp-lab">&lang;Y&rang;</span><div class="rs-track"><i id="rs-y"></i></div><span class="rs-exp-val" id="rs-yv">+0.00</span></div>
+        <div class="rs-exp-row"><span class="rs-exp-lab">&lang;Z&rang;</span><div class="rs-track"><i id="rs-z"></i></div><span class="rs-exp-val" id="rs-zv">+0.00</span></div>
+      </div>
+
+      <div class="rs-measure">
+        <div class="rs-basis">
+          <span class="rs-basis-lab">Measure in</span>
+          <div class="rs-basis-toggle" role="group" aria-label="Measurement basis">
+            <button type="button" data-basis="Z" class="active">Z basis</button>
+            <button type="button" data-basis="X">X basis</button>
+          </div>
+        </div>
+        <div class="rs-probs" id="rs-probs" aria-live="polite"></div>
+        <p class="rs-lesson" id="rs-lesson"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .rsim { --q: #4338ca; margin: 1.75rem 0; padding: 1rem; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px; }
+  .rsim-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 1.25rem; align-items: start; }
+  .rsim-stage { display: flex; flex-direction: column; gap: 0.4rem; }
+  .rsim-canvas { width: 100%; aspect-ratio: 1; display: block; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg-raised); cursor: grab; touch-action: none; }
+  .rsim-canvas:active { cursor: grabbing; }
+  .rsim-hint { margin: 0; text-align: center; font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); }
+
+  .rsim-side { display: flex; flex-direction: column; gap: 1rem; }
+  .rs-angle { display: flex; flex-direction: column; gap: 0.3rem; }
+  .rs-angle label { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-muted); }
+  .rs-angle-row { display: flex; align-items: center; gap: 0.6rem; }
+  .rs-angle-row input { flex: 1; accent-color: var(--q); }
+  .rs-angle-val { font-family: var(--font-mono); font-size: 0.82rem; color: var(--q); min-width: 3rem; text-align: right; }
+
+  .rs-gatebtns { display: flex; gap: 0.4rem; margin-top: 0.5rem; }
+  .rs-gatebtns button, .rs-seq-actions button, .rs-basis-toggle button {
+    font-family: var(--font-mono); font-size: 0.8rem; cursor: pointer;
+    background: var(--bg); color: var(--ink-dim);
+    border: 1px solid var(--rule); border-radius: 4px; padding: 0.32rem 0.6rem;
+  }
+  .rs-gatebtns button:hover, .rs-seq-actions button:hover { border-color: var(--q); color: var(--q); }
+  .rs-gatebtns .rs-h:hover { border-color: var(--teal); color: var(--teal); }
+  .rs-gatebtns sub { font-size: 0.7em; }
+
+  .rs-seq-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.6rem; }
+  .rs-seq { flex: 1; font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink); background: var(--bg); border: 1px solid var(--rule-soft); border-radius: 4px; padding: 0.4rem 0.55rem; min-height: 1.4rem; line-height: 1.7; overflow-x: auto; white-space: nowrap; }
+  .rs-seq .g { color: var(--q); }
+  .rs-seq .g.h { color: var(--teal); }
+  .rs-seq-actions { display: flex; flex-direction: column; gap: 0.3rem; }
+
+  .rs-exp { display: flex; flex-direction: column; gap: 0.45rem; }
+  .rs-exp-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem; }
+  .rs-exp-lab { font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-muted); }
+  .rs-track { position: relative; height: 0.7rem; border-radius: 3px; background: linear-gradient(var(--rule), var(--rule)) no-repeat center / 1px 100%, var(--rule-soft); }
+  .rs-track i { position: absolute; top: 0; height: 100%; border-radius: 2px; left: 50%; width: 0; }
+  .rs-exp-val { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink); min-width: 3.1rem; text-align: right; }
+
+  .rs-measure { display: flex; flex-direction: column; gap: 0.5rem; border-top: 1px solid var(--rule-soft); padding-top: 0.75rem; }
+  .rs-basis { display: flex; align-items: center; gap: 0.6rem; }
+  .rs-basis-lab { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-muted); }
+  .rs-basis-toggle { display: inline-flex; gap: 0.3rem; }
+  .rs-basis-toggle button.active { background: var(--q); color: #fff; border-color: var(--q); }
+  .rs-probs { font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-dim); display: flex; flex-direction: column; gap: 0.35rem; }
+  .rs-prob-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem; }
+  .rs-prob-bar { height: 0.6rem; background: var(--rule-soft); border-radius: 3px; overflow: hidden; }
+  .rs-prob-bar i { display: block; height: 100%; background: var(--teal); }
+  .rs-lesson { margin: 0; font-family: var(--font-serif); font-size: 0.86rem; font-style: italic; color: var(--ink-dim); min-height: 1.2rem; }
+
+  @media (max-width: 620px) { .rsim-grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { StateVector, blochVector } from '../scripts/qsim.js';
+  import { makeCamera, fitCanvas, attachDrag, drawSphere, drawStateArrow, paletteFromCSS } from '../scripts/bloch.js';
+
+  function init() {
+    const root = document.querySelector('[data-rotation-sim]');
+    if (!root) return;
+    if (root._cleanup) root._cleanup();
+
+    const canvas = root.querySelector('.rsim-canvas');
+    const ctx = canvas.getContext('2d');
+    const angleIn = root.querySelector('#rs-angle');
+    const angleVal = root.querySelector('#rs-angle-val');
+    const seqEl = root.querySelector('#rs-seq');
+    const probsEl = root.querySelector('#rs-probs');
+    const lessonEl = root.querySelector('#rs-lesson');
+    const bars = { x: root.querySelector('#rs-x'), y: root.querySelector('#rs-y'), z: root.querySelector('#rs-z') };
+    const vals = { x: root.querySelector('#rs-xv'), y: root.querySelector('#rs-yv'), z: root.querySelector('#rs-zv') };
+
+    const cam = makeCamera();
+    const palette = paletteFromCSS();
+    let dims = null;
+    let gates = [];
+    let basis = 'Z';
+
+    const fmt = (x) => (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(2);
+
+    function buildState() {
+      const sv = new StateVector(1);
+      for (const g of gates) {
+        if (g.type === 'RX') sv.applyRX(0, g.angle);
+        else if (g.type === 'RY') sv.applyRY(0, g.angle);
+        else if (g.type === 'RZ') sv.applyRZ(0, g.angle);
+        else if (g.type === 'H') sv.applyH(0);
+      }
+      return sv;
+    }
+
+    function setBar(el, v) {
+      if (v >= 0) { el.style.left = '50%'; el.style.width = (v * 50).toFixed(1) + '%'; el.style.background = 'var(--teal)'; }
+      else { el.style.left = (50 + v * 50).toFixed(1) + '%'; el.style.width = (-v * 50).toFixed(1) + '%'; el.style.background = 'var(--amber)'; }
+    }
+
+    function render() {
+      if (!dims) return;
+      const { w, h } = dims;
+      const sv = buildState();
+      const v = blochVector(sv);
+
+      drawSphere(ctx, cam, w, h, palette);
+      drawStateArrow(ctx, cam, w, h, v, palette, { guides: true });
+
+      setBar(bars.x, v.x); vals.x.textContent = fmt(v.x);
+      setBar(bars.y, v.y); vals.y.textContent = fmt(v.y);
+      setBar(bars.z, v.z); vals.z.textContent = fmt(v.z);
+
+      // Sequence display
+      if (gates.length === 0) seqEl.innerHTML = '|0⟩';
+      else {
+        seqEl.innerHTML = '|0⟩ ' + gates.map((g) => {
+          if (g.type === 'H') return '<span class="g h">H</span>';
+          const deg = Math.round(g.angle * 180 / Math.PI);
+          return `<span class="g">${g.type === 'RX' ? 'Rₓ' : g.type === 'RY' ? 'Rᵧ' : 'Rᴢ'}(${deg}°)</span>`;
+        }).join(' ');
+      }
+
+      // Measurement in the chosen basis
+      let mv = sv;
+      let labA = '|0⟩', labB = '|1⟩';
+      if (basis === 'X') { mv = sv.clone(); mv.applyH(0); labA = '|+⟩'; labB = '|−⟩'; }
+      const probs = mv.probabilities();
+      const counts = mv.sampleCounts(200, Math.random);
+      probsEl.innerHTML =
+        probRow(labA, probs[0], counts[0]) + probRow(labB, probs[1], counts[1]);
+
+      // The lesson hint
+      const last = gates[gates.length - 1];
+      if (last && last.type === 'RZ' && basis === 'Z') {
+        lessonEl.textContent = 'Rz moved the state, but the Z-basis outcomes did not change. Switch to the X basis (or add an H) to reveal the phase.';
+      } else if (basis === 'X' && gates.some((g) => g.type === 'RZ')) {
+        lessonEl.textContent = 'In the X basis the phase set by Rz is now visible in the outcomes.';
+      } else {
+        lessonEl.textContent = '';
+      }
+    }
+
+    function probRow(label, p, count) {
+      return `<div class="rs-prob-row"><span>${label}</span>` +
+        `<div class="rs-prob-bar"><i style="width:${(p * 100).toFixed(1)}%"></i></div>` +
+        `<span>${p.toFixed(2)} <span style="color:var(--ink-faint)">(${count})</span></span></div>`;
+    }
+
+    function addGate(type) {
+      const angle = type === 'H' ? 0 : (+angleIn.value) * Math.PI / 180;
+      gates.push({ type, angle });
+      render();
+    }
+
+    const onAngle = () => { angleVal.textContent = angleIn.value + '°'; };
+    angleIn.addEventListener('input', onAngle);
+
+    const gateBtns = [...root.querySelectorAll('.rs-gatebtns button')];
+    gateBtns.forEach((b) => b.addEventListener('click', () => addGate(b.dataset.gate)));
+    root.querySelector('#rs-undo').addEventListener('click', () => { gates.pop(); render(); });
+    root.querySelector('#rs-reset').addEventListener('click', () => { gates = []; render(); });
+
+    const basisBtns = [...root.querySelectorAll('.rs-basis-toggle button')];
+    basisBtns.forEach((b) => b.addEventListener('click', () => {
+      basis = b.dataset.basis;
+      basisBtns.forEach((x) => x.classList.toggle('active', x === b));
+      render();
+    }));
+
+    const detachDrag = attachDrag(canvas, cam, render);
+    function resize() { dims = fitCanvas(canvas, ctx); render(); }
+    window.addEventListener('resize', resize);
+
+    root._cleanup = () => {
+      detachDrag();
+      window.removeEventListener('resize', resize);
+      root._cleanup = null;
+    };
+
+    onAngle();
+    resize();
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>
