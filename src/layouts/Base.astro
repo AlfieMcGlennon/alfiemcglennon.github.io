@@ -4,20 +4,27 @@ import '../styles/global.css';
 
 const {
   title = 'Alfie McGlennon | Climate Risk, ML & Compound Extremes',
-  description = 'Alfie McGlennon. MSc Climate Change & AI at the University of Reading. Researching compound heat stress risk across Europe using copula-based frameworks and machine learning.',
+  description = 'Alfred (Alfie) McGlennon. MSc Climate Change & AI at the University of Reading. Researching compound heat stress risk across Europe using copula-based frameworks and machine learning.',
   ogTitle = 'Alfie McGlennon | Climate Risk, ML & Compound Extremes',
   ogDescription = 'MSc Climate Change & AI researcher. Compound heat stress, copula methods, RL for grid dispatch, quantum ML for atmospheric regression.',
   image,
+  ogType = 'website',
+  publishedTime,
+  tags = [],
+  headline,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImage = image ? new URL(image, Astro.site) : new URL('/og-image.png', Astro.site);
+const isArticle = ogType === 'article';
 
 const personSchema = {
   '@context': 'https://schema.org',
   '@type': 'Person',
   name: 'Alfie McGlennon',
   alternateName: 'Alfred McGlennon',
+  givenName: 'Alfred',
+  familyName: 'McGlennon',
   url: 'https://alfiemcglennon.com',
   image: new URL('/favicon.svg', Astro.site).toString(),
   jobTitle: 'MSc Climate Change & AI researcher',
@@ -47,6 +54,32 @@ const personSchema = {
     'https://www.linkedin.com/in/alfred-mcglennon-927589253/',
   ],
 };
+
+// Per-article structured data. Only emitted when a page opts in with
+// ogType="article" (currently blog posts via Post.astro).
+const articleSchema = isArticle
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: headline || title,
+      description,
+      datePublished: publishedTime,
+      dateModified: publishedTime,
+      author: {
+        '@type': 'Person',
+        name: 'Alfie McGlennon',
+        url: 'https://alfiemcglennon.com',
+      },
+      publisher: {
+        '@type': 'Person',
+        name: 'Alfie McGlennon',
+        url: 'https://alfiemcglennon.com',
+      },
+      mainEntityOfPage: canonicalURL.toString(),
+      ...(tags && tags.length ? { keywords: tags.join(', ') } : {}),
+      ...(image ? { image: ogImage.toString() } : {}),
+    }
+  : null;
 ---
 
 <!doctype html>
@@ -56,18 +89,32 @@ const personSchema = {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="keywords" content="Alfie McGlennon, climate risk, compound heat stress, copula, XGBoost, ERA5, CMIP6, machine learning, quantum, quantum machine learning, quantum ML, reinsurance, ECMWF, University of Reading, meteorology, DestinE, Kendall tau" />
+    <meta name="keywords" content="Alfie McGlennon, Alfred McGlennon, climate risk, compound heat stress, copula, XGBoost, ERA5, CMIP6, machine learning, quantum, quantum machine learning, quantum ML, reinsurance, ECMWF, University of Reading, meteorology, DestinE, Kendall tau" />
+    <meta name="author" content="Alfie McGlennon" />
     <meta property="og:title" content={ogTitle} />
     <meta property="og:description" content={ogDescription} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogTitle} />
+    {isArticle && (
+      <>
+        {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+        <meta property="article:author" content="Alfie McGlennon" />
+        {tags.map((tag) => <meta property="article:tag" content={tag} />)}
+      </>
+    )}
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={ogDescription} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogTitle} />
     <link rel="canonical" href={canonicalURL} />
 
     <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    {articleSchema && <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />}
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 

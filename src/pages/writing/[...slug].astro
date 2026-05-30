@@ -4,8 +4,9 @@ import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
   // Only generate routes for published posts. Set `draft: false` in a post's
-  // frontmatter to release it.
-  const posts = (await getCollection('blog')).filter(p => !p.data.draft);
+  // frontmatter to release it. Drafts are still routable on the local dev
+  // server (import.meta.env.DEV) so they can be previewed before release.
+  const posts = (await getCollection('blog')).filter(p => import.meta.env.DEV || !p.data.draft);
   return posts.map(post => ({
     params: { slug: post.id },
     props: { post },

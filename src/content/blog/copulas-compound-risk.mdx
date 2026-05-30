@@ -1,16 +1,17 @@
 ---
 title: "Copulas in Climate Risk: Why Extremes Don't Happen Alone"
 description: "A visual guide to copulas, dependence structures, and why assuming independence between climate hazards systematically underestimates compound risk."
-date: 2026-04-05
+date: 2026-05-30
 project: "compound-risk"
 accent: "#ef8a62"
+image: "/images/copulas/og-card.png"
 tags: ["climate-risk", "copulas", "compound-extremes", "statistics"]
-draft: true
+draft: false
 ---
 import CopulaExplorer from '../../components/CopulaExplorer.astro';
 import TrivariateCopula from '../../components/TrivariateCopula.astro';
 
-A storm hits the coast. Wind speeds are high but not record-breaking. Rainfall is heavy but not unprecedented. Neither hazard alone would trigger a catastrophic loss. But they arrive together, and the combination produces flooding that neither marginal distribution predicted.
+A storm hits the coast with high winds and heavy rain. Neither is record-breaking, and neither alone would trigger a major loss. They arrive together, and the combination produces flooding that neither marginal distribution predicted.
 
 This is compound risk. Events that are individually manageable become catastrophic in combination. Catastrophe modelling, climate adaptation, and reinsurance pricing all have to deal with it, and the standard approach of fitting marginal distributions to individual hazards handles it badly.
 
@@ -20,15 +21,15 @@ This post is a visual introduction to **copulas**, the mathematical framework fo
 
 Climate hazards are routinely assessed in isolation. Wind return periods are estimated from wind data. Flood return periods from rainfall data. Each analysis produces a marginal distribution: a complete description of the behaviour of one variable independently.
 
-The problem is that "independently" is doing a lot of work. If two hazards are positively dependent (high wind tends to coincide with heavy rain during extratropical cyclones), their joint exceedance probability is much higher than the product of their individual probabilities.
+The problem is the word "independently". If two hazards are positively dependent (high wind tends to coincide with heavy rain during extratropical cyclones), their joint exceedance probability is much higher than the product of their individual probabilities.
 
 ![Marginal distributions vs joint distribution showing compound extremes](/images/copulas/01-marginals-vs-joint.png)
 
-The left two panels look manageable. The right panel tells a different story. Those red dots in the upper-right corner are compound events where both hazards simultaneously exceed their individual thresholds. The marginal distributions, examined alone, don't see them coming.
+The left two panels look manageable. The right panel is the one to look at. Those red dots in the upper-right corner are compound events where both hazards simultaneously exceed their individual thresholds. The marginal distributions, examined alone, give you no warning of them.
 
 If you assume independence, the probability of both hazards exceeding their 95th percentiles simultaneously is 0.05 × 0.05 = 0.0025 (1 in 400). With positive dependence, it can be 1 in 50.
 
-> A factor of 8 in risk vanishes from any analysis that treats hazards as independent.
+> That is a factor of 8 in risk, and you miss it entirely if you treat the hazards as independent.
 
 ## A quick note on distributions
 
@@ -82,7 +83,7 @@ The rate and pattern of this convergence is exactly what the copula encodes. Dif
 
 ## The Gaussian copula
 
-The most widely used copula is derived from the multivariate Gaussian distribution. Transform each marginal to a standard normal, apply a correlation matrix, and transform back. The Gaussian copula has one parameter per variable pair: the linear correlation coefficient.
+The most widely used copula is derived from the multivariate Gaussian distribution. Transform each marginal to a standard normal, apply a correlation matrix, and transform back. The Gaussian copula has one parameter per variable pair: the correlation coefficient.
 
 In 3D, the Gaussian copula density for a bivariate case with correlation 0.7 looks like this:
 
@@ -98,13 +99,13 @@ The Gaussian copula is symmetric: upper and lower tails have the same dependence
 
 Different copula families capture different dependence patterns. The three most important for climate risk:
 
-![Clayton, Gaussian, and Gumbel copula samples side by side](/images/copulas/06-copula-families.png)
+![Clayton, Gaussian, and survival Clayton copula samples in uniform space, showing lower-tail, symmetric, and upper-tail climate dependence](/images/copulas/06-copula-families.png)
 
 **Clayton** concentrates dependence in the lower tail. Both variables tend to be simultaneously low more often than simultaneously high. Useful for modelling joint deficit events (drought across multiple catchments, simultaneous low wind across a region).
 
 **Gaussian** is symmetric. Upper and lower tails behave identically. Convenient as a default but rarely matches observed climate dependence.
 
-**Gumbel** (and survival Clayton, shown here) concentrates dependence in the upper tail. Both variables tend to be simultaneously extreme. This is the pattern that matters most for compound hazards: storm wind and surge, heat and drought, heavy precipitation and saturated soil.
+**Gumbel** and **survival Clayton** are two distinct families that both concentrate dependence in the upper tail: both variables tend to be simultaneously extreme. The panel above shows survival Clayton; the 3D surfaces further down use a true Gumbel copula. This is the pattern that matters most for compound hazards: storm wind and surge, heat and drought, heavy precipitation and saturated soil.
 
 The 3D density surfaces make the asymmetry visible:
 
@@ -132,25 +133,25 @@ Most of the time, it doesn't matter which copula you use. The body of the distri
 
 ![Zoomed view of upper tail: Gaussian vs upper-tail dependent](/images/copulas/07-tail-dependence.png)
 
-Same overall correlation, same marginals, but fundamentally different behaviour in the upper tail. The Gaussian copula produces far fewer joint extreme events than the upper-tail dependent structure. In a 1-in-100-year analysis, this difference is the gap between "rare but manageable" and "we needed more reinsurance."
+Same overall correlation, same marginals, but very different behaviour in the upper tail. The Gaussian copula produces far fewer joint extreme events than the upper-tail dependent structure. In a 1-in-100-year analysis, that difference is what decides whether you hold enough reinsurance.
 
 The effect compounds as you move deeper into the tail:
 
 ![Joint exceedance probability curves by dependence structure](/images/copulas/08-threshold-exceedance.png)
 
-At the 95th percentile, the three structures differ by a factor of 2-3. At the 99th, by an order of magnitude. The independent assumption (dashed grey) is catastrophically wrong: it underestimates joint exceedance by 10x or more compared to the tail-dependent case.
+At the 95th percentile, the three structures differ by a factor of 2-3. At the 99th, by an order of magnitude. The independent assumption (dashed grey) underestimates joint exceedance by 10x or more compared to the tail-dependent case.
 
-The choice between a Gaussian and a Gumbel copula, applied to the same marginals with the same correlation, can shift an aggregate loss estimate by billions.
+The choice between a Gaussian and a Gumbel copula, applied to the same marginals with the same correlation, can move an aggregate loss estimate by a large margin.
 
 ## Compound events in climate
 
-The compound risk problem is not theoretical. European windstorms routinely produce correlated wind, rainfall, and surge. The 2013/14 UK winter storms, Storm Desmond (2015), and Storm Ciara (2020) all involved multiple simultaneously extreme hazards whose joint probability was far higher than independence would predict.
+European windstorms routinely produce correlated wind, rainfall, and surge. The 2013/14 UK winter storms, Storm Desmond (2015), and Storm Ciara (2020) all involved multiple simultaneously extreme hazards whose joint probability was far higher than independence would predict.
 
 ![Compound wind-precipitation events and return period comparison](/images/copulas/11-climate-compound.png)
 
-The left panel shows simulated wind-precipitation events drawn from an upper-tail dependent copula (survival Clayton, calibrated to be roughly consistent with observed winter storm co-occurrence). The red cluster in the upper right represents compound extremes where both hazards simultaneously exceed their 95th percentiles.
+The left panel shows simulated wind-precipitation events drawn from an upper-tail dependent copula (survival Clayton, with the dependence strength chosen to illustrate the effect rather than fitted to data). The red cluster in the upper right represents compound extremes where both hazards simultaneously exceed their 95th percentiles.
 
-The right panel is where it gets concrete. A 20-year wind event and a 20-year precipitation event, if independent, should co-occur once in 400 years. With realistic upper-tail dependence, the compound event has a return period closer to 55 years. Assuming independence underestimates the frequency by a factor of 7.
+The right panel makes the consequence concrete. A 20-year wind event and a 20-year precipitation event, if independent, should co-occur once in 400 years. With moderate upper-tail dependence, the compound event has a return period closer to 55 years (illustrative figures, but the direction and rough scale are what matter). The independence assumption puts the frequency seven times too low.
 
 ## A typology of compound events
 
@@ -184,7 +185,7 @@ The three pairwise scatter plots on the right show the marginal copula for each 
 
 <TrivariateCopula />
 
-With three independent variables at the 90th percentile, joint exceedance is a 1-in-1000 event. With realistic dependence (&rho;=0.6), it can be 1-in-50. A factor of 20 in risk that disappears if you assume independence.
+With three independent variables at the 90th percentile, joint exceedance is a 1-in-1000 event. With realistic dependence (&rho;=0.6), it can be 1-in-50.
 
 ## What this means for risk modelling
 
@@ -198,4 +199,4 @@ Three practical implications:
 
 ---
 
-*This post covers the statistical framework. My dissertation applies these methods to specific compound extreme events across Europe using ERA5 reanalysis data. That work is ongoing and will be written up separately.*
+*I've been researching and working with copulas for my dissertation. Compound events can be devastating, and the more we understand them the better we can prepare. That's why I chose the topic.*

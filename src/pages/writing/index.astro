@@ -4,7 +4,7 @@ import ComingSoon from '../../components/ComingSoon.astro';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog'))
-  .filter(p => !p.data.draft)
+  .filter(p => import.meta.env.DEV || !p.data.draft)
   .sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf());
 
 function fmt(d) {
