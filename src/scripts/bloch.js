@@ -110,7 +110,9 @@ export function attachDrag(canvas, cam, onChange) {
 function ringAlpha(depth) { return 0.18 + 0.5 * clamp((depth + 1) / 2, 0, 1); }
 
 // Draw one great circle, parametrised by pointFn(angle) -> Bloch {x,y,z}.
-function drawRing(ctx, cam, w, h, scale, pointFn, colour) {
+// alphaMul scales the whole ring (used to fade off-slice rings when flattening).
+function drawRing(ctx, cam, w, h, scale, pointFn, colour, alphaMul = 1) {
+  if (alphaMul < 0.02) return;
   const N = 72;
   let prev = null;
   for (let i = 0; i <= N; i++) {
@@ -118,7 +120,7 @@ function drawRing(ctx, cam, w, h, scale, pointFn, colour) {
     const p = projectBloch(pointFn(a), cam, w, h, scale);
     if (prev) {
       ctx.strokeStyle = colour;
-      ctx.globalAlpha = ringAlpha((prev.z + p.z) / 2);
+      ctx.globalAlpha = ringAlpha((prev.z + p.z) / 2) * alphaMul;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(prev.x, prev.y);
@@ -131,30 +133,37 @@ function drawRing(ctx, cam, w, h, scale, pointFn, colour) {
 }
 
 // The full sphere: three great circles, three axes, basis labels.
+// opts.flatten (0..1) fades the equator, the Y-Z meridian, the Y axis and the
+// |+i> label, so the sphere visibly collapses onto its X-Z slice.
+// opts.clear=false skips the background fill (caller has already cleared).
 export function drawSphere(ctx, cam, w, h, palette = DEFAULT_PALETTE, opts = {}) {
   const scale = scaleFor(w, h);
-  ctx.fillStyle = palette.surface;
-  ctx.fillRect(0, 0, w, h);
-
-  // Great circles: equator (z=0), X-Z meridian (y=0), Y-Z meridian (x=0).
-  drawRing(ctx, cam, w, h, scale, (a) => ({ x: Math.cos(a), y: Math.sin(a), z: 0 }), palette.rule);
-  if (!opts.equatorOnly) {
-    drawRing(ctx, cam, w, h, scale, (a) => ({ x: Math.sin(a), y: 0, z: Math.cos(a) }), palette.rule);
-    drawRing(ctx, cam, w, h, scale, (a) => ({ x: 0, y: Math.sin(a), z: Math.cos(a) }), palette.rule);
+  const flat = clamp(opts.flatten || 0, 0, 1);
+  const off = 1 - flat;
+  if (opts.clear !== false) {
+    ctx.fillStyle = palette.surface;
+    ctx.fillRect(0, 0, w, h);
   }
 
-  // Axes through the centre.
+  // Great circles. The X-Z meridian is the slice and stays full; the equator
+  // and Y-Z meridian fade out as the sphere is flattened onto the slice.
+  drawRing(ctx, cam, w, h, scale, (a) => ({ x: Math.cos(a), y: Math.sin(a), z: 0 }), palette.rule, off);
+  drawRing(ctx, cam, w, h, scale, (a) => ({ x: Math.sin(a), y: 0, z: Math.cos(a) }), palette.rule, 1);
+  drawRing(ctx, cam, w, h, scale, (a) => ({ x: 0, y: Math.sin(a), z: Math.cos(a) }), palette.rule, off);
+
+  // Axes through the centre (X and Z stay; Y fades with flattening).
   const axes = [
-    { a: { x: -1, y: 0, z: 0 }, b: { x: 1, y: 0, z: 0 } },
-    { a: { x: 0, y: -1, z: 0 }, b: { x: 0, y: 1, z: 0 } },
-    { a: { x: 0, y: 0, z: -1 }, b: { x: 0, y: 0, z: 1 } },
+    { a: { x: -1, y: 0, z: 0 }, b: { x: 1, y: 0, z: 0 }, m: 1 },
+    { a: { x: 0, y: -1, z: 0 }, b: { x: 0, y: 1, z: 0 }, m: off },
+    { a: { x: 0, y: 0, z: -1 }, b: { x: 0, y: 0, z: 1 }, m: 1 },
   ];
   ctx.strokeStyle = palette.muted;
-  ctx.globalAlpha = 0.45;
   ctx.lineWidth = 1;
   for (const ax of axes) {
+    if (ax.m < 0.02) continue;
     const pa = projectBloch(ax.a, cam, w, h, scale);
     const pb = projectBloch(ax.b, cam, w, h, scale);
+    ctx.globalAlpha = 0.45 * ax.m;
     ctx.beginPath();
     ctx.moveTo(pa.x, pa.y);
     ctx.lineTo(pb.x, pb.y);
@@ -164,19 +173,22 @@ export function drawSphere(ctx, cam, w, h, palette = DEFAULT_PALETTE, opts = {})
 
   if (opts.labels !== false) {
     const labels = [
-      { p: { x: 0, y: 0, z: 1.18 }, t: '|0⟩' },
-      { p: { x: 0, y: 0, z: -1.18 }, t: '|1⟩' },
-      { p: { x: 1.2, y: 0, z: 0 }, t: '|+⟩' },
-      { p: { x: 0, y: 1.2, z: 0 }, t: '|+i⟩' },
+      { p: { x: 0, y: 0, z: 1.18 }, t: '|0⟩', m: 1 },
+      { p: { x: 0, y: 0, z: -1.18 }, t: '|1⟩', m: 1 },
+      { p: { x: 1.2, y: 0, z: 0 }, t: '|+⟩', m: 1 },
+      { p: { x: 0, y: 1.2, z: 0 }, t: '|+i⟩', m: off },
     ];
-    ctx.fillStyle = palette.muted;
     ctx.font = `${Math.max(10, Math.round(w * 0.034))}px ui-monospace, monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const l of labels) {
+      if (l.m < 0.05) continue;
       const p = projectBloch(l.p, cam, w, h, scale);
+      ctx.fillStyle = palette.muted;
+      ctx.globalAlpha = l.m;
       ctx.fillText(l.t, p.x, p.y);
     }
+    ctx.globalAlpha = 1;
   }
 }
 

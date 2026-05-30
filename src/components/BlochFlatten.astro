@@ -1,0 +1,197 @@
+---
+// Toy 2 — flatten the sphere on purpose. Scrolling through the scene collapses
+// the 3D sphere onto its X-Z (RY) slice: a dimension is visibly thrown away.
+// Then a theta slider sweeps the state along the slice while a probability
+// readout and a many-shots histogram show the Born statistics. Under reduced
+// motion the collapse becomes an ordinary slider, so nothing is lost.
+---
+
+<div class="flatten" data-bloch-flatten>
+  <div class="flatten-scene" data-flatten-scene>
+    <div class="flatten-pin">
+      <div class="flatten-grid">
+        <div class="flatten-stage">
+          <canvas class="flatten-canvas" role="img"
+            aria-label="A Bloch sphere collapsing onto its two-dimensional X-Z slice as you scroll, with the qubit state shown on the slice."></canvas>
+        </div>
+
+        <div class="flatten-side">
+          <div class="fl-control">
+            <label for="fl-flatten">Flatten <span class="fl-note">(3D sphere → 2D slice)</span></label>
+            <div class="fl-row">
+              <input id="fl-flatten" type="range" min="0" max="100" value="0" step="1" />
+            </div>
+            <p class="fl-hint" id="fl-hint">Scroll to flatten, or drag the slider</p>
+          </div>
+
+          <div class="fl-control">
+            <label for="fl-theta">State angle <span class="fl-sym">&theta;</span></label>
+            <div class="fl-row">
+              <input id="fl-theta" type="range" min="0" max="180" value="60" step="1" />
+              <output id="fl-theta-val" class="fl-val">60&deg;</output>
+            </div>
+          </div>
+
+          <div class="fl-probs" aria-live="polite" id="fl-probs">
+            <div class="fl-bar-row">
+              <span class="fl-bar-label">P(0) = cos&sup2;(&theta;/2)</span>
+              <div class="fl-bar"><i id="fl-bar0" class="zero"></i></div>
+              <span class="fl-bar-val" id="fl-p0">0.75</span>
+            </div>
+            <div class="fl-bar-row">
+              <span class="fl-bar-label">P(1) = sin&sup2;(&theta;/2)</span>
+              <div class="fl-bar"><i id="fl-bar1" class="one"></i></div>
+              <span class="fl-bar-val" id="fl-p1">0.25</span>
+            </div>
+            <p class="fl-shots" id="fl-shots">200 shots: |0&rang; &times; 150 &middot; |1&rang; &times; 50</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .flatten { --q: #4338ca; margin: 1.75rem 0; }
+  .flatten-pin { padding: 1rem; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px; }
+  .flatten-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.25rem; align-items: center; }
+
+  .flatten-canvas {
+    width: 100%;
+    aspect-ratio: 1;
+    display: block;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--bg-raised);
+    touch-action: pan-y;
+  }
+
+  .flatten-side { display: flex; flex-direction: column; gap: 1rem; }
+  .fl-control { display: flex; flex-direction: column; gap: 0.35rem; }
+  .fl-control label { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-muted); }
+  .fl-sym { color: var(--q); font-weight: 600; }
+  .fl-note { color: var(--ink-faint); }
+  .fl-row { display: flex; align-items: center; gap: 0.6rem; }
+  .fl-row input[type="range"] { flex: 1; accent-color: var(--q); }
+  .fl-val { font-family: var(--font-mono); font-size: 0.82rem; color: var(--q); min-width: 3rem; text-align: right; }
+  .fl-hint { margin: 0.15rem 0 0; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); }
+
+  .fl-probs {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+    background: var(--bg);
+    border: 1px solid var(--rule-soft);
+    border-radius: 4px;
+    padding: 0.7rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .fl-bar-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem; }
+  .fl-bar-label { white-space: nowrap; color: var(--ink-muted); }
+  .fl-bar { height: 0.7rem; background: var(--rule-soft); border-radius: 3px; overflow: hidden; }
+  .fl-bar i { display: block; height: 100%; border-radius: 3px; transition: none; }
+  .fl-bar i.zero { background: var(--teal); }
+  .fl-bar i.one { background: var(--amber); }
+  .fl-bar-val { color: var(--ink); min-width: 2.6rem; text-align: right; }
+  .fl-shots { margin: 0; color: var(--ink-faint); }
+
+  /* Scroll-linked mode: the scene is tall and the figure pins while you scroll
+     through the flatten. Added by JS only when reduced motion is not requested. */
+  .flatten-scene.scroll-linked { min-height: 240vh; }
+  .flatten-scene.scroll-linked .flatten-pin { position: sticky; top: 5vh; }
+
+  @media (max-width: 620px) {
+    .flatten-grid { grid-template-columns: 1fr; }
+    .flatten-scene.scroll-linked { min-height: 280vh; }
+  }
+</style>
+
+<script>
+  import { StateVector } from '../scripts/qsim.js';
+  import { makeCamera, fitCanvas, drawSphere, drawStateArrow, paletteFromCSS } from '../scripts/bloch.js';
+  import { attachScrollScene, prefersReducedMotion, lerp, easeInOut } from '../scripts/scrolly.js';
+
+  function init() {
+    const root = document.querySelector('[data-bloch-flatten]');
+    if (!root) return;
+    if (root._cleanup) root._cleanup();
+
+    const scene = root.querySelector('[data-flatten-scene]');
+    const canvas = root.querySelector('.flatten-canvas');
+    const ctx = canvas.getContext('2d');
+    const flattenIn = root.querySelector('#fl-flatten');
+    const thetaIn = root.querySelector('#fl-theta');
+    const thetaVal = root.querySelector('#fl-theta-val');
+    const hint = root.querySelector('#fl-hint');
+    const bar0 = root.querySelector('#fl-bar0');
+    const bar1 = root.querySelector('#fl-bar1');
+    const p0El = root.querySelector('#fl-p0');
+    const p1El = root.querySelector('#fl-p1');
+    const shotsEl = root.querySelector('#fl-shots');
+
+    const cam = makeCamera();
+    const palette = paletteFromCSS();
+    const reduced = prefersReducedMotion();
+    let dims = null;
+    let progress = 0;
+
+    if (!reduced) scene.classList.add('scroll-linked');
+    else hint.textContent = 'Drag the slider to flatten';
+
+    function render() {
+      if (!dims) return;
+      const { w, h } = dims;
+      const flat = easeInOut(progress);
+      cam.yaw = lerp(-0.62, 0, flat);
+      cam.pitch = lerp(0.5, 0, flat);
+
+      const theta = (+thetaIn.value) * Math.PI / 180;
+      const v = { x: Math.sin(theta), y: 0, z: Math.cos(theta) }; // state on the slice
+
+      drawSphere(ctx, cam, w, h, palette, { flatten: flat });
+      drawStateArrow(ctx, cam, w, h, v, palette);
+
+      const sv = new StateVector(1);
+      sv.applyRY(0, theta);
+      const probs = sv.probabilities();
+      const p0 = probs[0], p1 = probs[1];
+      bar0.style.width = (p0 * 100).toFixed(1) + '%';
+      bar1.style.width = (p1 * 100).toFixed(1) + '%';
+      p0El.textContent = p0.toFixed(2);
+      p1El.textContent = p1.toFixed(2);
+      thetaVal.textContent = thetaIn.value + '°';
+
+      const counts = sv.sampleCounts(200, Math.random);
+      shotsEl.textContent = `200 shots: |0⟩ × ${counts[0]} · |1⟩ × ${counts[1]}`;
+    }
+
+    function resize() { dims = fitCanvas(canvas, ctx); render(); }
+
+    thetaIn.addEventListener('input', render);
+    flattenIn.addEventListener('input', () => { progress = (+flattenIn.value) / 100; render(); });
+    window.addEventListener('resize', resize);
+
+    let detachScene = null;
+    if (!reduced) {
+      detachScene = attachScrollScene(scene, (p) => {
+        progress = p;
+        flattenIn.value = Math.round(p * 100);
+        render();
+      });
+    }
+
+    root._cleanup = () => {
+      if (detachScene) detachScene();
+      window.removeEventListener('resize', resize);
+      thetaIn.removeEventListener('input', render);
+      root._cleanup = null;
+    };
+
+    resize();
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>

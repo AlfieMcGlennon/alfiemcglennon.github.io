@@ -26,6 +26,7 @@ math: true
 */}
 
 import QubitBloch from '../../components/QubitBloch.astro';
+import BlochFlatten from '../../components/BlochFlatten.astro';
 
 **[PROSE: Alfie]** _Opening hook, recruiter-first. Brief: one or two sentences on what a quantum computer is actually for, before any mechanism. Lead with the use, not the mystique. Then a single line placing this as the front door to the series "Quantum Processes in Weather and Climate", and that the maths and simulations here are built and checked, while the framing is yours._
 
@@ -76,7 +77,9 @@ $$
 
 and the only rotation that keeps you on the slice is $R_Y(\theta)$. Everything is now angles on a circle, with no imaginary parts to track, and the measurement statistics are just $\cos^2(\theta/2)$ and $\sin^2(\theta/2)$. This is a loan against section 1, and section 3 repays it by switching the phase back on.
 
-**Interactive (added in a later build step).** As you scroll through this section, the three dimensional sphere collapses onto its $X$-$Z$ slice: a dimension is visibly thrown away. Then a slider sweeps $\theta$ while a many-shots histogram shows the measured outcomes tracking $\cos^2(\theta/2)$ and $\sin^2(\theta/2)$. The collapse is scroll-linked because the act of flattening is the lesson; with reduced motion it becomes a button you press.
+<BlochFlatten />
+
+Scroll through the figure, or drag the flatten slider, to collapse the sphere onto its $X$-$Z$ slice: a dimension is thrown away in front of you. Sweep $\theta$ and watch the measured outcomes track $\cos^2(\theta/2)$ and $\sin^2(\theta/2)$. The collapse is tied to scrolling because the act of flattening is the lesson; with reduced motion it becomes an ordinary slider.
 
 **Common traps.**
 
