@@ -33,7 +33,7 @@ import FourierEncoder from '../../components/FourierEncoder.astro';
 
 **[PROSE: Alfie]** _Opening hook, recruiter-first. Brief: one or two sentences on what a quantum computer is actually for, before any mechanism. Lead with the use, not the mystique. Then a single line placing this as the front door to the series "Quantum Processes in Weather and Climate", and that the maths and simulations here are built and checked, while the framing is yours._
 
-This page is built around a single commitment, and it is worth stating plainly before anything moves. A quantum computer does not try every answer at once. It carries a complex number, an amplitude, for each possible outcome, and it computes by making those amplitudes add and cancel. Useful quantum algorithms are arranged interference, not parallel search. Everywhere below, the amplitudes stay on screen, with their sign and phase, until the moment a measurement squares them into probabilities. If you hold on to that one idea, the rest is geometry.
+This page is built around a single commitment, and it is worth stating plainly before anything moves. A quantum computer does not try every answer at once. It carries a complex number, an amplitude, for each possible outcome, and it computes by making those amplitudes add and cancel. Useful quantum algorithms are engineered interference, not parallel search. Everywhere below, the amplitudes stay on screen, with their sign and phase, until the moment a measurement squares them into probabilities.
 
 A note on how the page behaves. Most of the figures are interactive: you drag, you set a slider, the state responds. In two places, the collapse of the sphere in the second section and the growth of the spectrum in the fifth, the motion is tied to scrolling, because there the transition itself is the thing being taught. If your system prefers reduced motion, those two become ordinary controls you drive yourself, and nothing is lost. Every result is also stated in the text, so the page reads with the interactivity switched off.
 
@@ -53,7 +53,7 @@ $$
 (\,\langle X\rangle,\ \langle Y\rangle,\ \langle Z\rangle\,) = (\,\sin\theta\cos\phi,\ \sin\theta\sin\phi,\ \cos\theta\,).
 $$
 
-Why two angles and not one? A normalised state in $\mathbb{C}^2$ starts with four real numbers. Normalisation removes one. An overall phase factor $e^{i\gamma}$ multiplying the whole state changes nothing you can ever measure, so it removes another. Two real numbers remain: $\theta$ and $\phi$. The distinction that does the work later is this. The **global** phase $\gamma$ is a gauge freedom, invisible by construction. The **relative** phase $\phi$, the longitude, is physical. It is the second degree of freedom, and it is where interference lives.
+Why two angles and not one? A normalised state in $\mathbb{C}^2$ starts with four real numbers. Normalisation removes one. An overall phase factor $e^{i\gamma}$ multiplying the whole state changes nothing you can ever measure, so it removes another. Two real numbers remain: $\theta$ and $\phi$. The distinction that does the work later is this. The **global** phase $\gamma$ is a gauge freedom, invisible by construction. The **relative** phase $\phi$, the longitude, is physical. It is the second degree of freedom, and the interference in later sections depends on it.
 
 <QubitBloch />
 
@@ -78,7 +78,7 @@ $$
 \ket{\psi} = \cos\tfrac{\theta}{2}\,\ket{0} + \sin\tfrac{\theta}{2}\,\ket{1},
 $$
 
-and the only rotation that keeps you on the slice is $R_Y(\theta)$. Everything is now angles on a circle, with no imaginary parts to track, and the measurement statistics are just $\cos^2(\theta/2)$ and $\sin^2(\theta/2)$. This is a loan against section 1, and section 3 repays it by switching the phase back on.
+and the only single-axis Pauli rotation that keeps you on the slice is $R_Y(\theta)$. Everything is now angles on a circle, with no imaginary parts to track, and the measurement statistics are just $\cos^2(\theta/2)$ and $\sin^2(\theta/2)$. This is a loan against section 1, and section 3 repays it by switching the phase back on.
 
 <BlochFlatten />
 
@@ -159,7 +159,7 @@ Tune qubit 0's superposition and toggle the CNOT. Watch the joint distribution, 
 - *"More entanglement means more power."* Not as a rule, and not at these scales. Treat it as machinery, not magic.
 - *"These toys scale."* They do not. A state vector is exponential in the number of qubits; this is a pedagogical model with a handful of wires.
 
-The conditional point-cloud technique follows Gidney's [Visualizing 2-qubit entanglement](https://algassert.com/post/1716); the benchmark caution follows Bowles, Ahmed and Schuld, *Better than classical? The subtle art of benchmarking quantum machine learning models* (2024).
+The conditional point-cloud technique follows Gidney's [Visualizing 2-qubit entanglement](https://algassert.com/post/1716); the benchmark caution follows Bowles, Ahmed and Schuld, [Better than classical? The subtle art of benchmarking quantum machine learning models](https://arxiv.org/abs/2403.07059) (2024).
 
 ## 5. The payoff: one qubit as a tunable Fourier series
 
@@ -194,13 +194,13 @@ The result is Schuld, Sweke and Meyer, [The effect of data encoding on the expre
 
 **[PROSE: Alfie]** _On-ramp, in your voice. Brief: you have just built the exact object my research dissects, a Fourier model whose frequencies you buy with encoding and whose coefficients you fit with training, and the series applies it to atmospheric data and reports honestly. Frame the contribution precisely: variational quantum regression on reanalysis data, with the Fourier spectrum as an interpretability lens, reported with its negative results against classical baselines. That is a defensible combination in a real gap, not a new technique. Then point onward and stop._
 
-A closing word on expectations, so the series starts honestly. No published quantum machine-learning result for weather or climate shows a clear advantage over classical methods; the most careful outcomes are parity, or classical models doing better, and added entanglement frequently does not help. There is also a growing body of work showing that the quantum models which are easy to train tend to be the ones a classical method can reproduce. The interest in the work ahead is not a speed claim. It is what a Fourier-decomposable model can tell you about structure in the data, examined carefully and reported without spin.
+A closing word on expectations, so the series starts honestly. No published quantum machine-learning result for weather or climate shows a clear advantage over classical methods; the most careful outcomes are parity, or classical models doing better, and added entanglement frequently does not help. A growing body of work also argues that the quantum models which are easy to train tend to be the ones a classical method can reproduce. That is an active argument rather than a settled theorem, though the evidence is accumulating (Cerezo et al., [arXiv:2312.09121](https://arxiv.org/abs/2312.09121)). The interest in the work ahead is not a speed claim. It is what a Fourier-decomposable model can tell you about structure in the data, examined carefully and reported without spin.
 
 Continue to the [research overview](/research), where the dissertation work is described, and watch this space for the next piece in the series.
 
 ## Sources and further reading
 
-This page is partly a synthesis, so the references are part of the content. The list below is being finalised against primary sources; a few citation details (exact volume and page numbers, and the wording of direct quotations) are still being checked.
+This page is partly a synthesis, so the references are part of the content. Every arXiv identifier below has been checked against its primary source; a few of the works are preprints and are cited as such.
 
 **The Fourier picture of variational circuits.** Schuld, Sweke and Meyer (2021), [arXiv:2008.08605](https://arxiv.org/abs/2008.08605); Pérez-Salinas et al. (2020), [arXiv:1907.02085](https://arxiv.org/abs/1907.02085); Gil Vidal and Theis (2020), [arXiv:1901.11434](https://arxiv.org/abs/1901.11434); Jerbi et al. (2023), [arXiv:2110.13162](https://arxiv.org/abs/2110.13162); Barthe and Pérez-Salinas (2024), [arXiv:2311.10822](https://arxiv.org/abs/2311.10822); Schuld and Petruccione, *Machine Learning with Quantum Computers* (2nd ed., 2021).
 
@@ -208,4 +208,4 @@ This page is partly a synthesis, so the references are part of the content. The 
 
 **Teaching, done well.** Nielsen and Matuschak, [Quantum Country](https://quantum.country/qcvc); Aaronson, [Why is quantum computing so hard to explain?](https://www.quantamagazine.org/why-is-quantum-computing-so-hard-to-explain-20210608/); Gidney's [Quirk](https://algassert.com/quirk) and [2-qubit entanglement](https://algassert.com/post/1716) visualisation; PennyLane's [Fourier series demo](https://pennylane.ai/qml/demos/tutorial_expressivity_fourier_series).
 
-**The honest frontier.** Mhiri et al. (2025), [arXiv:2403.09417](https://arxiv.org/abs/2403.09417); Bowles, Ahmed and Schuld (2024), *Better than classical?*; Pastori et al. (2025), [arXiv:2502.10131](https://arxiv.org/abs/2502.10131); Sakhuja et al. (2025), [arXiv:2503.23408](https://arxiv.org/abs/2503.23408); Fellner et al. (2026), [arXiv:2504.12416](https://arxiv.org/abs/2504.12416).
+**The honest frontier.** Mhiri et al. (2025), [arXiv:2403.09417](https://arxiv.org/abs/2403.09417); Bowles, Ahmed and Schuld (2024), [arXiv:2403.07059](https://arxiv.org/abs/2403.07059); Cerezo et al. (2025), [arXiv:2312.09121](https://arxiv.org/abs/2312.09121); Schreiber, Eisert and Meyer (2023), [arXiv:2206.11740](https://arxiv.org/abs/2206.11740); Sweke et al. (2025), [arXiv:2309.11647](https://arxiv.org/abs/2309.11647); Pastori et al. (2025), [arXiv:2502.10131](https://arxiv.org/abs/2502.10131); Fellner et al. (2026), [arXiv:2504.12416](https://arxiv.org/abs/2504.12416).
