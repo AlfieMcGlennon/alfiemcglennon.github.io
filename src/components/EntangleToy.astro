@@ -1,0 +1,196 @@
+---
+// Toy 4 — topology & entanglement. Tune qubit 0's superposition with RY(theta),
+// toggle a CNOT, and watch: the joint distribution of the two qubits, the two
+// reduced Bloch spheres (which shrink to dots when the pair is entangled, the
+// "no pair of spheres can hold it" lesson), and a many-shots correlation tally.
+// Physics from qsim.js. Honesty: more entanglement is not more power.
+---
+
+<div class="ent" data-entangle>
+  <div class="ent-controls">
+    <div class="ent-ctl">
+      <label for="ent-theta">Qubit 0 superposition <span class="ent-sym">R<sub>y</sub>(&theta;)</span></label>
+      <div class="ent-row">
+        <input id="ent-theta" type="range" min="0" max="180" value="90" step="1" />
+        <output id="ent-theta-val" class="ent-val">90&deg;</output>
+      </div>
+    </div>
+    <button type="button" id="ent-cnot" class="ent-cnot active" aria-pressed="true">CNOT: on</button>
+  </div>
+
+  <pre class="ent-circuit" id="ent-circuit" aria-label="Two-qubit circuit"></pre>
+
+  <div class="ent-panels">
+    <div class="ent-joint">
+      <div class="ent-panel-title">Joint distribution</div>
+      <div class="ent-joint-bars" id="ent-joint"></div>
+      <p class="ent-shots" id="ent-shots"></p>
+    </div>
+    <div class="ent-spheres">
+      <div class="ent-panel-title">The two qubits, seen separately</div>
+      <div class="ent-sphere-row">
+        <div class="ent-sphere">
+          <canvas class="ent-canvas" id="ent-c0" role="img" aria-label="Reduced Bloch sphere of qubit 0"></canvas>
+          <div class="ent-r" id="ent-r0">|r| = 1.00</div>
+        </div>
+        <div class="ent-sphere">
+          <canvas class="ent-canvas" id="ent-c1" role="img" aria-label="Reduced Bloch sphere of qubit 1"></canvas>
+          <div class="ent-r" id="ent-r1">|r| = 1.00</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="ent-lesson" id="ent-lesson" aria-live="polite"></p>
+</div>
+
+<style>
+  .ent { --q: #4338ca; margin: 1.75rem 0; padding: 1rem; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px; }
+  .ent-controls { display: flex; align-items: flex-end; gap: 1.25rem; flex-wrap: wrap; }
+  .ent-ctl { display: flex; flex-direction: column; gap: 0.3rem; }
+  .ent-ctl label { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-muted); }
+  .ent-sym { color: var(--q); }
+  .ent-row { display: flex; align-items: center; gap: 0.6rem; }
+  .ent-row input { width: 160px; accent-color: var(--q); }
+  .ent-val { font-family: var(--font-mono); font-size: 0.82rem; color: var(--q); min-width: 3rem; }
+  .ent-cnot { font-family: var(--font-mono); font-size: 0.8rem; cursor: pointer; background: var(--bg); color: var(--ink-dim); border: 1px solid var(--rule); border-radius: 4px; padding: 0.4rem 0.7rem; }
+  .ent-cnot.active { background: var(--q); color: #fff; border-color: var(--q); }
+
+  .ent-circuit { font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.6; color: var(--ink); background: var(--bg); border: 1px solid var(--rule-soft); border-radius: 4px; padding: 0.7rem 0.85rem; margin: 0.9rem 0; overflow-x: auto; }
+
+  .ent-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .ent-panel-title { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .ent-joint-bars { display: flex; flex-direction: column; gap: 0.4rem; }
+  .ent-jrow { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-dim); }
+  .ent-jrow .ket { color: var(--ink); }
+  .ent-jbar { height: 0.6rem; background: var(--rule-soft); border-radius: 3px; overflow: hidden; }
+  .ent-jbar i { display: block; height: 100%; background: var(--teal); }
+  .ent-shots { margin: 0.6rem 0 0; font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); }
+
+  .ent-sphere-row { display: flex; gap: 0.75rem; }
+  .ent-sphere { flex: 1; display: flex; flex-direction: column; gap: 0.3rem; align-items: center; }
+  .ent-canvas { width: 100%; aspect-ratio: 1; max-width: 150px; display: block; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg-raised); }
+  .ent-r { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-muted); }
+
+  .ent-lesson { margin: 0.9rem 0 0; font-family: var(--font-serif); font-size: 0.9rem; font-style: italic; color: var(--ink-dim); line-height: 1.5; }
+
+  @media (max-width: 620px) { .ent-panels { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { StateVector } from '../scripts/qsim.js';
+  import { makeCamera, fitCanvas, drawSphere, drawStateArrow, paletteFromCSS } from '../scripts/bloch.js';
+
+  function init() {
+    const root = document.querySelector('[data-entangle]');
+    if (!root) return;
+    if (root._cleanup) root._cleanup();
+
+    const thetaIn = root.querySelector('#ent-theta');
+    const thetaVal = root.querySelector('#ent-theta-val');
+    const cnotBtn = root.querySelector('#ent-cnot');
+    const circuitEl = root.querySelector('#ent-circuit');
+    const jointEl = root.querySelector('#ent-joint');
+    const shotsEl = root.querySelector('#ent-shots');
+    const lessonEl = root.querySelector('#ent-lesson');
+    const c0 = root.querySelector('#ent-c0'), c1 = root.querySelector('#ent-c1');
+    const x0 = c0.getContext('2d'), x1 = c1.getContext('2d');
+    const r0El = root.querySelector('#ent-r0'), r1El = root.querySelector('#ent-r1');
+
+    const cam = makeCamera();
+    const palette = paletteFromCSS();
+    let cnot = true;
+    let d0 = null, d1 = null;
+
+    function buildState() {
+      const sv = new StateVector(2);
+      sv.applyRY(0, (+thetaIn.value) * Math.PI / 180);
+      if (cnot) sv.applyCNOT(0, 1);
+      return sv;
+    }
+
+    function reduced(sv, q) { return { x: sv.expectationX(q), y: sv.expectationY(q), z: sv.expectationZ(q) }; }
+    function len(v) { return Math.hypot(v.x, v.y, v.z); }
+
+    function drawMini(ctx, dims, v) {
+      if (!dims) return;
+      const { w, h } = dims;
+      drawSphere(ctx, cam, w, h, palette, { labels: false });
+      drawStateArrow(ctx, cam, w, h, v, palette);
+    }
+
+    function render() {
+      const sv = buildState();
+      const probs = sv.probabilities();
+
+      // Circuit
+      const deg = thetaIn.value;
+      const ctrl = cnot ? '●' : ' ';
+      const targ = cnot ? '⊕' : ' ';
+      circuitEl.textContent =
+        `q0  |0⟩ ──[ Ry(${deg}°) ]──${ctrl}──\n` +
+        `q1  |0⟩ ─────────────────${targ}──`;
+
+      // Joint bars (label by q0 then q1)
+      let rows = '';
+      for (let i = 0; i < 4; i++) {
+        const q0 = i & 1, q1 = (i >> 1) & 1;
+        rows += `<div class="ent-jrow"><span class="ket">|${q0}${q1}⟩</span>` +
+          `<div class="ent-jbar"><i style="width:${(probs[i] * 100).toFixed(1)}%"></i></div>` +
+          `<span>${probs[i].toFixed(2)}</span></div>`;
+      }
+      jointEl.innerHTML = rows;
+
+      const counts = sv.sampleCounts(200, Math.random);
+      shotsEl.textContent = `200 shots → 00:${counts[0]}  10:${counts[1]}  01:${counts[2]}  11:${counts[3]}`;
+
+      // Reduced spheres
+      const v0 = reduced(sv, 0), v1 = reduced(sv, 1);
+      drawMini(x0, d0, v0);
+      drawMini(x1, d1, v1);
+      r0El.textContent = '|r| = ' + len(v0).toFixed(2);
+      r1El.textContent = '|r| = ' + len(v1).toFixed(2);
+
+      thetaVal.textContent = deg + '°';
+
+      // Lesson
+      const r = len(v0);
+      if (cnot && r < 0.25) {
+        lessonEl.textContent = 'Maximally entangled: each qubit on its own is a featureless dot at the centre of its sphere, yet measuring one fixes the other. No pair of Bloch spheres can capture that. (And note: more entanglement is not automatically more computational power.)';
+      } else if (cnot && r < 0.97) {
+        lessonEl.textContent = 'Partly entangled: each reduced sphere has shrunk inwards. The information has moved into the correlation between the qubits.';
+      } else if (cnot) {
+        lessonEl.textContent = 'With qubit 0 at a pole the CNOT does nothing yet: the state is still a product. Move θ towards 90° to build entanglement.';
+      } else {
+        lessonEl.textContent = 'Product state: the two qubits are independent. Each sits on the surface of its own sphere, and measuring one tells you nothing about the other.';
+      }
+    }
+
+    function resize() {
+      d0 = fitCanvas(c0, x0);
+      d1 = fitCanvas(c1, x1);
+      render();
+    }
+
+    thetaIn.addEventListener('input', render);
+    cnotBtn.addEventListener('click', () => {
+      cnot = !cnot;
+      cnotBtn.classList.toggle('active', cnot);
+      cnotBtn.setAttribute('aria-pressed', String(cnot));
+      cnotBtn.textContent = 'CNOT: ' + (cnot ? 'on' : 'off');
+      render();
+    });
+    window.addEventListener('resize', resize);
+
+    root._cleanup = () => {
+      window.removeEventListener('resize', resize);
+      thetaIn.removeEventListener('input', render);
+      root._cleanup = null;
+    };
+
+    resize();
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>

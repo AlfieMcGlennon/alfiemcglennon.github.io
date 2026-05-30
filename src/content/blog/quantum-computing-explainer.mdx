@@ -28,6 +28,7 @@ math: true
 import QubitBloch from '../../components/QubitBloch.astro';
 import BlochFlatten from '../../components/BlochFlatten.astro';
 import RotationSim from '../../components/RotationSim.astro';
+import EntangleToy from '../../components/EntangleToy.astro';
 
 **[PROSE: Alfie]** _Opening hook, recruiter-first. Brief: one or two sentences on what a quantum computer is actually for, before any mechanism. Lead with the use, not the mystique. Then a single line placing this as the front door to the series "Quantum Processes in Weather and Climate", and that the maths and simulations here are built and checked, while the framing is yours._
 
@@ -146,7 +147,9 @@ The honest way to see entanglement is statistical. Measure one qubit, note the o
 
 One caution belongs here, not later. More entanglement is not automatically more computational power. In careful machine-learning benchmarks, removing entanglement often leaves performance as good or better, which is exactly why the payoff in the next section is built to stand on a single qubit.
 
-**Interactive (added in a later build step).** Add or remove qubits, place a CNOT, measure one wire, and watch the conditional distribution of the other as a point cloud plus a many-shots histogram. The circuit stays legible as it grows, and the qubit count stays small, because the state vector doubles in size with every wire.
+<EntangleToy />
+
+Tune qubit 0's superposition and toggle the CNOT. Watch the joint distribution, the many-shots tally, and the two reduced Bloch spheres: as the pair entangles, each qubit's own sphere shrinks towards a dot while the correlation between them grows. The state vector doubles with every wire, so the qubit count stays small on purpose.
 
 **Common traps.**
 
