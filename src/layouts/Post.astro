@@ -1,7 +1,7 @@
 ---
 import Base from './Base.astro';
 
-const { title, description, date, tags, image, project } = Astro.props;
+const { title, description, date, tags, image, project, math } = Astro.props;
 
 const formatted = new Date(date).toLocaleDateString('en-GB', {
   year: 'numeric',
@@ -23,6 +23,7 @@ const ogDescription = description;
   publishedTime={new Date(date).toISOString()}
   tags={tags}
   headline={title}
+  math={math}
 >
   <article class="page-narrow post">
     <header class="post-head">
