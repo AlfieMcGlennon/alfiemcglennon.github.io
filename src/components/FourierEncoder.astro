@@ -1,0 +1,237 @@
+---
+// Toy 5 — THE PAYOFF. A single-qubit data re-uploading model: encode x with
+// S(x)=e^{-ixZ/2}, interleave L trainable blocks, measure <Z>. The left panel is
+// f(x)=<Z>; the right panel is its measured spectrum (the same dft the test
+// suite checks) with the analytic accessible frequencies {0..L} marked. Raise L
+// by scroll or slider and the comb widens one tooth per layer. Randomising the
+// trainable weights changes the shape but not the set of frequencies: depth buys
+// bandwidth, not free coefficients. All computed by the verified qsim.js.
+---
+
+<div class="fenc" data-fourier-encoder>
+  <div class="fenc-scene" data-fourier-scene>
+    <div class="fenc-pin">
+      <div class="fenc-controls">
+        <div class="fenc-ctl">
+          <label for="fenc-L">Re-uploading layers <span class="fenc-sym">L</span></label>
+          <div class="fenc-row">
+            <input id="fenc-L" type="range" min="1" max="6" value="3" step="1" />
+            <output id="fenc-L-val" class="fenc-val">3</output>
+          </div>
+          <p class="fenc-hint" id="fenc-hint">Scroll to add layers, or drag the slider</p>
+        </div>
+        <button type="button" id="fenc-rand" class="fenc-rand">Randomise weights</button>
+      </div>
+
+      <div class="fenc-plots">
+        <div class="fenc-plot">
+          <div class="fenc-plot-title">f(x) = &lang;Z&rang;</div>
+          <canvas class="fenc-curve" role="img" aria-label="The model output f of x across one period."></canvas>
+        </div>
+        <div class="fenc-plot">
+          <div class="fenc-plot-title">Spectrum |c<sub>n</sub>|</div>
+          <canvas class="fenc-spectrum" role="img" aria-label="The measured frequency spectrum of f, with the accessible frequencies up to L marked."></canvas>
+        </div>
+      </div>
+
+      <div class="fenc-readout" id="fenc-readout" aria-live="polite"></div>
+      <p class="fenc-note">Depth buys <strong>bandwidth</strong>, not free coefficients: one qubit reaches every frequency up to L, but cannot set their sizes independently. Randomise the weights and the curve changes while the set of frequencies does not.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .fenc { --q: #4338ca; margin: 1.75rem 0; }
+  .fenc-pin { padding: 1rem; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px; }
+  .fenc-controls { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .fenc-ctl { display: flex; flex-direction: column; gap: 0.3rem; }
+  .fenc-ctl label { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-muted); }
+  .fenc-sym { color: var(--q); font-weight: 600; }
+  .fenc-row { display: flex; align-items: center; gap: 0.6rem; }
+  .fenc-row input { width: 180px; accent-color: var(--q); }
+  .fenc-val { font-family: var(--font-mono); font-size: 0.9rem; color: var(--q); min-width: 1.4rem; }
+  .fenc-hint { margin: 0.1rem 0 0; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); }
+  .fenc-rand { font-family: var(--font-mono); font-size: 0.78rem; cursor: pointer; background: var(--bg); color: var(--ink-dim); border: 1px solid var(--rule); border-radius: 4px; padding: 0.4rem 0.7rem; }
+  .fenc-rand:hover { border-color: var(--q); color: var(--q); }
+
+  .fenc-plots { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.9rem; }
+  .fenc-plot-title { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-muted); margin-bottom: 0.3rem; }
+  .fenc-curve, .fenc-spectrum { width: 100%; aspect-ratio: 1.5; display: block; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg-raised); }
+
+  .fenc-readout { margin-top: 0.8rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-dim); }
+  .fenc-readout b { color: var(--q); }
+  .fenc-readout .ok { color: var(--teal); }
+  .fenc-note { margin: 0.7rem 0 0; font-family: var(--font-serif); font-size: 0.86rem; font-style: italic; color: var(--ink-dim); line-height: 1.5; }
+  .fenc-note strong { font-style: normal; color: var(--ink); }
+
+  .fenc-scene.scroll-linked { min-height: 240vh; }
+  .fenc-scene.scroll-linked .fenc-pin { position: sticky; top: 5vh; }
+
+  @media (max-width: 620px) {
+    .fenc-plots { grid-template-columns: 1fr; }
+    .fenc-scene.scroll-linked { min-height: 300vh; }
+  }
+</style>
+
+<script>
+  import { reuploadSamples, dft } from '../scripts/qsim.js';
+  import { paletteFromCSS, fitCanvas } from '../scripts/bloch.js';
+  import { attachScrollScene, prefersReducedMotion } from '../scripts/scrolly.js';
+
+  const LMAX = 6;
+  const N = 128;     // samples over [0, 2pi)
+  const NSHOW = 9;   // spectrum bins to show (0..NSHOW)
+
+  function init() {
+    const root = document.querySelector('[data-fourier-encoder]');
+    if (!root) return;
+    if (root._cleanup) root._cleanup();
+
+    const scene = root.querySelector('[data-fourier-scene]');
+    const LIn = root.querySelector('#fenc-L');
+    const LVal = root.querySelector('#fenc-L-val');
+    const hint = root.querySelector('#fenc-hint');
+    const randBtn = root.querySelector('#fenc-rand');
+    const curve = root.querySelector('.fenc-curve');
+    const spec = root.querySelector('.fenc-spectrum');
+    const cx = curve.getContext('2d'), sx = spec.getContext('2d');
+    const readout = root.querySelector('#fenc-readout');
+
+    const palette = paletteFromCSS();
+    const reduced = prefersReducedMotion();
+    let dCurve = null, dSpec = null;
+    let pool = makePool();
+
+    if (!reduced) scene.classList.add('scroll-linked');
+    else hint.textContent = 'Drag the slider to add layers';
+
+    function makePool() {
+      const p = [];
+      for (let j = 0; j <= LMAX; j++) {
+        p.push([Math.random() * 2 * Math.PI, Math.random() * Math.PI, Math.random() * 2 * Math.PI]);
+      }
+      return p;
+    }
+
+    function drawCurve(samples) {
+      if (!dCurve) return;
+      const { w, h } = dCurve;
+      cx.fillStyle = palette.surface; cx.fillRect(0, 0, w, h);
+      const m = 18;
+      const x0 = m, x1 = w - m, midY = h / 2, amp = (h - 2 * m) / 2;
+      // baseline (f = 0)
+      cx.strokeStyle = palette.rule; cx.lineWidth = 1;
+      cx.beginPath(); cx.moveTo(x0, midY); cx.lineTo(x1, midY); cx.stroke();
+      // +/-1 guides
+      cx.strokeStyle = palette.rule; cx.globalAlpha = 0.5;
+      cx.beginPath(); cx.moveTo(x0, midY - amp); cx.lineTo(x1, midY - amp); cx.stroke();
+      cx.beginPath(); cx.moveTo(x0, midY + amp); cx.lineTo(x1, midY + amp); cx.stroke();
+      cx.globalAlpha = 1;
+      // curve
+      cx.strokeStyle = palette.accent; cx.lineWidth = 2;
+      cx.beginPath();
+      for (let k = 0; k < samples.length; k++) {
+        const sxp = x0 + (k / samples.length) * (x1 - x0);
+        const syp = midY - samples[k] * amp;
+        if (k === 0) cx.moveTo(sxp, syp); else cx.lineTo(sxp, syp);
+      }
+      cx.stroke();
+      cx.fillStyle = palette.muted;
+      cx.font = `${Math.max(9, Math.round(w * 0.03))}px ui-monospace, monospace`;
+      cx.textAlign = 'left'; cx.textBaseline = 'top';
+      cx.fillText('+1', x0 + 2, midY - amp); cx.fillText('−1', x0 + 2, midY + amp - 12);
+      cx.textAlign = 'right'; cx.fillText('x: 0 → 2π', x1, h - 14);
+    }
+
+    function drawSpectrum(mags, L) {
+      if (!dSpec) return;
+      const { w, h } = dSpec;
+      sx.fillStyle = palette.surface; sx.fillRect(0, 0, w, h);
+      const m = 20, x0 = m, x1 = w - m, base = h - m, top = m;
+      let maxMag = 0; for (let n = 0; n <= NSHOW; n++) maxMag = Math.max(maxMag, mags[n] || 0);
+      if (maxMag < 1e-9) maxMag = 1;
+      const slot = (x1 - x0) / (NSHOW + 1);
+      const bw = slot * 0.55;
+      sx.textAlign = 'center'; sx.textBaseline = 'top';
+      sx.font = `${Math.max(9, Math.round(w * 0.028))}px ui-monospace, monospace`;
+      // boundary at n = L
+      const xb = x0 + (L + 0.5) * slot;
+      sx.strokeStyle = palette.amber; sx.globalAlpha = 0.6; sx.setLineDash([3, 3]); sx.lineWidth = 1;
+      sx.beginPath(); sx.moveTo(xb, top - 4); sx.lineTo(xb, base); sx.stroke();
+      sx.setLineDash([]); sx.globalAlpha = 1;
+      for (let n = 0; n <= NSHOW; n++) {
+        const cxp = x0 + (n + 0.5) * slot;
+        const mag = mags[n] || 0;
+        const bh = (mag / maxMag) * (base - top);
+        const accessible = n <= L;
+        // predicted-accessible tick at the baseline
+        sx.fillStyle = accessible ? palette.teal : palette.rule;
+        if (bh > 0.5) sx.fillRect(cxp - bw / 2, base - bh, bw, bh);
+        // marker dot for the analytic accessible set
+        sx.globalAlpha = accessible ? 0.9 : 0.25;
+        sx.beginPath(); sx.arc(cxp, base + 8, 1.6, 0, Math.PI * 2);
+        sx.fillStyle = accessible ? palette.teal : palette.rule; sx.fill();
+        sx.globalAlpha = 1;
+        sx.fillStyle = palette.muted;
+        sx.fillText(String(n), cxp, base + 12);
+      }
+      sx.fillStyle = palette.amber; sx.textAlign = 'left';
+      sx.fillText('L = ' + L, xb + 4, top - 2);
+    }
+
+    function currentL() { return +LIn.value; }
+
+    function render() {
+      const L = currentL();
+      const params = pool.slice(0, L + 1);
+      const samples = reuploadSamples(L, params, N);
+      const D = dft(samples);
+      const mags = [];
+      for (let n = 0; n <= NSHOW; n++) mags[n] = D.mag[n];
+
+      drawCurve(samples);
+      drawSpectrum(mags, L);
+
+      LVal.textContent = String(L);
+      // Confirm the spectrum stops at L (it does, by construction of the verified engine).
+      let beyond = 0; for (let n = L + 1; n <= NSHOW; n++) beyond += mags[n];
+      const clean = beyond < 1e-6;
+      readout.innerHTML =
+        'Accessible frequencies: <b>0 … ' + L + '</b> (degree ' + L + ', ' + (3 * (L + 1)) +
+        ' trainable parameters). ' +
+        (clean ? '<span class="ok">Spectrum matches the analytic prediction.</span>'
+               : 'Spectrum leaking beyond L (unexpected).');
+    }
+
+    function resize() {
+      dCurve = fitCanvas(curve, cx);
+      dSpec = fitCanvas(spec, sx);
+      render();
+    }
+
+    LIn.addEventListener('input', render);
+    randBtn.addEventListener('click', () => { pool = makePool(); render(); });
+    window.addEventListener('resize', resize);
+
+    let detachScene = null;
+    if (!reduced) {
+      detachScene = attachScrollScene(scene, (p) => {
+        const L = 1 + Math.round(p * (LMAX - 1));
+        if (L !== currentL()) { LIn.value = String(L); render(); }
+        else { LVal.textContent = String(L); }
+      });
+    }
+
+    root._cleanup = () => {
+      if (detachScene) detachScene();
+      window.removeEventListener('resize', resize);
+      LIn.removeEventListener('input', render);
+      root._cleanup = null;
+    };
+
+    resize();
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>

@@ -29,6 +29,7 @@ import QubitBloch from '../../components/QubitBloch.astro';
 import BlochFlatten from '../../components/BlochFlatten.astro';
 import RotationSim from '../../components/RotationSim.astro';
 import EntangleToy from '../../components/EntangleToy.astro';
+import FourierEncoder from '../../components/FourierEncoder.astro';
 
 **[PROSE: Alfie]** _Opening hook, recruiter-first. Brief: one or two sentences on what a quantum computer is actually for, before any mechanism. Lead with the use, not the mystique. Then a single line placing this as the front door to the series "Quantum Processes in Weather and Climate", and that the maths and simulations here are built and checked, while the framing is yours._
 
@@ -176,7 +177,9 @@ This is the one place where the page checks itself rather than asking you to tak
 
 There is a guardrail that has to travel with this result, or the result gets oversold. A single qubit with $L$ layers reaches the full set of frequencies $\{0,\dots,L\}$, but it cannot set the corresponding coefficients freely. Controlling $K+1$ complex coefficients arbitrarily needs at least $2K+1$ real parameters, and the number of ways the circuit can build a high frequency shrinks as the frequency grows, so high-frequency coefficients are structurally small. Full coefficient control, and the universal-approximation story that comes with it, needs width: more qubits, not just more depth. The honest one-line version is that the spectrum overstates the expressivity. That caveat is not a footnote; it is the reason the framing in the next section is defensible.
 
-**Interactive (added in a later build step).** Encode $x$, set the number of re-uploading layers $L$, and see two linked panels: the function $f(x) = \langle Z\rangle$ across the input range, and its measured spectrum with the predicted integer frequencies marked. Increasing $L$ (by slider, and scroll-linked through this section) makes the comb of frequencies widen one tooth at a time. The spectrum you see is the spectrum the test verifies.
+<FourierEncoder />
+
+Encode $x$ and set the number of re-uploading layers $L$ by slider, or by scrolling through this section. The left panel is $f(x) = \langle Z\rangle$; the right panel is its measured spectrum, with the accessible integer frequencies $0$ to $L$ marked. Add a layer and the comb widens by exactly one tooth. Randomise the trainable weights and the curve changes while the set of frequencies does not. The spectrum drawn here is computed by the same simulator the test suite verifies.
 
 **Common traps.**
 
