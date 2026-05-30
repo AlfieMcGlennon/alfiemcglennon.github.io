@@ -25,6 +25,8 @@ math: true
   - British English. No em dashes. Maths in KaTeX ($...$ inline, $$...$$ display).
 */}
 
+import QubitBloch from '../../components/QubitBloch.astro';
+
 **[PROSE: Alfie]** _Opening hook, recruiter-first. Brief: one or two sentences on what a quantum computer is actually for, before any mechanism. Lead with the use, not the mystique. Then a single line placing this as the front door to the series "Quantum Processes in Weather and Climate", and that the maths and simulations here are built and checked, while the framing is yours._
 
 This page is built around a single commitment, and it is worth stating plainly before anything moves. A quantum computer does not try every answer at once. It carries a complex number, an amplitude, for each possible outcome, and it computes by making those amplitudes add and cancel. Useful quantum algorithms are arranged interference, not parallel search. Everywhere below, the amplitudes stay on screen, with their sign and phase, until the moment a measurement squares them into probabilities. If you hold on to that one idea, the rest is geometry.
@@ -49,7 +51,9 @@ $$
 
 Why two angles and not one? A normalised state in $\mathbb{C}^2$ starts with four real numbers. Normalisation removes one. An overall phase factor $e^{i\gamma}$ multiplying the whole state changes nothing you can ever measure, so it removes another. Two real numbers remain: $\theta$ and $\phi$. The distinction that does the work later is this. The **global** phase $\gamma$ is a gauge freedom, invisible by construction. The **relative** phase $\phi$, the longitude, is physical. It is the second degree of freedom, and it is where interference lives.
 
-**Interactive (added in a later build step).** A drag-to-rotate Bloch sphere. You move $\theta$ and $\phi$ independently and watch the state, its amplitudes, and the three expectation values update together. The point of the toy is to make $\phi$ feel like a real axis you can travel along, not a number attached to the side of a formula.
+<QubitBloch />
+
+Drag the sphere to rotate the view, and move $\theta$ and $\phi$ to watch the state, its amplitudes, and the three expectation values move together. The aim is to feel $\phi$ as a real axis you can travel along, not a number attached to the side of a formula.
 
 **Common traps.**
 

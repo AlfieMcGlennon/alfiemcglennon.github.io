@@ -1,0 +1,185 @@
+---
+// Toy 1 — the whole Bloch sphere. Move theta and phi independently and watch
+// the state, its amplitudes, and the three Pauli expectations move together.
+// Drag the sphere to rotate the view. Light-theme native; physics from qsim.js.
+---
+
+<div class="qbloch" data-qubit-bloch>
+  <div class="qbloch-stage">
+    <canvas class="qbloch-canvas" role="img"
+      aria-label="A Bloch sphere with the qubit state shown as an arrow from the centre. Use the theta and phi sliders below to move it."></canvas>
+    <p class="qbloch-hint">Drag to rotate the view</p>
+  </div>
+
+  <div class="qbloch-side">
+    <div class="qbloch-controls">
+      <div class="qb-control">
+        <label for="qb-theta">Polar angle <span class="qb-sym">&theta;</span> <span class="qb-note">(|0&rang; to |1&rang;)</span></label>
+        <div class="qb-row">
+          <input id="qb-theta" type="range" min="0" max="180" value="60" step="1" />
+          <output id="qb-theta-val" class="qb-val">60&deg;</output>
+        </div>
+      </div>
+      <div class="qb-control">
+        <label for="qb-phi">Phase <span class="qb-sym">&phi;</span> <span class="qb-note">(the second axis)</span></label>
+        <div class="qb-row">
+          <input id="qb-phi" type="range" min="0" max="360" value="45" step="1" />
+          <output id="qb-phi-val" class="qb-val">45&deg;</output>
+        </div>
+      </div>
+    </div>
+
+    <div class="qbloch-readout" id="qb-readout" aria-live="polite">
+      <div class="qb-state" id="qb-state"></div>
+      <div class="qb-expect" id="qb-expect"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .qbloch {
+    --q: #4338ca;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 1.25rem;
+    align-items: center;
+    margin: 1.75rem 0;
+    padding: 1rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+  }
+  .qbloch-stage { display: flex; flex-direction: column; gap: 0.4rem; }
+  .qbloch-canvas {
+    width: 100%;
+    aspect-ratio: 1;
+    display: block;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--bg-raised);
+    cursor: grab;
+    touch-action: none;
+  }
+  .qbloch-canvas:active { cursor: grabbing; }
+  .qbloch-hint {
+    margin: 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+  }
+
+  .qbloch-side { display: flex; flex-direction: column; gap: 1rem; }
+  .qb-control { display: flex; flex-direction: column; gap: 0.35rem; }
+  .qb-control label {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.01em;
+  }
+  .qb-sym { color: var(--q); font-weight: 600; }
+  .qb-note { color: var(--ink-faint); }
+  .qb-row { display: flex; align-items: center; gap: 0.6rem; }
+  .qb-row input[type="range"] { flex: 1; accent-color: var(--q); }
+  .qb-val {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--q);
+    min-width: 3.2rem;
+    text-align: right;
+  }
+
+  .qbloch-readout {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    background: var(--bg);
+    border: 1px solid var(--rule-soft);
+    border-radius: 4px;
+    padding: 0.7rem 0.85rem;
+  }
+  .qb-state { margin-bottom: 0.5rem; color: var(--ink); }
+  .qb-state b { color: var(--q); font-weight: 600; }
+  .qb-expect span { display: inline-block; min-width: 5.4rem; }
+  .qb-expect b { color: var(--teal); font-weight: 600; }
+
+  @media (max-width: 620px) {
+    .qbloch { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  import { StateVector, blochVector } from '../scripts/qsim.js';
+  import { makeCamera, fitCanvas, attachDrag, drawSphere, drawStateArrow, paletteFromCSS } from '../scripts/bloch.js';
+
+  function init() {
+    const root = document.querySelector('[data-qubit-bloch]');
+    if (!root) return;
+    if (root._cleanup) root._cleanup();
+
+    const canvas = root.querySelector('.qbloch-canvas');
+    const ctx = canvas.getContext('2d');
+    const thetaIn = root.querySelector('#qb-theta');
+    const phiIn = root.querySelector('#qb-phi');
+    const thetaVal = root.querySelector('#qb-theta-val');
+    const phiVal = root.querySelector('#qb-phi-val');
+    const stateEl = root.querySelector('#qb-state');
+    const expectEl = root.querySelector('#qb-expect');
+
+    const cam = makeCamera();
+    const palette = paletteFromCSS();
+    let dims = null;
+
+    const fmt = (x) => (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(2);
+
+    function render() {
+      if (!dims) return;
+      const { w, h } = dims;
+      const theta = (+thetaIn.value) * Math.PI / 180;
+      const phi = (+phiIn.value) * Math.PI / 180;
+
+      const sv = new StateVector(1);
+      sv.applyRY(0, theta);
+      sv.applyRZ(0, phi);
+      const v = blochVector(sv);
+
+      drawSphere(ctx, cam, w, h, palette);
+      drawStateArrow(ctx, cam, w, h, v, palette, { guides: true });
+
+      const a = Math.cos(theta / 2);
+      const bMag = Math.sin(theta / 2);
+      const bRe = bMag * Math.cos(phi);
+      const bIm = bMag * Math.sin(phi);
+      thetaVal.textContent = thetaIn.value + '°';
+      phiVal.textContent = phiIn.value + '°';
+      stateEl.innerHTML =
+        '|ψ⟩ = <b>' + a.toFixed(3) + '</b>|0⟩ + <b>' +
+        '(' + bRe.toFixed(3) + (bIm >= 0 ? ' + ' : ' − ') + Math.abs(bIm).toFixed(3) + 'i)</b>|1⟩';
+      expectEl.innerHTML =
+        '<span>⟨X⟩ = <b>' + fmt(v.x) + '</b></span>' +
+        '<span>⟨Y⟩ = <b>' + fmt(v.y) + '</b></span>' +
+        '<span>⟨Z⟩ = <b>' + fmt(v.z) + '</b></span>';
+    }
+
+    function resize() { dims = fitCanvas(canvas, ctx); render(); }
+
+    thetaIn.addEventListener('input', render);
+    phiIn.addEventListener('input', render);
+    const detachDrag = attachDrag(canvas, cam, render);
+    window.addEventListener('resize', resize);
+
+    root._cleanup = () => {
+      detachDrag();
+      window.removeEventListener('resize', resize);
+      thetaIn.removeEventListener('input', render);
+      phiIn.removeEventListener('input', render);
+      root._cleanup = null;
+    };
+
+    resize();
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>
