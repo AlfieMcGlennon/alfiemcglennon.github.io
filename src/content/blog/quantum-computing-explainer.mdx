@@ -49,7 +49,7 @@ $$
 \ket{\psi} = \cos\tfrac{\theta}{2}\,\ket{0} + e^{i\phi}\sin\tfrac{\theta}{2}\,\ket{1}.
 $$
 
-The poles are the classical bits: $\theta = 0$ is $\ket{0}$, $\theta = \pi$ is $\ket{1}$. Everywhere else is a genuine superposition. The Cartesian coordinates of the point are not decoration; they are exactly the quantities you can measure, the expectation values of the three Pauli observables:
+The poles are the classical bits: $\theta = 0$ is $\ket{0}$, $\theta = \pi$ is $\ket{1}$. Halfway down, at $\theta = \pi/2$ and $\phi = 0$, you are at $\ket{+}$, the equal superposition sitting on the equator facing you. Everywhere else is a genuine superposition. The Cartesian coordinates of the point are not decoration; they are exactly the quantities you can measure, the expectation values of the three Pauli observables:
 
 $$
 (\,\langle X\rangle,\ \langle Y\rangle,\ \langle Z\rangle\,) = (\,\sin\theta\cos\phi,\ \sin\theta\sin\phi,\ \cos\theta\,).
@@ -103,13 +103,13 @@ R_Y(t) = \begin{pmatrix} \cos\tfrac{t}{2} & -\sin\tfrac{t}{2} \\[2pt] \sin\tfrac
 R_Z(t) = \begin{pmatrix} e^{-i t/2} & 0 \\[2pt] 0 & e^{+i t/2} \end{pmatrix}.
 $$
 
-Now the lesson the section exists for. The measured value of $Z$ is
+Now the lesson the section exists for, and it is worth slowing down for: of the three rotations, the one that does its work exactly where you cannot directly see it is $R_Z$. The measured value of $Z$ is
 
 $$
 \langle Z\rangle = |\alpha|^2 - |\beta|^2 = \cos\theta,
 $$
 
-which depends on $\theta$ alone. It does not contain $\phi$. So $R_Z(\lambda)$, which sends $\phi \to \phi + \lambda$, slides the state around a line of latitude and changes $\langle X\rangle$ and $\langle Y\rangle$, while leaving $\langle Z\rangle$ and the entire $Z$-basis outcome distribution untouched. In the computational basis, $R_Z$ is invisible.
+which depends on $\theta$ alone. It does not contain $\phi$. You might reasonably ask where the phase went; it has gone nowhere, it simply leaves no mark on a $Z$ measurement. So $R_Z(\lambda)$, which sends $\phi \to \phi + \lambda$, slides the state around a line of latitude and changes $\langle X\rangle$ and $\langle Y\rangle$, while leaving $\langle Z\rangle$ and the entire $Z$-basis outcome distribution untouched. In the computational basis, $R_Z$ is invisible.
 
 The phase is not gone; it is waiting for a change of basis. A Hadamard is exactly the rotation between the $Z$ basis and the $X$ basis, since $H Z H = X$. Apply $R_Z(\phi)$ to $\ket{+}$ and then $H$, and the $Z$-readout sweeps deterministically from $\ket{0}$ to $\ket{1}$ as $\phi$ runs from $0$ to $\pi$:
 
@@ -167,13 +167,13 @@ The conditional point-cloud technique follows Gidney's [Visualizing 2-qubit enta
 
 **[PROSE: Alfie]** _Bridge. Brief: this is the destination and the on-ramp to your research. It pays back the phase axis from section 1 and the hidden-phase lesson from section 3, and it does so entirely on one qubit. Keep the tone earned, not triumphant._
 
-Here is the move that connects all of the above to machine learning. Take one qubit. Encode a single real input $x$ by a rotation whose generator is the Pauli $Z$, $S(x) = e^{-i x Z / 2}$, and interleave $L$ copies of that encoding with trainable single-qubit rotations $W$. This repetition of the input is called data re-uploading. Measure $\langle Z\rangle$ at the end and call the result $f(x)$. The claim is that this circuit is a Fourier series in $x$:
+Here is the move that connects all of the above to machine learning. Take one qubit. Encode a single real input $x$ by a rotation whose generator is the Pauli $Z$, $S(x) = e^{-i x Z / 2}$, and interleave $L$ copies of that encoding with trainable single-qubit rotations $W$. This repetition of the input is called data re-uploading. Measure $\langle Z\rangle$ at the end and call the result $f(x)$. Each encoding contributes a phase that turns at a fixed rate in $x$, and adding up turning phases is exactly what a Fourier series does, so it should be less of a shock that the whole circuit collapses to one:
 
 $$
 f(x) = \sum_{n=-L}^{L} c_n\, e^{i n x}, \qquad c_{-n} = c_n^{*}.
 $$
 
-Three things make this the whole story in miniature. First, the accessible frequencies are the integers $\{0, 1, \dots, L\}$. They come from differences of sums of the encoding generator's eigenvalues, which for $Z/2$ are $\pm\tfrac{1}{2}$, so the gap is $1$ and that gap is the base frequency. Second, each extra re-uploading layer adds exactly one new top frequency: going from $L$ to $L+1$ widens the spectrum from $\{-L,\dots,L\}$ to $\{-(L+1),\dots,L+1\}$ and nothing else. Third, the encoding sets the frequencies, and the trainable gates set the coefficients $c_n$. Depth buys bandwidth; training shapes what you do with it.
+Three things make this the whole story in miniature. First, the accessible frequencies are the integers $\{0, 1, \dots, L\}$. Concretely, each $Z$-encoding can add or subtract $\tfrac{1}{2}$, so any path through the layers lands on a whole number, and neighbouring whole numbers sit one apart. Said generally, they come from differences of sums of the encoding generator's eigenvalues, which for $Z/2$ are $\pm\tfrac{1}{2}$, so the gap is $1$ and that gap is the base frequency. Second, each extra re-uploading layer adds exactly one new top frequency: going from $L$ to $L+1$ widens the spectrum from $\{-L,\dots,L\}$ to $\{-(L+1),\dots,L+1\}$ and nothing else. Third, the encoding sets the frequencies, and the trainable gates set the coefficients $c_n$. Depth buys bandwidth; training shapes what you do with it.
 
 This is the one place where the page checks itself rather than asking you to take a derivation on faith. The toy below computes $f(x)$ from the same simulator the earlier toys use, takes its discrete Fourier transform, and overlays the frequencies the theory predicts. The same circuit is also checked in a small test that runs outside the page, where the measured spectrum is confirmed to sit exactly on the integers $0$ to $L$, the reality condition $c_{-n} = c_n^{*}$ holds, and adding a layer adds precisely one tone. If the picture and the prediction ever disagreed, that would be a bug, and you would see it.
 
