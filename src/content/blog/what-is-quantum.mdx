@@ -1,6 +1,6 @@
 ---
 title: "Quantum: What Is It, and Why Is Everyone Talking About It?"
-description: "No hype, no equations, and no 'tries every answer at once'. What a quantum computer is actually for, what a qubit really does, why measurement is the catch, and how it could ever help. My honest notes as I learn it, with a couple of things to play with."
+description: "No hype, no equations, and no 'tries every answer at once'. What a quantum computer is actually for, what a qubit really does, why measurement is the catch, and how it could ever help. The plain-English way in to a deeper write-up, with a couple of things to play with."
 date: 2026-05-31
 project: "quantum-ml"
 accent: "#4338ca"
@@ -13,9 +13,10 @@ math: false
 {/*
   Companion / front door to "Quantum Computing from First Principles" (the deep piece).
   Conventions:
-  - POSITIONING: Alfie documenting his OWN learning of quantum (climate/ML background, learning
-    it for the series), honest about not being an expert, and curating the resources that helped
-    him. Not an authoritative expert explainer; persona stays humble and first-person.
+  - POSITIONING: Alfie is a climate/ML researcher who uses quantum ML. This is the deliberately-gentle
+    plain-English COMPANION to the rigorous deep piece (same author, two registers) — competent and
+    generous, NOT self-deprecating. Honest about the FIELD (early, narrow, no clear advantage), not
+    about his own competence. Do NOT say "I am not an expert" (it undercuts the deep piece).
   - **[PROSE: Alfie ...]** marks voice prose. The expository middle (sections 3 and 4)
     is drafted to keep; the hook / why-now / section-5 framing / close carry a PROVISIONAL
     draft clearly marked for Alfie to replace in his voice.
@@ -34,7 +35,7 @@ import TwoWaves from '../../components/TwoWaves.astro';
 
 **[PROSE: Alfie — provisional draft, replace in your voice]**
 
-I work in climate and machine learning, and I have been teaching myself quantum computing on the side, partly because it keeps turning up near my research and partly because the headlines made me curious. This is not an expert's explainer. It is me writing down the handful of ideas that finally made it click, in plain language, and pointing you to the people who explain it far better than I can. If you keep seeing "quantum" in headlines and want an honest, jargon-light place to start, this is roughly the page I wish I had found first. I have stuck to what I am fairly sure of and flagged where I am still hazy. And one promise: you will not read "tries every answer at once" here, except to explain why it is the thing almost everyone, me included at first, gets wrong.
+I work in climate and machine learning, and quantum computing keeps coming up near my research, so I have spent a fair while getting to grips with it. This is the plain-English version I wished existed when I started: the few ideas that make everything else fall into place, and the resources that helped me most. There is a companion piece that goes properly into the machinery; this is the gentle way in. I have kept it honest, which here mostly means refusing the lines you have probably already heard, the first being that a quantum computer "tries every answer at once".
 
 So, what is a quantum computer actually for? Not a faster laptop. It is a different machine that should one day be good at a short, specific list of problems, simulating molecules and materials, some kinds of optimisation, and, more speculatively, parts of machine learning, and no better than a pocket calculator at most of what you do all day. The interesting question was never "how fast". It is "good at what".
 
@@ -83,7 +84,7 @@ Set a tilt, then look once: you get a single 0 or 1. Look a hundred times and th
 
 **[PROSE: Alfie — provisional draft, replace in your voice]**
 
-Now the part I got most wrong at first. The tempting story is that the machine quietly tries every answer at once and hands you the winner. From the last section you can already see the hole in it: if the qubits were just a blur over all possible answers and you looked, you would get one of them at random, no better than a guess, and you could have saved a great deal of money.
+Now the part almost everyone gets wrong. The tempting story is that the machine quietly tries every answer at once and hands you the winner. From the last section you can already see the hole in it: if the qubits were just a blur over all possible answers and you looked, you would get one of them at random, no better than a guess, and you could have saved a great deal of money.
 
 The real trick uses the arrow's hidden sideways setting from section 3. A quantum computation can reach the same answer by several different routes at once. Each route carries one of those sideways settings, like the crest or trough of a wave, and crests and troughs can add up or cancel out. You arrange things so the routes to the *wrong* answers arrive out of step and flatten each other to nothing, the way two sound waves can cancel to silence, while the routes to the *right* answer line up and reinforce. Then, when you look, the right answer is overwhelmingly the one you get. The slider below is the whole idea in miniature: two contributions can line up and add, or oppose and vanish.
 
@@ -95,9 +96,9 @@ Cancelling wrong answers is the thing an ordinary computer cannot easily do, and
 
 **[PROSE: Alfie — provisional draft, replace in your voice]**
 
-That is about as far as I would confidently take it at this level: a qubit is a direction you set, looking forces an answer, and the cleverness is in cancelling the wrong ones. What I have skipped is what the "direction" really is, how you arrange the cancellation on purpose, what happens when qubits are linked together, and the famous algorithms that made everyone pay attention.
+That is the honest core at this level: a qubit is a direction you set, looking forces an answer, and the cleverness is in cancelling the wrong ones. What this gentle version leaves out is what the "direction" really is, how you arrange the cancellation on purpose, what happens when qubits are linked together, and the famous algorithms that made everyone pay attention.
 
-That is the next post, and the start of a short series I am writing as I learn, so it will grow. If the arrow and the cancelling made sense, you already have the honest core; the [deep version](/writing/quantum-computing-explainer/) adds the actual gears.
+That is what the companion piece is for, and it is the start of a short series. If the arrow and the cancelling made sense, you already have the honest core; the [deep version](/writing/quantum-computing-explainer/) takes it properly from here.
 
 ## The resources that actually helped me
 
