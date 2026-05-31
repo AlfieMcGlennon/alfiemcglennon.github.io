@@ -1,0 +1,104 @@
+---
+title: "What Is a Quantum Computer? An Honest, Plain-English Introduction"
+description: "No hype, no maths, and no 'tries every answer at once'. What a quantum computer is actually for, what a qubit really does, why measurement is the catch, and how it could ever help. In plain English, with a couple of things to play with."
+date: 2026-05-31
+project: "quantum-ml"
+accent: "#4338ca"
+tags: ["quantum-computing", "explainer", "beginner", "interactive"]
+image: "/images/quantum-intro/og-card.png"
+draft: true
+math: false
+---
+
+{/*
+  Companion / front door to "Quantum Computing from First Principles" (the deep piece).
+  Conventions:
+  - **[PROSE: Alfie ...]** marks voice prose. The expository middle (sections 3 and 4)
+    is drafted to keep; the hook / why-now / section-5 framing / close carry a PROVISIONAL
+    draft clearly marked for Alfie to replace in his voice.
+  - No maths, no em dashes, British English. No '$' (math rendering is off for this post).
+  - Toys reuse the shared qsim.js + bloch.js core via the thin QubitArrow component.
+*/}
+
+import QubitArrow from '../../components/QubitArrow.astro';
+import TwoWaves from '../../components/TwoWaves.astro';
+
+## 1. What is a quantum computer actually for?
+
+**[PROSE: Alfie — provisional draft, replace in your voice]**
+
+Forget "faster computer". A quantum computer is a different kind of machine, built to be good at a short list of hard problems: simulating molecules and materials, certain kinds of optimisation, and parts of machine learning. At almost everything else, including the things your laptop does all day, it is no better, and often much worse. The interesting question was never "how fast". It is "good at what".
+
+This is the wide, gentle introduction. No maths, no jargon you have not met, and a couple of things you can play with. If you finish it you should be able to explain a qubit to a colleague without saying anything that is secretly wrong. If you then want the actual machinery, the [companion piece](/writing/quantum-computing-explainer/) is right next door.
+
+One promise up front: you will not read the phrase "tries every answer at once" here, except to explain why it is the thing most people get wrong.
+
+## 2. Why is everyone suddenly talking about it?
+
+**[PROSE: Alfie — provisional draft, replace in your voice]**
+
+Three real things happened at roughly the same time, and each one comes with a caveat worth keeping.
+
+First, a genuine milestone. In late 2024, Google's Willow chip showed error correction working "below threshold" for the first time: adding more of the error-prone physical parts made the encoded result *less* error-prone, not more. That had been the field's stated goal since the 1990s. The caveat is that Google itself says a genuinely useful machine still needs improvements of many orders of magnitude. A marker on a long road, not the destination.
+
+Second, a steady trend. The reliability of the basic operations has climbed over years, from coin-flip unreliable to better than 99.9% in the best labs. No single date attached, just a line going the right way.
+
+Third, a wall of money. Investment into quantum start-ups reached around 12.6 billion dollars in a single recent year, several times the year before, with governments adding billions more. The caveat is the important one: money measures belief, not capability.
+
+So the headlines make sense. But the machines today are still small and noisy, the genuinely useful applications are not here yet, and the loudest claims tend to be the ones to distrust.
+
+## 3. What is a qubit?
+
+A normal bit is a switch: it is either 0 or 1. A qubit is better pictured as an **arrow you can tilt**. Point it straight up and it means 0. Point it straight down and it means 1. The interesting part is everywhere in between: the arrow can point at any angle, and where you aim it sets the *odds* of getting 0 or 1 when you eventually look. Near the top, you will almost always get 0. Pointing sideways, it is roughly a coin toss.
+
+That is the honest whole of it. A qubit is a direction you have chosen.
+
+<QubitArrow />
+
+Tilt the arrow and read off the odds. It is worth pausing on what this picture is *not*. You will often hear that a qubit is "0 and 1 at the same time". Taken literally that is the wrong words: the arrow is in one definite direction, you simply cannot capture that direction with the single word "0" or "1". It is not secretly storing both answers for you to read off later, and a string of qubits is not quietly holding every combination at once. Where the arrow points is real and specific. What you can *do* with it is the subject of the next two sections.
+
+## 4. How do you get an answer out?
+
+Here is the catch that makes quantum computing hard, and the single most counterintuitive thing for a newcomer. You cannot read the arrow's direction. The only thing you are allowed to do is **look**, and looking forces the qubit to answer with a plain 0 or 1, with odds set by the tilt. The moment it answers, the direction is gone. You cannot peek again to learn more about where it had been pointing.
+
+So a single look gives you one bit and destroys the rest. To see the odds the tilt was hiding, you have to prepare the same arrow again and again and look each time.
+
+<QubitArrow measure />
+
+Set a tilt, then look once: you get a single 0 or 1. Look a hundred times and the tally settles towards the odds the arrow was holding. The tilt sets the odds; each look spends them on one answer; only many looks reveal them. Hold on to "looking is destructive", because it is exactly why the obvious idea in the next section does not work.
+
+## 5. So how could it ever help?
+
+**[PROSE: Alfie — provisional draft, replace in your voice]**
+
+Now the part everyone gets wrong. The tempting story is that the machine quietly tries every answer at once and hands you the winner. From the last section you can already see the hole in it: if the qubits were just a blur over all possible answers and you looked, you would get one of them at random, no better than a guess, and you could have saved a great deal of money.
+
+The real trick is more interesting. You arrange the computation so that the paths leading to the *wrong* answers cancel each other out, while the paths leading to the *right* answer reinforce, like noise-cancelling headphones aimed at wrong answers. Then, when you finally look, the right answer is overwhelmingly the one you get. The slider below is the whole idea in miniature: two contributions can line up and add, or oppose and vanish.
+
+<TwoWaves />
+
+Cancelling wrong answers is the thing an ordinary computer cannot easily do, and arranging it on purpose is the actual craft of quantum computing. It only pays off for specially structured problems: simulating quantum systems like molecules and materials, some kinds of optimisation, and parts of machine learning. For most tasks there is no advantage at all, and even where there might be, it is early days.
+
+## 6. Want the actual machinery?
+
+**[PROSE: Alfie — provisional draft, replace in your voice]**
+
+That is the honest skeleton: a qubit is a direction you set, looking forces an answer, and the cleverness is in cancelling the wrong ones. What we skipped is what the "direction" really is, how you arrange the cancellation on purpose, what happens when qubits are linked together, and the famous algorithms that made everyone pay attention.
+
+That is the next post, and the start of a short series. If the arrow and the cancelling made sense, you already have the honest core. The [deep version](/writing/quantum-computing-explainer/) adds the actual gears.
+
+## Go deeper
+
+The natural next step is the companion piece, [Quantum Computing from First Principles](/writing/quantum-computing-explainer/), which builds the same ideas properly. If you want a few other honest starting points first, this is a short, beginner-friendly shelf.
+
+**Watch**
+
+- [Quantum Computing in 5 Levels of Difficulty](https://www.youtube.com/watch?v=OWJCfOvochA) (WIRED, with Talia Gershon of IBM). A good first five minutes: a real researcher, an honest spinning-coin prop, and the difficulty dialled up level by level.
+- [What makes quantum computers SO powerful?](https://www.youtube.com/watch?v=-UrdExQW0cs) (Veritasium). Good for *seeing* the real mechanism, and it centres interference rather than "trying everything at once".
+- [Don't fall for quantum hype](https://www.youtube.com/watch?v=b-aGIvUomTA) (Sabine Hossenfelder). A reality check if the headlines have been getting to you, without dismissing the science.
+
+**Read**
+
+- [Why Is Quantum Computing So Hard to Explain?](https://www.quantamagazine.org/why-is-quantum-computing-so-hard-to-explain-20210608/) (Scott Aaronson, Quanta). The one to read if you read one: why "0 and 1 at once" misleads, and what is actually going on.
+- [What is Superposition?](https://www.quera.com/glossary/superposition) (QuEra). A short, candid definition that refuses the "0 and 1 at once" line.
+- [Quantum Computing for the Very Curious](https://quantum.country/qcvc) (Nielsen and Matuschak). A heavier, rewarding read that treats a qubit as an arrow and never resorts to the myth.

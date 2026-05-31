@@ -1,0 +1,108 @@
+---
+// Section 5 interference toy. One idea only: two contributions can line up and
+// add into a bigger wave (reinforce = the right answer) or oppose and flatten to
+// nothing (cancel = a wrong answer). One slider. No phase numbers, no frequency
+// control, no axes. Its default rendered state is a sensible static figure
+// (reinforcing), so it doubles as the no-JS / OG / print fallback. Reuses the
+// generic canvas helpers from bloch.js; no quantum simulation needed.
+---
+
+<div class="twowaves" data-two-waves>
+  <canvas class="tw-canvas" role="img"
+    aria-label="Two waves added together. Slide from lined up, where they reinforce into a bigger wave, to opposed, where they cancel to almost nothing."></canvas>
+  <div class="tw-controls">
+    <span class="tw-end">lined up</span>
+    <input class="tw-slider" type="range" min="0" max="100" value="12" step="1" aria-label="Slide the two waves from lined up to opposed" />
+    <span class="tw-end">opposed</span>
+  </div>
+  <p class="tw-status" aria-live="polite"></p>
+</div>
+
+<style>
+  .twowaves { --q: #4338ca; margin: 1.75rem 0; padding: 1rem; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px; }
+  .tw-canvas { width: 100%; aspect-ratio: 2.4; display: block; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg-raised); }
+  .tw-controls { display: flex; align-items: center; gap: 0.7rem; margin-top: 0.7rem; }
+  .tw-controls .tw-slider { flex: 1; accent-color: var(--q); }
+  .tw-end { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); white-space: nowrap; }
+  .tw-status { margin: 0.6rem 0 0; font-family: var(--font-serif); font-size: 0.95rem; font-style: italic; color: var(--ink-dim); line-height: 1.45; min-height: 1.4rem; }
+  .tw-status b { font-style: normal; font-weight: 600; }
+</style>
+
+<script>
+  import { paletteFromCSS, fitCanvas } from '../scripts/bloch.js';
+
+  function initOne(root) {
+    if (root._cleanup) root._cleanup();
+    const canvas = root.querySelector('.tw-canvas');
+    const ctx = canvas.getContext('2d');
+    const slider = root.querySelector('.tw-slider');
+    const statusEl = root.querySelector('.tw-status');
+    const palette = paletteFromCSS();
+    let dims = null;
+
+    function draw() {
+      if (!dims) return;
+      const { w, h } = dims;
+      ctx.fillStyle = palette.surface;
+      ctx.fillRect(0, 0, w, h);
+      const m = 18, x0 = m, x1 = w - m, mid = h / 2;
+      const A = (h / 2 - m) * 0.42;
+      const k = (Math.PI * 2 * 2.5) / (x1 - x0);
+      const offset = (+slider.value) / 100 * Math.PI;
+
+      const stroke = (fn) => {
+        ctx.beginPath();
+        for (let x = x0; x <= x1; x++) {
+          const y = mid - fn(x);
+          if (x === x0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      };
+
+      // Faint centre line.
+      ctx.strokeStyle = palette.rule; ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
+      ctx.beginPath(); ctx.moveTo(x0, mid); ctx.lineTo(x1, mid); ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      // The two contributions, faint.
+      ctx.strokeStyle = palette.muted; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.45;
+      stroke((x) => A * Math.sin(k * (x - x0)));
+      stroke((x) => A * Math.sin(k * (x - x0) + offset));
+      ctx.globalAlpha = 1;
+
+      // Their sum, bold.
+      const ampSum = 2 * Math.cos(offset / 2);
+      ctx.strokeStyle = ampSum < 0.5 ? palette.muted : palette.accent;
+      ctx.lineWidth = 2.6;
+      stroke((x) => A * Math.sin(k * (x - x0)) + A * Math.sin(k * (x - x0) + offset));
+
+      if (ampSum > 1.4) {
+        statusEl.innerHTML = 'The two line up and add into a <b>bigger</b> wave. They <b>reinforce</b>: this is the right answer.';
+      } else if (ampSum < 0.5) {
+        statusEl.innerHTML = 'The two are opposed and flatten to almost <b>nothing</b>. They <b>cancel</b>: this is a wrong answer.';
+      } else {
+        statusEl.innerHTML = 'As they slide out of step, the combined wave shrinks: part reinforcing, part cancelling.';
+      }
+    }
+
+    function resize() { dims = fitCanvas(canvas, ctx); draw(); }
+    const onInput = () => draw();
+    slider.addEventListener('input', onInput);
+    window.addEventListener('resize', resize);
+
+    root._cleanup = () => {
+      slider.removeEventListener('input', onInput);
+      window.removeEventListener('resize', resize);
+      root._cleanup = null;
+    };
+
+    resize();
+  }
+
+  function initAll() {
+    document.querySelectorAll('[data-two-waves]').forEach(initOne);
+  }
+
+  initAll();
+  document.addEventListener('astro:after-swap', initAll);
+</script>

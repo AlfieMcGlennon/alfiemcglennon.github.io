@@ -1,0 +1,187 @@
+---
+// Stripped "qubit arrow" for the beginner intro post. Reuses the shared,
+// verified core (qsim.js for the state/odds, bloch.js for the drawing) so any
+// fix propagates to both posts; the deep-piece components are left untouched.
+// theta only: no phase axis, no expectation bars. Used twice on the page:
+//   <QubitArrow />          -> section 3 (tilt -> odds)
+//   <QubitArrow measure />  -> section 4 (tilt -> odds -> look once / look 100x)
+// Because it appears more than once, everything is scoped to each root element
+// (no global ids) and every instance is initialised.
+const { measure = false } = Astro.props;
+---
+
+<div class="qarrow" data-qubit-arrow data-measure={measure ? '1' : '0'}>
+  <div class="qa-grid">
+    <div class="qa-stage">
+      <canvas class="qa-canvas" role="img"
+        aria-label="A ball with an arrow you can tilt between 0 at the top and 1 at the bottom."></canvas>
+      <p class="qa-hint">Drag to look around &middot; use the slider to tilt the arrow</p>
+    </div>
+
+    <div class="qa-side">
+      <label class="qa-label">
+        Tilt the arrow
+        <span class="qa-row">
+          <input class="qa-theta" type="range" min="0" max="180" value="50" step="1" />
+          <output class="qa-theta-val"></output>
+        </span>
+      </label>
+      <div class="qa-poles"><span>|0&rang; at the top</span><span>|1&rang; at the bottom</span></div>
+
+      <p class="qa-odds" aria-live="polite"></p>
+
+      {measure && (
+        <div class="qa-measure">
+          <div class="qa-bars">
+            <div class="qa-bar-row"><span>0</span><div class="qa-bar"><i class="qa-bar0"></i></div><span class="qa-p0"></span></div>
+            <div class="qa-bar-row"><span>1</span><div class="qa-bar"><i class="qa-bar1"></i></div><span class="qa-p1"></span></div>
+          </div>
+          <div class="qa-btns">
+            <button type="button" class="qa-once">Look once</button>
+            <button type="button" class="qa-many">Look 100&times;</button>
+          </div>
+          <p class="qa-result" aria-live="polite"></p>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+<style>
+  .qarrow { --q: #4338ca; margin: 1.75rem 0; padding: 1rem; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px; }
+  .qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: center; }
+  .qa-stage { display: flex; flex-direction: column; gap: 0.4rem; }
+  .qa-canvas { width: 100%; aspect-ratio: 1; display: block; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg-raised); cursor: grab; touch-action: none; }
+  .qa-canvas:active { cursor: grabbing; }
+  .qa-hint { margin: 0; text-align: center; font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); }
+
+  .qa-side { display: flex; flex-direction: column; gap: 0.8rem; }
+  .qa-label { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-muted); display: flex; flex-direction: column; gap: 0.35rem; }
+  .qa-row { display: flex; align-items: center; gap: 0.6rem; }
+  .qa-row .qa-theta { flex: 1; accent-color: var(--q); }
+  .qa-theta-val { font-family: var(--font-mono); font-size: 0.82rem; color: var(--q); min-width: 3rem; text-align: right; }
+  .qa-poles { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); }
+  .qa-odds { margin: 0; font-family: var(--font-serif); font-size: 0.95rem; line-height: 1.5; color: var(--ink-dim); }
+  .qa-odds b { color: var(--ink); font-weight: 600; }
+
+  .qa-measure { display: flex; flex-direction: column; gap: 0.6rem; border-top: 1px solid var(--rule-soft); padding-top: 0.7rem; }
+  .qa-bars { display: flex; flex-direction: column; gap: 0.35rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-dim); }
+  .qa-bar-row { display: grid; grid-template-columns: 1rem 1fr auto; align-items: center; gap: 0.5rem; }
+  .qa-bar { height: 0.7rem; background: var(--rule-soft); border-radius: 3px; overflow: hidden; }
+  .qa-bar i { display: block; height: 100%; }
+  .qa-bar0 { background: var(--teal); }
+  .qa-bar1 { background: var(--amber); }
+  .qa-btns { display: flex; gap: 0.4rem; }
+  .qa-btns button { font-family: var(--font-mono); font-size: 0.8rem; cursor: pointer; background: var(--bg); color: var(--ink-dim); border: 1px solid var(--rule); border-radius: 4px; padding: 0.35rem 0.7rem; }
+  .qa-btns button:hover { border-color: var(--q); color: var(--q); }
+  .qa-result { margin: 0; min-height: 1.1rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink); }
+
+  @media (max-width: 620px) { .qa-grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { StateVector } from '../scripts/qsim.js';
+  import { makeCamera, fitCanvas, attachDrag, drawSphere, drawStateArrow, paletteFromCSS, projectBloch, scaleFor } from '../scripts/bloch.js';
+
+  function initOne(root) {
+    if (root._cleanup) root._cleanup();
+    const measure = root.dataset.measure === '1';
+    const canvas = root.querySelector('.qa-canvas');
+    const ctx = canvas.getContext('2d');
+    const thetaIn = root.querySelector('.qa-theta');
+    const thetaVal = root.querySelector('.qa-theta-val');
+    const oddsEl = root.querySelector('.qa-odds');
+
+    const cam = makeCamera();
+    const palette = paletteFromCSS();
+    let dims = null;
+
+    function poleLabels(w, h) {
+      const s = scaleFor(w, h);
+      ctx.fillStyle = palette.muted;
+      ctx.font = `${Math.max(11, Math.round(w * 0.04))}px ui-monospace, monospace`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const top = projectBloch({ x: 0, y: 0, z: 1.2 }, cam, w, h, s);
+      const bot = projectBloch({ x: 0, y: 0, z: -1.2 }, cam, w, h, s);
+      ctx.fillText('|0⟩', top.x, top.y);
+      ctx.fillText('|1⟩', bot.x, bot.y);
+    }
+
+    function probs() {
+      const theta = (+thetaIn.value) * Math.PI / 180;
+      const p0 = Math.cos(theta / 2) ** 2;
+      return { theta, p0, p1: 1 - p0 };
+    }
+
+    let bar0, bar1, p0El, p1El, resultEl;
+    if (measure) {
+      bar0 = root.querySelector('.qa-bar0'); bar1 = root.querySelector('.qa-bar1');
+      p0El = root.querySelector('.qa-p0'); p1El = root.querySelector('.qa-p1');
+      resultEl = root.querySelector('.qa-result');
+    }
+
+    function render() {
+      if (!dims) return;
+      const { w, h } = dims;
+      const { theta, p0, p1 } = probs();
+      const v = { x: Math.sin(theta), y: 0, z: Math.cos(theta) };
+      drawSphere(ctx, cam, w, h, palette, { labels: false });
+      drawStateArrow(ctx, cam, w, h, v, palette);
+      poleLabels(w, h);
+
+      thetaVal.textContent = thetaIn.value + '°';
+      const pc = (p) => Math.round(p * 100);
+      oddsEl.innerHTML = 'Look now and you would get <b>0</b> about <b>' + pc(p0) +
+        '%</b> of the time, and <b>1</b> about <b>' + pc(p1) + '%</b>.';
+
+      if (measure) {
+        bar0.style.width = (p0 * 100).toFixed(0) + '%';
+        bar1.style.width = (p1 * 100).toFixed(0) + '%';
+        p0El.textContent = pc(p0) + '%';
+        p1El.textContent = pc(p1) + '%';
+      }
+    }
+
+    function resize() { dims = fitCanvas(canvas, ctx); render(); }
+
+    const onInput = () => render();
+    thetaIn.addEventListener('input', onInput);
+    const detachDrag = attachDrag(canvas, cam, render);
+    window.addEventListener('resize', resize);
+
+    let onOnce, onMany;
+    if (measure) {
+      const sv = () => new StateVector(1).applyRY(0, (+thetaIn.value) * Math.PI / 180);
+      onOnce = () => {
+        const out = sv().sample(Math.random);
+        resultEl.textContent = 'You looked once and got: ' + out + '.';
+      };
+      onMany = () => {
+        const counts = sv().sampleCounts(100, Math.random);
+        resultEl.textContent = '100 looks: 0 came up ' + counts[0] + ' times, 1 came up ' + counts[1] + ' times.';
+      };
+      root.querySelector('.qa-once').addEventListener('click', onOnce);
+      root.querySelector('.qa-many').addEventListener('click', onMany);
+    }
+
+    root._cleanup = () => {
+      detachDrag();
+      window.removeEventListener('resize', resize);
+      thetaIn.removeEventListener('input', onInput);
+      if (measure) {
+        root.querySelector('.qa-once').removeEventListener('click', onOnce);
+        root.querySelector('.qa-many').removeEventListener('click', onMany);
+      }
+      root._cleanup = null;
+    };
+
+    resize();
+  }
+
+  function initAll() {
+    document.querySelectorAll('[data-qubit-arrow]').forEach(initOne);
+  }
+
+  initAll();
+  document.addEventListener('astro:after-swap', initAll);
+</script>
