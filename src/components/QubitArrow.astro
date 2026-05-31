@@ -26,7 +26,7 @@ const { measure = false } = Astro.props;
           <output class="qa-theta-val"></output>
         </span>
       </label>
-      <div class="qa-poles"><span>|0&rang; at the top</span><span>|1&rang; at the bottom</span></div>
+      <div class="qa-poles"><span>0 at the top</span><span>1 at the bottom</span></div>
 
       <p class="qa-odds" aria-live="polite"></p>
 
@@ -103,8 +103,8 @@ const { measure = false } = Astro.props;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       const top = projectBloch({ x: 0, y: 0, z: 1.2 }, cam, w, h, s);
       const bot = projectBloch({ x: 0, y: 0, z: -1.2 }, cam, w, h, s);
-      ctx.fillText('|0⟩', top.x, top.y);
-      ctx.fillText('|1⟩', bot.x, bot.y);
+      ctx.fillText('0', top.x, top.y);
+      ctx.fillText('1', bot.x, bot.y);
     }
 
     function probs() {
@@ -130,6 +130,11 @@ const { measure = false } = Astro.props;
       poleLabels(w, h);
 
       thetaVal.textContent = thetaIn.value + '°';
+      thetaIn.setAttribute('aria-valuetext',
+        p0 > 0.85 ? 'tilted near the top, almost always 0'
+        : p0 < 0.15 ? 'tilted near the bottom, almost always 1'
+        : Math.abs(p0 - 0.5) < 0.12 ? 'sideways, roughly even odds'
+        : p0 > 0.5 ? 'tilted up, more often 0' : 'tilted down, more often 1');
       const pc = (p) => Math.round(p * 100);
       oddsEl.innerHTML = 'Look now and you would get <b>0</b> about <b>' + pc(p0) +
         '%</b> of the time, and <b>1</b> about <b>' + pc(p1) + '%</b>.';

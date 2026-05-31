@@ -72,6 +72,10 @@
 
       // Their sum, bold.
       const ampSum = 2 * Math.cos(offset / 2);
+      slider.setAttribute('aria-valuetext',
+        ampSum > 1.4 ? 'waves lined up, combined wave at full strength'
+        : ampSum < 0.5 ? 'waves opposed, combined wave near zero'
+        : 'waves part-aligned, combined wave reduced');
       ctx.strokeStyle = ampSum < 0.5 ? palette.muted : palette.accent;
       ctx.lineWidth = 2.6;
       stroke((x) => A * Math.sin(k * (x - x0)) + A * Math.sin(k * (x - x0) + offset));
