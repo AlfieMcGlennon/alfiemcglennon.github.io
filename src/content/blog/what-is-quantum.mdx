@@ -58,9 +58,9 @@ So the headlines make sense. But the machines today are still small and noisy, t
 
 ## 3. What is a qubit?
 
-A normal bit is a switch: it is either 0 or 1. A qubit is better pictured as an **arrow you can tilt**. Point it straight up and it means 0. Point it straight down and it means 1. The interesting part is everywhere in between: the arrow can point at any angle, and where you aim it sets the *odds* of getting 0 or 1 when you eventually look. Near the top, you will almost always get 0. Pointing sideways, it is roughly a coin toss.
+A normal bit is a switch: it is either 0 or 1. A qubit is better pictured as an **arrow you can tilt**. Point it straight up and it means 0. Point it straight down and it means 1. The interesting part is everywhere in between: the arrow can point at any angle, and where you aim it sets the *odds* of getting 0 or 1 when you eventually look. Near the top, you will almost always get 0; near the bottom, almost always 1; pointing sideways, it is roughly a coin toss.
 
-A qubit is a direction you have chosen, and that tilt sets the odds. One more thing about the arrow matters later, so hold the thought: as well as tilting it up or down, you can turn it to face different sideways directions, and that sideways setting changes nothing about the odds when you look once. It seems pointless now. It turns out to be the part that does the real work in section 5.
+A qubit is a direction you have chosen, and that tilt sets the odds. One more thing about the arrow matters later, so hold the thought: as well as tilting it up or down, you can turn it to face different sideways directions, and that sideways setting changes nothing about the odds when you look once. It seems pointless now. If a setting you can change but never see sounds pointless, that is the right reaction for the moment; we are deliberately leaving it parked. It turns out to be the part that does the real work in section 5.
 
 <QubitArrow />
 
@@ -68,13 +68,13 @@ Tilt the arrow and read off the odds. It is worth pausing on what this picture i
 
 ## 4. How do you get an answer out?
 
-Here is the catch that makes quantum computing hard, and the single most counterintuitive thing for a newcomer. You cannot read the arrow's direction. The only thing you are allowed to do is **look**, and looking forces the qubit to answer with a plain 0 or 1, with odds set by the tilt. The moment it answers, the direction is gone. You cannot peek again to learn more about where it had been pointing.
+Everything so far has been friendly. This next part is the one genuinely hard idea in the post, so it is worth slowing down for. It is the catch that makes quantum computing hard, and the single most counterintuitive thing for a newcomer. You cannot read the arrow's direction. The only thing you are allowed to do is **look**, and looking forces the qubit to answer with a plain 0 or 1, with odds set by the tilt. The moment it answers, the direction is gone. Your instinct here is probably to look again, more carefully, and that is a fair thing to want. But there is nothing left to look at: that one answer is all the qubit will ever tell you about the tilt.
 
-So a single look gives you one answer, 0 or 1, and erases the tilt that was hiding the odds. To see those odds, you have to prepare the same arrow again and again and look each time.
+So a single look gives you one answer, 0 or 1, and erases the tilt that was hiding the odds. To see those odds, you have to prepare the same arrow again and again, a fresh, identically tilted arrow each time since the last one is spent, and look at each one.
 
 <QubitArrow measure />
 
-Set a tilt, then look once: you get a single 0 or 1. Look a hundred times and the tally settles close to the odds the arrow was holding, though not exactly, because a hundred looks is still only a sample. The tilt sets the odds; each look spends them on one answer; only many looks reveal them. Hold on to "looking is destructive", because it is exactly why the obvious idea in the next section does not work.
+Set a tilt, then look once: you get a single 0 or 1. Look a hundred times and the tally settles close to the odds the arrow was holding, though not exactly, because a hundred looks is still only a sample. The tilt sets the odds; each look spends them on one answer; only many looks reveal them. So we have two facts to carry forward: an arrow whose tilt only sets the odds, and a look that spends those odds on a single answer and destroys the tilt. Hold on to "looking is destructive", because it is exactly why the obvious idea in the next section does not work.
 
 ## 5. So how could it ever help?
 
