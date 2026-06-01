@@ -1,0 +1,255 @@
+---
+// InterferenceLab.astro — the "showcase" interference interactive: a double-slit
+// experiment where photons arrive ONE AT A TIME and the interference pattern
+// builds up dot-by-dot, with the smooth intensity curve overlaid. This is the
+// honest, profound version of section 5's reinforce/cancel: bright fringes are
+// where the two paths reinforce, dark where they cancel — yet every photon
+// lands whole. The slider changes slit spacing (fringe density). Replaces
+// TwoWaves in the showcase. Reduced motion fills the pattern instantly.
+---
+
+<div class="ilab" data-interference-lab data-reveal>
+  <canvas class="ilab-canvas" role="img"
+    aria-label="A double-slit experiment: photons pass through two slits and land on a screen, building up bright and dark interference fringes one dot at a time."></canvas>
+  <div class="ilab-controls">
+    <label class="ilab-ctl">
+      <span>slit spacing</span>
+      <input class="ilab-spread" type="range" min="0" max="100" value="46" step="1" aria-label="Slit spacing, which sets how tightly the fringes are packed" />
+    </label>
+    <button type="button" class="ilab-fire">Fire photons</button>
+    <button type="button" class="ilab-clear">Clear</button>
+  </div>
+  <p class="ilab-status" aria-live="polite"></p>
+</div>
+
+<style>
+  .ilab {
+    margin: 2rem 0;
+    padding: 1rem;
+    border: 1px solid rgba(140, 150, 235, 0.18);
+    border-radius: 12px;
+    background:
+      radial-gradient(120% 90% at 85% 0%, rgba(99, 110, 210, 0.10), transparent 55%),
+      var(--lab-panel, #0f1320);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -28px rgba(0, 0, 0, 0.8);
+  }
+  .ilab-canvas {
+    width: 100%; aspect-ratio: 2.1; display: block;
+    border: 1px solid rgba(140, 150, 235, 0.12); border-radius: 10px;
+    background: radial-gradient(120% 120% at 50% 50%, #0c1020, #07090f);
+  }
+  .ilab-controls { display: flex; align-items: center; gap: 0.9rem; margin-top: 0.8rem; flex-wrap: wrap; }
+  .ilab-ctl { display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 12rem; }
+  .ilab-ctl span { font-family: var(--font-mono); font-size: 0.74rem; color: var(--lab-dim, #9aa3bd); white-space: nowrap; }
+  .ilab-ctl input[type="range"] { flex: 1; accent-color: var(--lab-accent, #8b93f8); }
+  .ilab-controls button {
+    font-family: var(--font-mono); font-size: 0.78rem; cursor: pointer;
+    color: var(--lab-ink, #e7e9f0); background: rgba(139, 147, 248, 0.10);
+    border: 1px solid rgba(139, 147, 248, 0.35); border-radius: 7px; padding: 0.4rem 0.85rem;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.05s ease;
+  }
+  .ilab-controls button:hover { background: rgba(139, 147, 248, 0.22); border-color: var(--lab-accent-bright, #c2c8ff); }
+  .ilab-controls button:active { transform: translateY(1px); }
+  .ilab-controls .ilab-clear { background: rgba(154, 163, 189, 0.08); border-color: rgba(154, 163, 189, 0.28); color: var(--lab-dim, #9aa3bd); }
+  .ilab-status { margin: 0.7rem 0 0; font-family: var(--font-mono); font-size: 0.76rem; color: var(--lab-accent-bright, #c2c8ff); min-height: 1.1rem; }
+</style>
+
+<script>
+  import { LAB, fitCanvas, prefersReducedMotion, clamp, rand, rafLoop, glowStroke, glowDot } from '../scripts/labgfx.js';
+
+  const NB = 96;                 // intensity bins across the screen
+  const TOTAL = 420;             // photons per "Fire"
+  const TRAVEL = 0.55;           // seconds per photon flight
+  const MAX_INFLIGHT = 16;
+
+  function initOne(root) {
+    if (root._cleanup) root._cleanup();
+    const reduced = prefersReducedMotion();
+    const canvas = root.querySelector('.ilab-canvas');
+    const ctx = canvas.getContext('2d');
+    const spreadIn = root.querySelector('.ilab-spread');
+    const fireBtn = root.querySelector('.ilab-fire');
+    const clearBtn = root.querySelector('.ilab-clear');
+    const statusEl = root.querySelector('.ilab-status');
+    const pal = LAB;
+
+    let dims = null;
+    const counts = new Array(NB).fill(0);
+    let total = 0;
+    let inflight = [];
+    let fired = 0;
+    let firing = false;
+
+    const spread = () => 6 + (+spreadIn.value) / 100 * 26;        // 6..32
+    const intensity = (y) => Math.cos(spread() * y / 2) ** 2;     // y in [-1,1]
+    const binOf = (y) => clamp(Math.floor((y + 1) / 2 * NB), 0, NB - 1);
+
+    // Rejection-sample a landing position weighted by the intensity pattern.
+    function sampleY() {
+      for (let i = 0; i < 64; i++) {
+        const y = rand(-1, 1);
+        if (Math.random() < intensity(y)) return y;
+      }
+      return rand(-1, 1);
+    }
+
+    // Geometry helpers (depend on current dims).
+    function geom() {
+      const { w, h } = dims;
+      const mid = h / 2;
+      const sx = w * 0.08;          // source
+      const bx = w * 0.40;          // barrier
+      const scx = w * 0.78;         // screen
+      const amp = h * 0.42;         // screen half-height for y-mapping
+      const slit = h * 0.07;        // slit offset from centre
+      return { w, h, mid, sx, bx, scx, amp, slit };
+    }
+    const screenY = (g, y) => g.mid - y * g.amp;
+
+    function drawStatic(g) {
+      const { w, h, mid, sx, bx, scx, slit } = g;
+      ctx.clearRect(0, 0, w, h);
+
+      // source
+      glowDot(ctx, sx, mid, 4, pal.accentBright, 14);
+
+      // barrier with two slits
+      ctx.fillStyle = 'rgba(150,160,235,0.16)';
+      const gap = slit * 0.6;
+      ctx.fillRect(bx - 3, 0, 6, mid - slit - gap);
+      ctx.fillRect(bx - 3, mid - slit + gap, 6, 2 * (slit - gap));
+      ctx.fillRect(bx - 3, mid + slit + gap, 6, h - (mid + slit + gap));
+
+      // faint wavefronts from each slit
+      ctx.save();
+      ctx.strokeStyle = 'rgba(139,147,248,0.10)'; ctx.lineWidth = 1;
+      for (const sy of [mid - slit, mid + slit]) {
+        for (let r = 18; r < (scx - bx); r += 22) {
+          ctx.beginPath(); ctx.arc(bx, sy, r, -0.9, 0.9); ctx.stroke();
+        }
+      }
+      ctx.restore();
+
+      // screen
+      ctx.strokeStyle = 'rgba(150,160,235,0.22)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(scx, 6); ctx.lineTo(scx, h - 6); ctx.stroke();
+
+      // intensity curve, glowing, just left of the screen
+      const cw = w * 0.13;
+      glowStroke(ctx, pal.accent, 1.6, 8, () => {
+        for (let i = 0; i <= NB; i++) {
+          const y = (i / NB) * 2 - 1;
+          const xx = scx - intensity(y) * cw;
+          const yy = screenY(g, y);
+          if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
+        }
+      });
+    }
+
+    function drawDots(g) {
+      const { w, scx } = g;
+      const maxPerRow = Math.max(8, Math.floor((w - 8 - scx) / 4));
+      ctx.fillStyle = 'rgba(220,225,255,0.9)';
+      for (let b = 0; b < NB; b++) {
+        const n = Math.min(counts[b], maxPerRow);
+        if (!n) continue;
+        const y = (b + 0.5) / NB * 2 - 1;
+        const yy = screenY(g, y);
+        for (let j = 0; j < n; j++) {
+          ctx.beginPath();
+          ctx.arc(scx + 5 + j * 4, yy + (j % 2 ? 0.8 : -0.8), 1.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function drawInflight(g) {
+      for (const ph of inflight) {
+        const slitY = g.mid + ph.slit;
+        let x, y;
+        if (ph.t < 0.5) {
+          const u = ph.t / 0.5;
+          x = g.sx + (g.bx - g.sx) * u; y = g.mid + (slitY - g.mid) * u;
+        } else {
+          const u = (ph.t - 0.5) / 0.5;
+          const ty = screenY(g, ph.y);
+          x = g.bx + (g.scx - g.bx) * u; y = slitY + (ty - slitY) * u;
+        }
+        glowDot(ctx, x, y, 1.8, pal.accentBright, 8);
+      }
+    }
+
+    function frameDraw() {
+      if (!dims) return;
+      const g = geom();
+      drawStatic(g);
+      drawDots(g);
+      drawInflight(g);
+    }
+
+    function setStatus(done) {
+      statusEl.textContent = done
+        ? total + ' photons in. Bright bands = the two paths reinforce; dark = they cancel — yet each arrived as a single dot.'
+        : 'Firing… ' + total + ' photons landed.';
+    }
+
+    const loop = rafLoop((dt) => {
+      // spawn up to the in-flight cap until the batch is done
+      while (firing && inflight.length < MAX_INFLIGHT && fired < TOTAL) {
+        const y = sampleY();
+        inflight.push({ y, t: 0, slit: (Math.random() < 0.5 ? -1 : 1) * geom().slit });
+        fired++;
+      }
+      for (let i = inflight.length - 1; i >= 0; i--) {
+        inflight[i].t += dt / TRAVEL;
+        if (inflight[i].t >= 1) {
+          counts[binOf(inflight[i].y)]++; total++;
+          inflight.splice(i, 1);
+        }
+      }
+      frameDraw();
+      if (fired % 24 === 0) setStatus(false);
+      if (firing && fired >= TOTAL && inflight.length === 0) {
+        firing = false; loop.stop(); setStatus(true); frameDraw();
+      }
+    });
+
+    function fire() {
+      if (reduced) {
+        for (let i = 0; i < TOTAL; i++) { counts[binOf(sampleY())]++; total++; }
+        frameDraw(); setStatus(true); return;
+      }
+      if (firing) return;
+      firing = true; fired = 0; loop.start();
+    }
+
+    function clearAll() {
+      firing = false; loop.stop(); inflight = [];
+      for (let i = 0; i < NB; i++) counts[i] = 0;
+      total = 0; statusEl.textContent = ''; frameDraw();
+    }
+
+    function resize() { dims = fitCanvas(canvas, ctx); frameDraw(); }
+
+    const onSpread = () => frameDraw();   // re-draw the curve as spacing changes
+    spreadIn.addEventListener('input', onSpread);
+    fireBtn.addEventListener('click', fire);
+    clearBtn.addEventListener('click', clearAll);
+    window.addEventListener('resize', resize);
+
+    root._cleanup = () => {
+      loop.stop();
+      spreadIn.removeEventListener('input', onSpread);
+      fireBtn.removeEventListener('click', fire);
+      clearBtn.removeEventListener('click', clearAll);
+      window.removeEventListener('resize', resize);
+      root._cleanup = null;
+    };
+
+    resize();
+  }
+
+  function initAll() { document.querySelectorAll('[data-interference-lab]').forEach(initOne); }
+  initAll();
+  document.addEventListener('astro:after-swap', initAll);
+</script>

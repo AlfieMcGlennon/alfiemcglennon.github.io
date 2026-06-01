@@ -1,0 +1,23 @@
+---
+// ShowcaseChrome.astro — fills the <StyleVariants /> slot when the intro post is
+// rendered in the showcase. A small banner instead of the parchment switcher.
+---
+<div class="sc-banner" data-reveal>
+  <span class="sc-badge">Lab build</span>
+  <span class="sc-banner-text">The same piece, turned up: deeper interactives, a darker finish.</span>
+</div>
+
+<style>
+  .sc-banner {
+    display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap;
+    margin: 0 0 2.5rem; padding: 0.7rem 0.9rem;
+    border: 1px solid rgba(139, 147, 248, 0.25); border-radius: 10px;
+    background: rgba(139, 147, 248, 0.06);
+  }
+  .sc-badge {
+    font-family: var(--font-mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.14em;
+    color: #07090f; background: linear-gradient(90deg, #8b93f8, #c2c8ff);
+    padding: 0.22rem 0.6rem; border-radius: 999px; font-weight: 600; white-space: nowrap;
+  }
+  .sc-banner-text { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-muted); }
+</style>

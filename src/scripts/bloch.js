@@ -31,7 +31,7 @@ export function paletteFromCSS(el = document.documentElement) {
     ink: get('--ink', DEFAULT_PALETTE.ink),
     rule: get('--rule', DEFAULT_PALETTE.rule),
     muted: get('--ink-muted', DEFAULT_PALETTE.muted),
-    accent: DEFAULT_PALETTE.accent,
+    accent: get('--arrow', DEFAULT_PALETTE.accent),
     amber: get('--amber', DEFAULT_PALETTE.amber),
     teal: get('--teal', DEFAULT_PALETTE.teal),
     surface: get('--bg-raised', DEFAULT_PALETTE.surface),

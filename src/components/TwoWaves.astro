@@ -7,7 +7,7 @@
 // generic canvas helpers from bloch.js; no quantum simulation needed.
 ---
 
-<div class="twowaves" data-two-waves>
+<div class="twowaves" data-two-waves data-reveal>
   <canvas class="tw-canvas" role="img"
     aria-label="Two waves added together. Slide from lined up, where they reinforce into a bigger wave, to opposed, where they cancel to almost nothing."></canvas>
   <div class="tw-controls">
@@ -15,21 +15,26 @@
     <input class="tw-slider" type="range" min="0" max="100" value="12" step="1" aria-label="Slide the two waves from lined up to opposed" />
     <span class="tw-end">opposed</span>
   </div>
+  <button type="button" class="tw-demo" hidden>see them cancel</button>
   <p class="tw-status" aria-live="polite"></p>
 </div>
 
 <style>
-  .twowaves { --q: #4338ca; margin: 1.75rem 0; padding: 1rem; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px; }
+  .twowaves { --q: var(--accent, #4338ca); margin: 1.75rem 0; padding: 1rem; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px; }
   .tw-canvas { width: 100%; aspect-ratio: 2.4; display: block; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg-raised); }
   .tw-controls { display: flex; align-items: center; gap: 0.7rem; margin-top: 0.7rem; }
   .tw-controls .tw-slider { flex: 1; accent-color: var(--q); }
   .tw-end { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); white-space: nowrap; }
+  .tw-demo { margin-top: 0.6rem; font-family: var(--font-mono); font-size: 0.72rem; cursor: pointer; background: none; color: var(--ink-muted); border: 1px solid var(--rule); border-radius: 4px; padding: 0.3rem 0.7rem; transition: color 0.18s ease, border-color 0.18s ease; }
+  .tw-demo:hover { color: var(--q); border-color: var(--q); }
   .tw-status { margin: 0.6rem 0 0; font-family: var(--font-serif); font-size: 0.95rem; font-style: italic; color: var(--ink-dim); line-height: 1.45; min-height: 1.4rem; }
   .tw-status b { font-style: normal; font-weight: 600; }
 </style>
 
 <script>
   import { paletteFromCSS, fitCanvas } from '../scripts/bloch.js';
+  import { animate } from 'animejs';
+  import { prefersReducedMotion } from '../scripts/scrolly.js';
 
   function initOne(root) {
     if (root._cleanup) root._cleanup();
@@ -37,8 +42,11 @@
     const ctx = canvas.getContext('2d');
     const slider = root.querySelector('.tw-slider');
     const statusEl = root.querySelector('.tw-status');
+    const demoBtn = root.querySelector('.tw-demo');
     const palette = paletteFromCSS();
+    const reduced = prefersReducedMotion();
     let dims = null;
+    let sweeping = false; // true while the "see it" button is animating the slider
 
     function draw() {
       if (!dims) return;
@@ -80,23 +88,55 @@
       ctx.lineWidth = 2.6;
       stroke((x) => A * Math.sin(k * (x - x0)) + A * Math.sin(k * (x - x0) + offset));
 
-      if (ampSum > 1.4) {
-        statusEl.innerHTML = 'The two line up and add into a <b>bigger</b> wave. They <b>reinforce</b>: this is the right answer.';
-      } else if (ampSum < 0.5) {
-        statusEl.innerHTML = 'The two are opposed and flatten to almost <b>nothing</b>. They <b>cancel</b>: this is a wrong answer.';
-      } else {
-        statusEl.innerHTML = 'As they slide out of step, the combined wave shrinks: part reinforcing, part cancelling.';
+      if (!sweeping) {
+        if (ampSum > 1.4) {
+          statusEl.innerHTML = 'The two line up and add into a <b>bigger</b> wave. They <b>reinforce</b>: this is the right answer.';
+        } else if (ampSum < 0.5) {
+          statusEl.innerHTML = 'The two are opposed and flatten to almost <b>nothing</b>. They <b>cancel</b>: this is a wrong answer.';
+        } else {
+          statusEl.innerHTML = 'As they slide out of step, the combined wave shrinks: part reinforcing, part cancelling.';
+        }
       }
     }
 
     function resize() { dims = fitCanvas(canvas, ctx); draw(); }
-    const onInput = () => draw();
+
+    function updateDemoLabel() {
+      if (demoBtn) demoBtn.textContent = (+slider.value < 50) ? 'see them cancel' : 'see them reinforce';
+    }
+
+    const onInput = () => { draw(); updateDemoLabel(); };
     slider.addEventListener('input', onInput);
     window.addEventListener('resize', resize);
+
+    // Opt-in: one user-initiated sweep to the opposite extreme, so a reader who
+    // never drags still sees the same two waves go from reinforcing to
+    // cancelling. Hidden entirely under reduced motion (the slider already shows
+    // both states), so there is no fake equivalent to maintain.
+    let onDemo = null;
+    if (!reduced && demoBtn) {
+      demoBtn.hidden = false;
+      updateDemoLabel();
+      onDemo = () => {
+        if (sweeping) return;
+        const target = (+slider.value < 50) ? 100 : 0;
+        sweeping = true;
+        const obj = { v: +slider.value };
+        animate(obj, {
+          v: target,
+          duration: 600,
+          ease: 'inOut(2)',
+          onUpdate: () => { slider.value = obj.v; draw(); },
+          onComplete: () => { sweeping = false; slider.value = target; draw(); updateDemoLabel(); },
+        });
+      };
+      demoBtn.addEventListener('click', onDemo);
+    }
 
     root._cleanup = () => {
       slider.removeEventListener('input', onInput);
       window.removeEventListener('resize', resize);
+      if (onDemo) demoBtn.removeEventListener('click', onDemo);
       root._cleanup = null;
     };
 
@@ -109,4 +149,5 @@
 
   initAll();
   document.addEventListener('astro:after-swap', initAll);
+  window.addEventListener('variantchange', initAll);
 </script>

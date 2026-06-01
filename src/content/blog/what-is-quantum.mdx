@@ -28,8 +28,12 @@ math: false
   - Toys reuse the shared qsim.js + bloch.js core via the thin QubitArrow component.
 */}
 
-import QubitArrow from '../../components/QubitArrow.astro';
-import TwoWaves from '../../components/TwoWaves.astro';
+{/* QubitArrow, TwoWaves and StyleVariants are provided by the rendering route
+    via the MDX `components` prop, so the same prose can be rendered with the
+    plain toys (/writing/what-is-quantum/) or the rich Lab toys (/lab/quantum/)
+    without duplicating this file. */}
+
+<StyleVariants />
 
 ## 1. What this is, and what a quantum computer is for
 

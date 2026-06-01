@@ -1,0 +1,22 @@
+---
+import ShowcaseLayout from '../../layouts/ShowcaseLayout.astro';
+import { getEntry, render } from 'astro:content';
+import BlochLab from '../../components/BlochLab.astro';
+import InterferenceLab from '../../components/InterferenceLab.astro';
+import ShowcaseChrome from '../../components/ShowcaseChrome.astro';
+
+// Renders the SAME content entry as /writing/what-is-quantum/, but swaps the
+// interactive components for their richer "Lab" versions via the MDX components
+// prop. The prose lives in one place (the content collection) — no duplication.
+const post = await getEntry('blog', 'what-is-quantum');
+const { Content } = await render(post);
+const dev = import.meta.env.DEV;
+---
+
+<ShowcaseLayout title={post.data.title} description={post.data.description}>
+  {dev ? (
+    <Content components={{ QubitArrow: BlochLab, TwoWaves: InterferenceLab, StyleVariants: ShowcaseChrome }} />
+  ) : (
+    <p>This interactive showcase is a local preview only while the post is a draft.</p>
+  )}
+</ShowcaseLayout>

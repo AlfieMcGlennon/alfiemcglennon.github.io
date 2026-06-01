@@ -10,7 +10,7 @@
 const { measure = false } = Astro.props;
 ---
 
-<div class="qarrow" data-qubit-arrow data-measure={measure ? '1' : '0'}>
+<div class="qarrow" data-qubit-arrow data-reveal data-measure={measure ? '1' : '0'}>
   <div class="qa-grid">
     <div class="qa-stage">
       <canvas class="qa-canvas" role="img"
@@ -48,7 +48,7 @@ const { measure = false } = Astro.props;
 </div>
 
 <style>
-  .qarrow { --q: #4338ca; margin: 1.75rem 0; padding: 1rem; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px; }
+  .qarrow { --q: var(--accent, #4338ca); margin: 1.75rem 0; padding: 1rem; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px; }
   .qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: center; }
   .qa-stage { display: flex; flex-direction: column; gap: 0.4rem; }
   .qa-canvas { width: 100%; aspect-ratio: 1; display: block; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg-raised); cursor: grab; touch-action: none; }
@@ -72,16 +72,24 @@ const { measure = false } = Astro.props;
   .qa-bar0 { background: var(--teal); }
   .qa-bar1 { background: var(--amber); }
   .qa-btns { display: flex; gap: 0.4rem; }
-  .qa-btns button { font-family: var(--font-mono); font-size: 0.8rem; cursor: pointer; background: var(--bg); color: var(--ink-dim); border: 1px solid var(--rule); border-radius: 4px; padding: 0.35rem 0.7rem; }
+  .qa-btns button { font-family: var(--font-mono); font-size: 0.8rem; cursor: pointer; background: var(--bg); color: var(--ink-dim); border: 1px solid var(--rule); border-radius: 4px; padding: 0.35rem 0.7rem; transition: color 0.18s ease, border-color 0.18s ease; }
   .qa-btns button:hover { border-color: var(--q); color: var(--q); }
   .qa-result { margin: 0; min-height: 1.1rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink); }
 
   @media (max-width: 620px) { .qa-grid { grid-template-columns: 1fr; } }
+
+  /* Bar widths ease as "each look spends the odds on one answer" — gated so
+     reduced-motion readers get instant width changes. */
+  @media (prefers-reduced-motion: no-preference) {
+    .qa-bar i { transition: width 0.28s ease; }
+  }
 </style>
 
 <script>
   import { StateVector } from '../scripts/qsim.js';
   import { makeCamera, fitCanvas, attachDrag, drawSphere, drawStateArrow, paletteFromCSS, projectBloch, scaleFor } from '../scripts/bloch.js';
+  import { animate } from 'animejs';
+  import { prefersReducedMotion } from '../scripts/scrolly.js';
 
   function initOne(root) {
     if (root._cleanup) root._cleanup();
@@ -94,6 +102,7 @@ const { measure = false } = Astro.props;
 
     const cam = makeCamera();
     const palette = paletteFromCSS();
+    const reduced = prefersReducedMotion();
     let dims = null;
 
     function poleLabels(w, h) {
@@ -120,14 +129,21 @@ const { measure = false } = Astro.props;
       resultEl = root.querySelector('.qa-result');
     }
 
-    function render() {
+    // Draw the sphere + an arrow pointing at an arbitrary Bloch vector. Used
+    // both by render() (slider-driven) and by the collapse animation (which
+    // sweeps the arrow to a pole without touching the slider).
+    function drawScene(v) {
       if (!dims) return;
       const { w, h } = dims;
-      const { theta, p0, p1 } = probs();
-      const v = { x: Math.sin(theta), y: 0, z: Math.cos(theta) };
       drawSphere(ctx, cam, w, h, palette, { labels: false });
       drawStateArrow(ctx, cam, w, h, v, palette);
       poleLabels(w, h);
+    }
+
+    function render() {
+      if (!dims) return;
+      const { theta, p0, p1 } = probs();
+      drawScene({ x: Math.sin(theta), y: 0, z: Math.cos(theta) });
 
       thetaVal.textContent = thetaIn.value + '°';
       thetaIn.setAttribute('aria-valuetext',
@@ -157,14 +173,54 @@ const { measure = false } = Astro.props;
     let onOnce, onMany;
     if (measure) {
       const sv = () => new StateVector(1).applyRY(0, (+thetaIn.value) * Math.PI / 180);
+
+      // Look once: the rich tilt collapses to a bare pole and is gone. The
+      // single hardest idea in the post, made into a felt event.
       onOnce = () => {
         const out = sv().sample(Math.random);
-        resultEl.textContent = 'You looked once and got: ' + out + '.';
+        const announce = 'You looked once and got: ' + out + '. The tilt is gone.';
+        const finalV = { x: 0, y: 0, z: out === 0 ? 1 : -1 };
+        if (reduced) { drawScene(finalV); resultEl.textContent = announce; return; }
+        const startA = (+thetaIn.value) * Math.PI / 180;
+        const poleA = out === 0 ? 0 : Math.PI;
+        const obj = { a: startA };
+        animate(obj, {
+          a: poleA,
+          duration: 520,
+          ease: 'out(4)',
+          onUpdate: () => drawScene({ x: Math.sin(obj.a), y: 0, z: Math.cos(obj.a) }),
+          onComplete: () => { drawScene(finalV); resultEl.textContent = announce; },
+        });
+        // The arrow stays parked at the pole; the next slider input prepares a
+        // fresh, identically tilted arrow (per the prose).
       };
+
+      // Look 100x: the tally accrues toward the SAMPLED odds — close to, but
+      // not exactly, the tilt's odds, because a hundred looks is still a sample.
       onMany = () => {
-        const counts = sv().sampleCounts(100, Math.random);
-        resultEl.textContent = '100 looks: 0 came up ' + counts[0] + ' times, 1 came up ' + counts[1] + ' times.';
+        const counts = sv().sampleCounts(100, Math.random); // sum is 100, so % == count
+        const setFinal = () => {
+          bar0.style.transition = ''; bar1.style.transition = '';
+          bar0.style.width = counts[0] + '%'; bar1.style.width = counts[1] + '%';
+          p0El.textContent = counts[0] + '%'; p1El.textContent = counts[1] + '%';
+          resultEl.textContent = '100 looks: 0 came up ' + counts[0] + ' times, 1 came up ' + counts[1] + ' times.';
+        };
+        if (reduced) { setFinal(); return; }
+        bar0.style.transition = 'none'; bar1.style.transition = 'none'; // JS drives width per frame
+        const obj = { t: 0 };
+        animate(obj, {
+          t: 1,
+          duration: 600,
+          ease: 'out(2)',
+          onUpdate: () => {
+            const c0 = Math.round(counts[0] * obj.t), c1 = Math.round(counts[1] * obj.t);
+            bar0.style.width = c0 + '%'; bar1.style.width = c1 + '%';
+            p0El.textContent = c0 + '%'; p1El.textContent = c1 + '%';
+          },
+          onComplete: setFinal,
+        });
       };
+
       root.querySelector('.qa-once').addEventListener('click', onOnce);
       root.querySelector('.qa-many').addEventListener('click', onMany);
     }
@@ -189,4 +245,6 @@ const { measure = false } = Astro.props;
 
   initAll();
   document.addEventListener('astro:after-swap', initAll);
+  // Re-read the palette + redraw when the page style variant changes.
+  window.addEventListener('variantchange', initAll);
 </script>

@@ -15,6 +15,7 @@
   "dependencies": {
     "@astrojs/mdx": "^5.0.3",
     "@astrojs/sitemap": "^3.7.2",
+    "animejs": "^4.4.1",
     "astro": "^6.1.4",
     "katex": "0.17.0",
     "rehype-katex": "7.0.1",

@@ -26,10 +26,35 @@
   --amber: #b45309;
   --amber-soft: #f5dcb3;
 
+  /* Per-project accent (consumed by interactive figures + per-post chrome) */
+  --accent: var(--teal);
+  /* --arrow: canvas state-vector colour; unset => bloch.js falls back to indigo */
+
   /* Typography */
   --font-sans: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ── Per-project accent ─────────────────────────────── */
+/* The frontmatter `accent` is mirrored to one token, set on the post <article>
+   via data-project in Post.astro, so figures and chrome read a single source. */
+[data-project="grid-tool"]       { --accent: #ffb000; }
+[data-project="rl-dispatch"]     { --accent: #7c3aed; }
+[data-project="quantum-ml"]      { --accent: #4338ca; }
+[data-project="compound-risk"]   { --accent: #ef8a62; }
+[data-project="climate-stripes"] { --accent: #d73027; }
+
+/* ── Scroll reveal (opt-in, JS-armed) ───────────────── */
+/* Start-state applies ONLY once JS has armed it AND motion is allowed, so no-JS
+   and reduced-motion readers always get fully-visible content (no opacity:0 trap). */
+@media (prefers-reduced-motion: no-preference) {
+  html.reveal-armed [data-reveal] { opacity: 0; transform: translateY(14px); }
+  html.reveal-armed [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
 }
 
 html {
