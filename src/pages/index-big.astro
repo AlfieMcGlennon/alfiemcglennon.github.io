@@ -1,0 +1,474 @@
+---
+// index-big.astro — the BIG, over-the-top concept. A WebGL weather world you can
+// SCRUB (set weather + day/night to test scenarios), smooth scroll (Lenis),
+// kinetic split/roll-in/fade reveals, a scroll-driven scrim, the climate-risk ->
+// quantum narrative, and a 3D copula surface. Non-SVG. Concept route; the real
+// homepage (index.astro) is untouched. v1 — built to iterate bigger.
+const projects = [
+  { n: '01', label: 'GB Grid Scenario Tool', line: 'A browser DC power-flow model of GB transmission constraints.', href: 'https://alfiemcglennon.github.io/gb-grid-tool/', external: true },
+  { n: '02', label: 'RL Grid Dispatch', line: 'Reinforcement learning dispatching a constrained national grid.', href: '/writing/rl-grid-dispatch-baseline/' },
+  { n: '03', label: 'Quantum ML', line: 'A single qubit as a tunable Fourier model, reported honestly.', href: '/writing/quantum-computing-explainer/' },
+  { n: '04', label: 'Compound Heat Stress', line: 'When heat and humidity combine beyond what either predicts.', href: '/research/' },
+];
+const weathers = [
+  { id: 'clear', t: 'Clear' }, { id: 'partly', t: 'Partly' }, { id: 'overcast', t: 'Overcast' },
+  { id: 'rain', t: 'Rain' }, { id: 'storm', t: 'Storm' }, { id: 'snow', t: 'Snow' }, { id: 'fog', t: 'Fog' },
+];
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alfie McGlennon — big concept</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&display=swap" rel="stylesheet" />
+  </head>
+  <body class="big">
+    <canvas class="sky3d" data-sky aria-hidden="true"></canvas>
+    <div class="scrim" data-scrim aria-hidden="true"></div>
+
+    <div class="big-top">
+      <a class="bt-mark" href="/">ALFIE McGLENNON</a>
+      <span class="bt-tag">BIG CONCEPT · WIP</span>
+      <a class="bt-back" href="/">← real site</a>
+    </div>
+
+    <!-- HERO -->
+    <header class="big-hero">
+      <p class="bh-eyebrow" data-fade>Climate · risk · machine learning · quantum</p>
+      <h1 class="bh-title" data-split>Reading the sky, and the risk inside it.</h1>
+      <p class="bh-sub" data-fade>I'm Alfie. I study how weather turns into risk, and build the tools to see it coming.</p>
+
+      <div class="wx-panel" data-fade aria-label="Weather scenario controls">
+        <span class="wx-lab">Set the sky</span>
+        <div class="wx-btns" data-wx-btns>
+          {weathers.map((w, i) => (<button type="button" data-wx={w.id} aria-pressed={i === 1 ? 'true' : 'false'}>{w.t}</button>))}
+        </div>
+        <label class="wx-time">
+          <span>Night</span>
+          <input type="range" min="0" max="100" value="62" data-time />
+          <span>Day</span>
+        </label>
+      </div>
+      <div class="bh-cue" aria-hidden="true"><span>scroll</span><i></i></div>
+    </header>
+
+    <!-- WHY CLIMATE: beauty + terror -->
+    <section class="big-sec why">
+      <p class="big-kicker" data-fade>Why this</p>
+      <h2 class="big-statement" data-split>Weather is the most beautiful system there is.</h2>
+      <h2 class="big-statement alt" data-split>It is also the most frightening.</h2>
+      <div class="why-cols">
+        <p data-roll>The same atmosphere that paints a sky red drowns a city, dries a harvest, knocks out a grid. The risk side of weather is breathtaking and brutal at once, and most of the harm hides in the extremes that arrive together.</p>
+        <p data-roll>That's the work: turning chaos into something you can price, plan for, and defend against. Not predicting the weather, exactly. Predicting the <em>risk</em> — where, how often, and how bad, together.</p>
+      </div>
+    </section>
+
+    <!-- RISK: the copula in 3D -->
+    <section class="big-sec risk">
+      <div class="risk-grid">
+        <div class="risk-text">
+          <p class="big-kicker" data-fade>Predicting risk</p>
+          <h2 class="big-statement" data-split>Risk lives in the tail.</h2>
+          <p data-roll>Treat hazards as independent and you miss the days when two extremes land at once — the heat <em>and</em> the humidity, the demand spike <em>and</em> the outage. A copula is how you model that dependence directly.</p>
+          <p data-roll>The surface beside you is one: two ordinary risks, bound so the dangerous corners rise together. That coupling, the tail dependence, is exactly what undercosts disasters when it's ignored.</p>
+          <p class="risk-foot" data-fade>Drag the surface. <a href="/writing/copulas-compound-risk/">Read the write-up →</a></p>
+        </div>
+        <div class="risk-vis">
+          <canvas class="copula3d" data-copula aria-label="A rotating 3D copula density surface: two coupled risks whose joint extremes rise together in the corners."></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUANTUM -->
+    <section class="big-sec quantum">
+      <p class="big-kicker" data-fade>What's next</p>
+      <h2 class="big-statement grad" data-split>Quantum, honestly.</h2>
+      <div class="why-cols">
+        <p data-roll>A quantum computer doesn't try every answer at once. It arranges interference so the wrong answers cancel and the right one reinforces. For a narrow, specific list of problems that could change what's computable.</p>
+        <p data-roll>I work at that edge: a single qubit as a tunable Fourier model for atmospheric data. No clear advantage yet, and I'll say so plainly — but the ground it's making is genuinely exciting, and the UX of <em>making it legible</em> is half the battle.</p>
+      </div>
+      <p class="q-link" data-fade><a href="/writing/quantum-computing-explainer/">The honest deep dive →</a></p>
+    </section>
+
+    <!-- WORK -->
+    <section class="big-sec work">
+      <p class="big-kicker" data-fade>Selected work</p>
+      <div class="big-cards">
+        {projects.map((p) => (
+          <a class="big-card" data-roll href={p.href} {...(p.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+            <span class="bc-n">{p.n}</span><span class="bc-title">{p.label}</span><span class="bc-line">{p.line}</span><span class="bc-go">→</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <footer class="big-foot">
+      <h2 class="big-cta" data-split>Let's predict something.</h2>
+      <p class="big-links" data-fade>
+        <a id="big-email" href="#">email</a><span>/</span>
+        <a href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer">github</a><span>/</span>
+        <a href="https://www.linkedin.com/in/alfred-mcglennon-927589253/" target="_blank" rel="noopener noreferrer">linkedin</a>
+      </p>
+      <p class="big-note">A big, deliberately over-the-top concept. The calm real site is <a href="/">here</a>.</p>
+    </footer>
+
+    <style is:global>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body.big { background: #0a1422; color: #eef2f8; font-family: 'Outfit', system-ui, sans-serif; overflow-x: hidden;
+        --c1: #34e7c9; --c2: #8b93f8; --c3: #f7b955; }
+      .sky3d { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; display: block; }
+      .scrim { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0;
+        background: linear-gradient(180deg, rgba(8,14,24,0) 0%, rgba(8,14,24,0.55) 60%, rgba(8,14,24,0.82) 100%); }
+      .big-top, .big-hero, .big-sec, .big-foot { position: relative; z-index: 2; }
+      a { color: inherit; }
+
+      .big-top { position: fixed; top: 0; left: 0; right: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between;
+        padding: 1.1rem clamp(1.1rem, 4vw, 2.6rem); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.16em; }
+      .bt-mark { font-weight: 700; text-decoration: none; color: #fff; }
+      .bt-tag { color: var(--c3); opacity: 0.8; } .bt-back { color: #aebbd0; text-decoration: none; } .bt-back:hover { color: #fff; }
+
+      .big-hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 clamp(1.2rem, 6vw, 5.5rem); max-width: 1400px; margin: 0 auto; }
+      .bh-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: clamp(0.7rem, 1vw, 0.85rem); letter-spacing: 0.28em; text-transform: uppercase; color: var(--c1); margin-bottom: 1.3rem; text-shadow: 0 2px 18px rgba(0,0,0,0.5); }
+      .bh-title { font-weight: 800; font-size: clamp(2.6rem, 8vw, 7rem); line-height: 0.98; letter-spacing: -0.035em; max-width: 16ch; margin-bottom: 1.4rem; text-shadow: 0 6px 40px rgba(0,0,0,0.45); }
+      .bh-sub { font-family: 'Source Serif 4', Georgia, serif; font-style: italic; font-size: clamp(1.1rem, 2vw, 1.6rem); color: #dbe2ee; max-width: 40ch; line-height: 1.4; margin-bottom: 2.2rem; text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
+
+      .wx-panel { display: inline-flex; flex-direction: column; gap: 0.7rem; padding: 1rem 1.1rem; border-radius: 14px;
+        background: rgba(12,20,34,0.55); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.12); width: fit-content; max-width: 100%; }
+      .wx-lab { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: #9fb0c8; }
+      .wx-btns { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+      .wx-btns button { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; cursor: pointer; color: #cdd7e6;
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.14); border-radius: 999px; padding: 0.34rem 0.8rem; transition: all 0.18s ease; }
+      .wx-btns button:hover { border-color: var(--c1); color: #fff; }
+      .wx-btns button[aria-pressed="true"] { background: var(--c1); color: #06121a; border-color: var(--c1); font-weight: 600; }
+      .wx-time { display: flex; align-items: center; gap: 0.6rem; font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: #9fb0c8; }
+      .wx-time input { flex: 1; min-width: 140px; accent-color: var(--c3); }
+
+      .bh-cue { position: absolute; bottom: 1.8rem; left: 50%; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.3em; color: #8aa0bd; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+      .bh-cue i { width: 1px; height: 34px; background: linear-gradient(#8aa0bd, transparent); animation: cue 2.2s ease-in-out infinite; }
+      @keyframes cue { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+      .big-sec { max-width: 1200px; margin: 0 auto; padding: 16vh clamp(1.2rem, 6vw, 5.5rem); }
+      .big-kicker { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.26em; text-transform: uppercase; color: var(--c1); margin-bottom: 1.4rem; }
+      .big-statement { font-weight: 800; font-size: clamp(1.9rem, 5.5vw, 4.4rem); line-height: 1.02; letter-spacing: -0.03em; margin-bottom: 1rem; max-width: 18ch; text-shadow: 0 6px 40px rgba(0,0,0,0.4); }
+      .big-statement.alt { color: var(--c3); }
+      .big-statement.grad { background: linear-gradient(100deg, var(--c1), var(--c2) 55%, var(--c3)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+      .why-cols { display: grid; grid-template-columns: 1fr; gap: 1.6rem; margin-top: 2.5rem; max-width: 900px; }
+      @media (min-width: 760px) { .why-cols { grid-template-columns: 1fr 1fr; gap: 3rem; } }
+      .why-cols p, .risk-text p { font-family: 'Source Serif 4', serif; font-size: clamp(1.05rem, 1.6vw, 1.25rem); line-height: 1.6; color: #dbe2ee; }
+      .why-cols em, .risk-text em { color: #fff; font-style: italic; }
+
+      .risk-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; align-items: center; }
+      @media (min-width: 880px) { .risk-grid { grid-template-columns: 1fr 1fr; gap: 3.5rem; } }
+      .risk-text p { margin-top: 1.1rem; }
+      .risk-foot { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #9fb0c8; }
+      .risk-foot a { color: var(--c1); }
+      .risk-vis { position: relative; }
+      .copula3d { width: 100%; aspect-ratio: 1; display: block; border-radius: 16px; background: rgba(8,14,24,0.4); border: 1px solid rgba(255,255,255,0.1); cursor: grab; touch-action: none; }
+      .copula3d:active { cursor: grabbing; }
+
+      .q-link { margin-top: 2.5rem; font-family: 'JetBrains Mono', monospace; } .q-link a { color: var(--c1); border-bottom: 1px solid rgba(52,231,201,0.4); text-decoration: none; }
+
+      .big-cards { display: grid; grid-template-columns: 1fr; gap: 1px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; margin-top: 2rem; }
+      @media (min-width: 760px) { .big-cards { grid-template-columns: 1fr 1fr; } }
+      .big-card { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: 'n title go' 'n line go'; column-gap: 1rem; align-items: center; padding: 1.9rem 1.7rem; background: rgba(10,18,30,0.7); text-decoration: none; color: #eef2f8; transition: background 0.25s ease; }
+      .big-card:hover { background: rgba(16,26,42,0.9); }
+      .bc-n { grid-area: n; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--c2); }
+      .bc-title { grid-area: title; font-weight: 700; font-size: clamp(1.1rem, 2.2vw, 1.5rem); }
+      .bc-line { grid-area: line; font-family: 'Source Serif 4', serif; font-size: 0.93rem; color: #9fb0c8; margin-top: 0.25rem; }
+      .bc-go { grid-area: go; font-size: 1.5rem; color: #6b7d97; transition: transform 0.25s ease, color 0.25s ease; }
+      .big-card:hover .bc-go { transform: translateX(6px); color: var(--c1); }
+
+      .big-foot { max-width: 1200px; margin: 0 auto; padding: 18vh clamp(1.2rem, 6vw, 5.5rem) 10vh; text-align: center; }
+      .big-cta { font-weight: 900; font-size: clamp(2.4rem, 9vw, 7rem); letter-spacing: -0.04em; line-height: 1; margin-bottom: 2rem; }
+      .big-links { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; display: flex; gap: 1rem; justify-content: center; margin-bottom: 3rem; }
+      .big-links a { text-decoration: none; color: #cdd7e6; border-bottom: 1px solid transparent; } .big-links a:hover { color: #fff; border-bottom-color: var(--c1); } .big-links span { color: #44546b; }
+      .big-note { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #6b7d97; } .big-note a { color: #aebbd0; }
+
+      .split-word { display: inline-block; overflow: hidden; padding-bottom: 0.1em; vertical-align: bottom; }
+      .split-word > span { display: inline-block; will-change: transform, opacity; }
+      @media (prefers-reduced-motion: reduce) { .bh-cue i { animation: none; } }
+    </style>
+
+    <script>
+      import * as THREE from 'three';
+      import Lenis from 'lenis';
+      import { animate, stagger, inView } from 'motion';
+
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const EASE = [0.16, 1, 0.3, 1];
+
+      /* ---------- colour helpers ---------- */
+      const hx = (h) => { h = h.replace('#', ''); return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; };
+      const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+      const rgb = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;
+
+      /* ---------- canvas textures ---------- */
+      function discTex(soft) {
+        const s = 128, cv = document.createElement('canvas'); cv.width = cv.height = s; const x = cv.getContext('2d');
+        const g = x.createRadialGradient(s/2, s/2, 0, s/2, s/2, s/2);
+        g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(soft ? 0.5 : 0.7, 'rgba(255,255,255,0.5)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+        x.fillStyle = g; x.fillRect(0, 0, s, s); return new THREE.CanvasTexture(cv);
+      }
+      function cloudTex() {
+        const s = 256, cv = document.createElement('canvas'); cv.width = cv.height = s; const x = cv.getContext('2d');
+        for (let i = 0; i < 18; i++) {
+          const cx = 40 + Math.random() * 176, cy = 90 + Math.random() * 90, r = 26 + Math.random() * 54;
+          const g = x.createRadialGradient(cx, cy, 0, cx, cy, r);
+          g.addColorStop(0, 'rgba(255,255,255,0.9)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+          x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.fill();
+        }
+        return new THREE.CanvasTexture(cv);
+      }
+
+      /* ---------- WEATHER WORLD ---------- */
+      (function sky() {
+        const canvas = document.querySelector('[data-sky]');
+        if (!canvas) return;
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(62, 1, 0.1, 2000);
+        camera.position.set(0, 0, 60);
+
+        // sky background gradient (redrawn on change)
+        const skyCanvas = document.createElement('canvas'); skyCanvas.width = 8; skyCanvas.height = 320;
+        const sctx = skyCanvas.getContext('2d');
+        const skyTex = new THREE.CanvasTexture(skyCanvas); skyTex.colorSpace = THREE.SRGBColorSpace;
+        scene.background = skyTex;
+        function paintSky(top, mid, bot) {
+          const g = sctx.createLinearGradient(0, 0, 0, 320);
+          g.addColorStop(0, rgb(top)); g.addColorStop(0.55, rgb(mid)); g.addColorStop(1, rgb(bot));
+          sctx.fillStyle = g; sctx.fillRect(0, 0, 8, 320); skyTex.needsUpdate = true;
+        }
+
+        // sun / moon
+        const disc = discTex(true);
+        const sun = new THREE.Sprite(new THREE.SpriteMaterial({ map: disc, color: 0xffd98a, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+        const moon = new THREE.Sprite(new THREE.SpriteMaterial({ map: disc, color: 0xcdd7e6, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+        sun.scale.setScalar(34); moon.scale.setScalar(22); sun.position.set(28, 18, -80); moon.position.set(-30, 22, -80);
+        scene.add(sun, moon);
+
+        // stars
+        const STAR = 600; const sg = new THREE.BufferGeometry(); const sp = new Float32Array(STAR * 3);
+        for (let i = 0; i < STAR; i++) { sp[i*3] = (Math.random()-0.5)*300; sp[i*3+1] = Math.random()*120 - 10; sp[i*3+2] = -120 - Math.random()*120; }
+        sg.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+        const stars = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.9, sizeAttenuation: true, transparent: true, opacity: 0 }));
+        scene.add(stars);
+
+        // clouds
+        const ctex = cloudTex();
+        const clouds = [];
+        for (let i = 0; i < 16; i++) {
+          const m = new THREE.SpriteMaterial({ map: ctex, color: 0xffffff, transparent: true, opacity: 0, depthWrite: false });
+          const s = new THREE.Sprite(m);
+          const sc = 40 + Math.random() * 60; s.scale.set(sc * 1.5, sc, 1);
+          s.position.set((Math.random() - 0.5) * 260, 6 + Math.random() * 40, -50 - Math.random() * 70);
+          s.userData.spd = 0.6 + Math.random() * 1.4; scene.add(s); clouds.push(s);
+        }
+
+        // rain (line streaks)
+        const RN = 1400; const rg = new THREE.BufferGeometry(); const rpos = new Float32Array(RN * 6);
+        const RX = 120, RY = 80, RZ = 70;
+        for (let i = 0; i < RN; i++) {
+          const x = (Math.random() - 0.5) * RX, y = (Math.random() - 0.5) * RY, z = 20 - Math.random() * RZ;
+          rpos[i*6] = x; rpos[i*6+1] = y; rpos[i*6+2] = z; rpos[i*6+3] = x + 0.4; rpos[i*6+4] = y - 3.2; rpos[i*6+5] = z;
+        }
+        rg.setAttribute('position', new THREE.BufferAttribute(rpos, 3));
+        const rain = new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0xbcd4ee, transparent: true, opacity: 0.4 }));
+        rain.visible = false; scene.add(rain);
+
+        // snow (points)
+        const SN = 900; const ng = new THREE.BufferGeometry(); const npos = new Float32Array(SN * 3);
+        for (let i = 0; i < SN; i++) { npos[i*3] = (Math.random()-0.5)*RX; npos[i*3+1] = (Math.random()-0.5)*RY; npos[i*3+2] = 20 - Math.random()*RZ; }
+        ng.setAttribute('position', new THREE.BufferAttribute(npos, 3));
+        const snow = new THREE.Points(ng, new THREE.PointsMaterial({ map: discTex(true), color: 0xffffff, size: 1.6, sizeAttenuation: true, transparent: true, opacity: 0.9, depthWrite: false }));
+        snow.visible = false; scene.add(snow);
+
+        scene.fog = new THREE.FogExp2(0x9fb0c8, 0.0);
+
+        // weather day palettes [top, mid, bot] + params
+        const WX = {
+          clear:    { p: [hx('#5aa6df'), hx('#bcdcf0'), hx('#eed8a6')], cloud: 0.12, rain: false, snow: false, fog: 0.0008, sun: 1 },
+          partly:   { p: [hx('#6fb0dd'), hx('#cfe0ec'), hx('#ecd4a8')], cloud: 0.55, rain: false, snow: false, fog: 0.0012, sun: 0.9 },
+          overcast: { p: [hx('#9aa7b1'), hx('#bcc3c8'), hx('#d2c9b8')], cloud: 1.0, rain: false, snow: false, fog: 0.004, sun: 0.2 },
+          rain:     { p: [hx('#5b6772'), hx('#7d8893'), hx('#9b9a90')], cloud: 1.0, rain: true, snow: false, fog: 0.006, sun: 0 },
+          storm:    { p: [hx('#2b3340'), hx('#454b57'), hx('#5c574e')], cloud: 1.0, rain: true, snow: false, fog: 0.008, sun: 0 },
+          snow:     { p: [hx('#aebccb'), hx('#d2dae2'), hx('#e7e6dc')], cloud: 0.9, rain: false, snow: true, fog: 0.006, sun: 0.3 },
+          fog:      { p: [hx('#b3bcc2'), hx('#c7ccce'), hx('#d6d2c8')], cloud: 0.5, rain: false, snow: false, fog: 0.02, sun: 0.3 },
+        };
+        const NIGHT = { top: hx('#060d18'), mid: hx('#0f1d2e'), bot: hx('#16283a') };
+
+        const state = { weather: 'partly', time: 0.62 };
+        function apply() {
+          const wx = WX[state.weather]; const day = state.time; // 0 night .. 1 day
+          const top = mix(NIGHT.top, wx.p[0], day), mid = mix(NIGHT.mid, wx.p[1], day), bot = mix(NIGHT.bot, wx.p[2], day);
+          paintSky(top, mid, bot);
+          const elev = -18 + day * 60; // y from below horizon to high
+          sun.position.y = elev; sun.material.opacity = Math.max(0, (day - 0.42) / 0.58) * wx.sun;
+          moon.position.y = 6 + (1 - day) * 28; moon.material.opacity = Math.max(0, (0.55 - day) / 0.55);
+          stars.material.opacity = Math.max(0, (0.4 - day) / 0.4) * (1 - wx.cloud * 0.6);
+          clouds.forEach((c) => { c.userData.tOp = wx.cloud * (0.5 + day * 0.5); });
+          rain.visible = wx.rain; snow.visible = wx.snow;
+          rain.material.color.setStyle(rgb(mix(hx('#6f7c8a'), hx('#bcd4ee'), day)));
+          scene.fog.density = wx.fog; scene.fog.color.setStyle(rgb(mid));
+          // page text adapts: dark text in bright day-ish? keep light (over scrim). body bg fallback:
+          document.body.style.background = rgb(mid);
+        }
+        function setWeather(w) {
+          state.weather = w;
+          document.querySelectorAll('[data-wx]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.wx === w)));
+          apply();
+        }
+        function setTime(v) { state.time = v; apply(); }
+
+        document.querySelectorAll('[data-wx]').forEach((b) => b.addEventListener('click', () => setWeather(b.dataset.wx)));
+        const timeEl = document.querySelector('[data-time]');
+        if (timeEl) timeEl.addEventListener('input', () => setTime(+timeEl.value / 100));
+
+        function resize() {
+          const w = window.innerWidth, h = window.innerHeight;
+          renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+        }
+        window.addEventListener('resize', resize); resize(); apply();
+
+        let raf = 0, last = 0;
+        function frame(t) {
+          const dt = last ? Math.min(0.05, (t - last) / 1000) : 0.016; last = t;
+          for (const c of clouds) {
+            c.position.x += c.userData.spd * dt * 6;
+            if (c.position.x > 150) c.position.x = -150;
+            const op = c.userData.tOp || 0; c.material.opacity += (op - c.material.opacity) * 0.05;
+          }
+          if (rain.visible) {
+            const a = rg.attributes.position.array;
+            for (let i = 0; i < RN; i++) {
+              a[i*6+1] -= dt * 130; a[i*6+4] -= dt * 130;
+              if (a[i*6+4] < -RY/2) { const ny = RY/2 + Math.random()*10; a[i*6+1] = ny; a[i*6+4] = ny - 3.2; }
+            }
+            rg.attributes.position.needsUpdate = true;
+          }
+          if (snow.visible) {
+            const a = ng.attributes.position.array;
+            for (let i = 0; i < SN; i++) {
+              a[i*3+1] -= dt * 14; a[i*3] += Math.sin(t * 0.001 + i) * dt * 4;
+              if (a[i*3+1] < -RY/2) a[i*3+1] = RY/2 + Math.random()*8;
+            }
+            ng.attributes.position.needsUpdate = true;
+          }
+          renderer.render(scene, camera);
+          raf = requestAnimationFrame(frame);
+        }
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && raf) { cancelAnimationFrame(raf); raf = 0; }
+          else if (!document.hidden && !raf) raf = requestAnimationFrame(frame);
+        });
+        raf = requestAnimationFrame(frame);
+      })();
+
+      /* ---------- 3D COPULA SURFACE ---------- */
+      (function copula() {
+        const canvas = document.querySelector('[data-copula]');
+        if (!canvas) return;
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(2.4, 2.2, 2.4); camera.lookAt(0, 0.15, 0);
+
+        const SEG = 64; const geo = new THREE.PlaneGeometry(2, 2, SEG, SEG);
+        const pos = geo.attributes.position; const colors = new Float32Array(pos.count * 3);
+        const c1 = hx('#0f766e'), c2 = hx('#34e7c9'), c3 = hx('#f7b955');
+        let maxz = 0;
+        const dens = (u, v) => { // two coupled tails: both-high and both-low corners rise together
+          const a = Math.exp(-(((u-1)**2 + (v-1)**2)) / 0.12);
+          const b = Math.exp(-(((u-0)**2 + (v-0)**2)) / 0.12);
+          const ridge = 0.35 * Math.exp(-((u - v) ** 2) / 0.06);
+          return a + b + ridge + 0.04;
+        };
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i), y = pos.getY(i); const u = (x + 1) / 2, v = (y + 1) / 2;
+          const z = dens(u, v); maxz = Math.max(maxz, z); pos.setZ(i, z);
+        }
+        for (let i = 0; i < pos.count; i++) {
+          const z = pos.getZ(i) / maxz; pos.setZ(i, pos.getZ(i) * 0.9 - 0.4);
+          const col = z < 0.5 ? mix(c1, c2, z * 2) : mix(c2, c3, (z - 0.5) * 2);
+          colors[i*3] = col[0]/255; colors[i*3+1] = col[1]/255; colors[i*3+2] = col[2]/255;
+        }
+        geo.setAttribute('color', new THREE.BufferAttribute(colors, 3)); geo.computeVertexNormals();
+        geo.rotateX(-Math.PI / 2);
+        const surf = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.95 }));
+        const wire = new THREE.LineSegments(new THREE.WireframeGeometry(geo), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.06 }));
+        const group = new THREE.Group(); group.add(surf, wire); scene.add(group);
+
+        function resize() { const r = canvas.getBoundingClientRect(); renderer.setSize(r.width, r.height, false); camera.aspect = r.width / r.height; camera.updateProjectionMatrix(); }
+        window.addEventListener('resize', resize); resize();
+
+        let drag = false, lx = 0, vy = 0.003, ry = 0;
+        canvas.addEventListener('pointerdown', (e) => { drag = true; lx = e.clientX; });
+        window.addEventListener('pointerup', () => { drag = false; });
+        window.addEventListener('pointermove', (e) => { if (drag) { ry += (e.clientX - lx) * 0.01; lx = e.clientX; vy = 0; } });
+
+        let raf = 0, inv = true;
+        function frame() { if (!drag) ry += vy; group.rotation.y = ry; renderer.render(scene, camera); raf = inv ? requestAnimationFrame(frame) : 0; }
+        if (typeof IntersectionObserver !== 'undefined') {
+          new IntersectionObserver((es) => { inv = es[0].isIntersecting; if (inv && !raf) raf = requestAnimationFrame(frame); }, { threshold: 0.05 }).observe(canvas);
+        } else { raf = requestAnimationFrame(frame); }
+        raf = requestAnimationFrame(frame);
+      })();
+
+      /* ---------- Lenis smooth scroll + scrim ---------- */
+      if (!reduced) {
+        const lenis = new Lenis({ lerp: 0.09 });
+        function lraf(t) { lenis.raf(t); requestAnimationFrame(lraf); }
+        requestAnimationFrame(lraf);
+      }
+      const scrim = document.querySelector('[data-scrim]');
+      function onScroll() {
+        const y = window.scrollY, vh = window.innerHeight;
+        if (scrim) scrim.style.opacity = String(Math.min(0.92, Math.max(0, (y - vh * 0.4) / (vh * 0.7))));
+      }
+      window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+      /* ---------- kinetic reveals ---------- */
+      // split headings into words/letters
+      document.querySelectorAll('[data-split]').forEach((el) => {
+        const words = el.textContent.split(' ');
+        el.textContent = '';
+        words.forEach((wd, i) => {
+          const w = document.createElement('span'); w.className = 'split-word';
+          const s = document.createElement('span'); s.textContent = wd; w.appendChild(s);
+          el.appendChild(w); if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+        });
+      });
+      function reveal() {
+        if (reduced) return;
+        // hero splits + fades immediately
+        document.querySelectorAll('.big-hero [data-split] .split-word > span').forEach((s, i) => { s.style.transform = 'translateY(110%)'; });
+        const heroSpans = document.querySelectorAll('.big-hero [data-split] .split-word > span');
+        if (heroSpans.length) animate(heroSpans, { y: ['110%', '0%'] }, { duration: 0.9, delay: stagger(0.05, { start: 0.15 }), ease: EASE });
+        document.querySelectorAll('.big-hero [data-fade]').forEach((el, i) => { el.style.opacity = '0'; animate(el, { opacity: [0, 1], y: [18, 0] }, { duration: 0.7, delay: 0.5 + i * 0.12, ease: EASE }); });
+
+        // section splits on scroll-in
+        document.querySelectorAll('.big-sec [data-split], .big-foot [data-split]').forEach((el) => {
+          const spans = el.querySelectorAll('.split-word > span'); spans.forEach((s) => (s.style.transform = 'translateY(110%)'));
+          inView(el, () => { animate(spans, { y: ['110%', '0%'] }, { duration: 0.85, delay: stagger(0.04), ease: EASE }); }, { amount: 0.4 });
+        });
+        document.querySelectorAll('[data-roll]').forEach((el) => { el.style.opacity = '0';
+          inView(el, () => animate(el, { opacity: [0, 1], y: [40, 0] }, { duration: 0.9, ease: EASE }), { amount: 0.3 }); });
+        document.querySelectorAll('.big-sec [data-fade], .big-foot [data-fade]').forEach((el) => { el.style.opacity = '0';
+          inView(el, () => animate(el, { opacity: [0, 1] }, { duration: 0.8, ease: EASE }), { amount: 0.5 }); });
+      }
+      reveal();
+
+      (function () { const el = document.getElementById('big-email'); if (el) el.href = 'mailto:alfie@alfiemcglennon.com'; })();
+    </script>
+  </body>
+</html>
