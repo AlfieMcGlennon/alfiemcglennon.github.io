@@ -1,0 +1,533 @@
+---
+// index-concept.astro — a CONCEPT homepage to evaluate (NOT the live home page,
+// which stays at src/pages/index.astro). Direction = the design panel's pick:
+// keep the live-weather hero, add a gentle "clearing" entrance, and spend the
+// whole interactivity budget on ONE earned wow — the compound heat-stress /
+// copula scroll pin where the naive independence assumption visibly under-counts
+// the dangerous-in-both tail (Alfie's dissertation). The full-viewport "clouds
+// part" split-open is included but OPT-IN (visit ?fx=part) so you can feel it.
+// Warm parchment only, reduced-motion-safe, no AI tells. Reuses motion.dev,
+// scrolly.js (attachScrollScene) and reveal.js.
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf())
+  .slice(0, 4);
+const fmt = (d) => new Date(d).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+
+const projects = [
+  { n: '01', label: 'GB Grid Scenario Tool', line: 'A browser-based DC power-flow model of GB transmission constraints, built from public data.', href: 'https://alfiemcglennon.github.io/gb-grid-tool/', cta: 'Live demo →', external: true, spark: true },
+  { n: '02', label: 'RL Grid Dispatch', line: 'Reinforcement-learning agents dispatching a network-constrained power grid.', href: '/writing/rl-grid-dispatch-baseline/', cta: 'Write-up →' },
+  { n: '03', label: 'Quantum ML', line: 'A single qubit as a tunable Fourier model, applied to atmospheric data and reported honestly.', href: '/writing/quantum-computing-explainer/', cta: 'Write-up →' },
+];
+---
+
+<Base
+  title="Alfie McGlennon | Climate Risk, ML & Compound Extremes"
+  description="Concept homepage: climate science, machine learning and compound risk. Live-weather hero and an interactive look at why heat and humidity don't add up."
+>
+  <!-- Optional split-open veil (armed by JS only on ?fx=part; no-JS never sees it) -->
+  <div class="cloud-veil" data-veil aria-hidden="true">
+    <div class="veil-half veil-top"></div>
+    <div class="veil-half veil-bot"></div>
+  </div>
+
+  <!-- ── Hero: live Reading weather (kept), with a gentle clearing entrance ── -->
+  <section class="hero" data-hero aria-label="Introduction">
+    <div class="sky" aria-hidden="true">
+      <svg class="sky-svg" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sky-gradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" class="sky-stop-top" />
+            <stop offset="55%" class="sky-stop-mid" />
+            <stop offset="100%" class="sky-stop-bot" />
+          </linearGradient>
+          <filter id="cloud-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5" /></filter>
+          <symbol id="cloud-a" viewBox="0 0 320 100">
+            <ellipse cx="80" cy="60" rx="80" ry="26" fill="#ffffff" /><ellipse cx="160" cy="48" rx="100" ry="32" fill="#ffffff" /><ellipse cx="240" cy="62" rx="74" ry="22" fill="#ffffff" />
+          </symbol>
+          <symbol id="cloud-b" viewBox="0 0 260 90">
+            <ellipse cx="70" cy="55" rx="70" ry="22" fill="#ffffff" /><ellipse cx="150" cy="44" rx="80" ry="28" fill="#ffffff" /><ellipse cx="210" cy="58" rx="50" ry="18" fill="#ffffff" />
+          </symbol>
+          <symbol id="cloud-c" viewBox="0 0 200 70">
+            <ellipse cx="60" cy="40" rx="56" ry="18" fill="#ffffff" /><ellipse cx="130" cy="34" rx="62" ry="22" fill="#ffffff" />
+          </symbol>
+          <pattern id="rain-pattern" x="0" y="0" width="60" height="100" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+            <line x1="10" y1="0" x2="10" y2="22" stroke="#7a8896" stroke-width="1.1" stroke-linecap="round" opacity="0.7" />
+            <line x1="34" y1="40" x2="34" y2="64" stroke="#7a8896" stroke-width="1.1" stroke-linecap="round" opacity="0.55" />
+            <line x1="50" y1="70" x2="50" y2="90" stroke="#7a8896" stroke-width="1.1" stroke-linecap="round" opacity="0.6" />
+          </pattern>
+        </defs>
+        <rect width="1200" height="600" fill="url(#sky-gradient)" />
+        <g class="cloud-layer cloud-layer-slow" filter="url(#cloud-blur)">
+          <use href="#cloud-a" x="-400" y="80" width="320" height="100" opacity="0.55" /><use href="#cloud-c" x="200" y="130" width="200" height="70" opacity="0.45" /><use href="#cloud-b" x="700" y="60" width="260" height="90" opacity="0.55" /><use href="#cloud-a" x="1100" y="110" width="320" height="100" opacity="0.5" />
+        </g>
+        <g class="cloud-layer cloud-layer-medium" filter="url(#cloud-blur)">
+          <use href="#cloud-b" x="-300" y="220" width="260" height="90" opacity="0.7" /><use href="#cloud-a" x="350" y="250" width="320" height="100" opacity="0.6" /><use href="#cloud-c" x="900" y="200" width="200" height="70" opacity="0.7" />
+        </g>
+        <g class="cloud-layer cloud-layer-fast" filter="url(#cloud-blur)">
+          <use href="#cloud-c" x="-200" y="400" width="200" height="70" opacity="0.75" /><use href="#cloud-b" x="500" y="430" width="260" height="90" opacity="0.7" /><use href="#cloud-a" x="950" y="410" width="320" height="100" opacity="0.7" />
+        </g>
+        <rect class="rain-layer" width="1200" height="600" fill="url(#rain-pattern)" />
+      </svg>
+    </div>
+
+    <div class="hero-content">
+      <p class="hero-kicker" data-boot>Climate risk · machine learning · compound extremes</p>
+      <h1 class="hero-name">Alfie McGlennon</h1>
+      <p class="hero-affiliation" data-boot>MSc Climate Change &amp; AI // University of Reading</p>
+      <p class="hero-tag" data-boot>
+        From copula-based dependence modelling to reinforcement learning on the
+        national grid. I try to understand things through a data lens.
+      </p>
+      <span class="hero-hairline" data-hairline aria-hidden="true"></span>
+    </div>
+
+    <div class="weather-readout" data-weather-readout aria-label="Live weather telemetry">
+      <span class="wr-dot" aria-hidden="true"></span>
+      <span class="wr-label">LIVE</span><span class="wr-sep" aria-hidden="true">·</span>
+      <span class="wr-loc">READING</span><span class="wr-sep" aria-hidden="true">·</span>
+      <span class="wr-segment" data-readout-temp>--.-°C</span>
+      <span class="wr-sep wr-sep-rh" aria-hidden="true">·</span>
+      <span class="wr-segment wr-rh" data-readout-rh>-- %RH</span>
+      <span class="wr-sep" aria-hidden="true">·</span>
+      <span class="wr-segment wr-cond" data-readout-cond>…</span>
+      <span class="wr-sep wr-sep-time" aria-hidden="true">·</span>
+      <span class="wr-segment wr-time" data-readout-time>UPDATED --:--</span>
+    </div>
+  </section>
+
+  <!-- ── Who ── -->
+  <section class="page who">
+    <div class="who-grid">
+      <div class="who-text">
+        <p>
+          Hi, I'm Alfie. I'm finishing an MSc in Climate Change and AI at the
+          University of Reading, after a BSc in Meteorology and Climate. My
+          dissertation is on compound heat stress across Europe: when heat and
+          humidity combine in ways neither variable alone would predict.
+        </p>
+        <p>
+          I'm curious about how things work, and data is usually how I pull those
+          questions apart, whether that's atmospheric systems, energy markets, or
+          the assumptions buried inside a model. If you work in climate risk,
+          reinsurance, or operational meteorology, I'd like to hear from you.
+        </p>
+      </div>
+      <aside class="station-card" data-reveal aria-label="Profile">
+        <div class="sc-row"><span>NAME</span><b>A. MCGLENNON</b></div>
+        <div class="sc-row"><span>ROLE</span><b>MSc CLIMATE &amp; AI</b></div>
+        <div class="sc-row"><span>STATION</span><b>READING · 51.45°N</b></div>
+        <div class="sc-row"><span>FOCUS</span><b>COMPOUND RISK</b></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ── Research = THE WOW: the compound-risk copula pin ── -->
+  <section class="research" aria-label="Research: compound heat stress">
+    <div class="copula-scene" data-copula-scene>
+      <div class="copula-pin">
+        <div class="copula-grid">
+          <div class="copula-stage">
+            <canvas class="copula-canvas" role="img"
+              aria-label="A scatter of days by heat and humidity. As you scroll, the naive independence model gives way to the true joint distribution, which has far more days that are extreme in both, the compound-risk tail the independence model misses."></canvas>
+          </div>
+          <div class="copula-side">
+            <p class="copula-kicker">Dissertation · compound heat stress</p>
+            <h2 class="copula-head">Heat and humidity don't add up</h2>
+            <div class="copula-caps">
+              <p class="copula-cap" data-cap="0">Treat heat and humidity as independent, and the dangerous-in-both corner looks almost empty.</p>
+              <p class="copula-cap" data-cap="1">But they aren't independent. The real joint distribution grows a heavy tail towards the corner where both are extreme.</p>
+              <p class="copula-cap" data-cap="2">That tail is the compound risk. The independence assumption misses most of it.</p>
+            </div>
+            <p class="copula-readout">
+              <span class="cr-num" data-copula-num>0</span><span class="cr-unit">% of dangerous-in-both days the independence model misses</span>
+            </p>
+            <p class="copula-foot">Illustrative figure of the copula idea, not a published result. <a href="/writing/copulas-compound-risk/">Read the write-up →</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Projects ── -->
+  <section class="page projects" aria-label="Selected work">
+    <p class="section-label" data-reveal>Selected work</p>
+    <ul class="proj-list">
+      {projects.map((p) => (
+        <li class="proj-row" data-reveal>
+          <span class="proj-n">{p.n}</span>
+          <div class="proj-body">
+            <a class="proj-title" href={p.href} {...(p.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{p.label}</a>
+            <p class="proj-line">{p.line}</p>
+          </div>
+          <div class="proj-cta">
+            {p.spark && <svg class="proj-spark" data-spark viewBox="0 0 120 28" aria-hidden="true"><polyline points="0,20 18,16 32,22 48,8 64,14 80,4 98,12 120,6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>}
+            <a class="proj-link" href={p.href} {...(p.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{p.cta}</a>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- ── Writing ── -->
+  <section class="page writing-sec" aria-label="Writing">
+    <p class="section-label" data-reveal>Writing</p>
+    <ul class="wr-list">
+      {posts.map((post) => (
+        <li class="wr-item" data-reveal>
+          <a class="wr-link-row" href={`/writing/${post.id}/`}>
+            <span class="wr-date">{fmt(post.data.date)}</span>
+            <span class="wr-title">{post.data.title}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="wr-more"><a href="/writing/">All writing →</a></p>
+  </section>
+
+  <!-- ── Contact ── -->
+  <section class="page contact" aria-label="Contact">
+    <span class="hero-hairline contact-rule" data-hairline aria-hidden="true"></span>
+    <p class="contact-status">BASED · READING &nbsp;//&nbsp; OPEN TO · CLIMATE RISK / REINSURANCE / OP-MET</p>
+    <p class="contact-line">
+      <a id="contact-email" href="#" aria-label="Email Alfie McGlennon">[enable JavaScript to see email]</a>
+      <span class="contact-sep">·</span>
+      <a href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <span class="contact-sep">·</span>
+      <a href="https://www.linkedin.com/in/alfred-mcglennon-927589253/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    </p>
+  </section>
+</Base>
+
+<style>
+  /* ===== shared hero tokens (from the live homepage) ===== */
+  .hero {
+    position: relative; width: 100%; height: clamp(380px, 64vh, 560px);
+    overflow: hidden; border-bottom: 1px solid var(--rule);
+    --sky-top: #b6cfdc; --sky-mid: #e8d4a8; --sky-bot: #ecb37a;
+    --sun-opacity: 1; --rain-opacity: 0; transition: background 0.6s ease;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: 6%; right: 10%;
+    width: clamp(220px, 32vw, 380px); height: clamp(220px, 32vw, 380px); border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,218,150,0.6) 0%, rgba(255,200,130,0.3) 35%, rgba(255,200,130,0) 70%);
+    pointer-events: none; z-index: 0; opacity: var(--sun-opacity, 1); transition: opacity 0.6s ease;
+  }
+  .sky-stop-top { stop-color: var(--sky-top); } .sky-stop-mid { stop-color: var(--sky-mid); } .sky-stop-bot { stop-color: var(--sky-bot); }
+  .hero[data-weather="clear"] { --sky-top: #9ec4dc; --sky-mid: #f0d4a0; --sky-bot: #f3b270; --sun-opacity: 1; }
+  .hero[data-weather="partly-cloudy"] { --sun-opacity: 0.85; }
+  .hero[data-weather="overcast"] { --sky-top: #97a4ae; --sky-mid: #b3bbbf; --sky-bot: #d4c8b4; --sun-opacity: 0.25; }
+  .hero[data-weather="rain"] { --sky-top: #6f7c8a; --sky-mid: #8c95a0; --sky-bot: #aba99e; --rain-opacity: 0.22; --sun-opacity: 0; }
+  .hero[data-weather="snow"] { --sky-top: #c5d3df; --sky-mid: #dde2e6; --sky-bot: #e7e4d8; --sun-opacity: 0.3; }
+  .hero[data-weather="storm"] { --sky-top: #3a4252; --sky-mid: #5a5e68; --sky-bot: #767168; --rain-opacity: 0.28; --sun-opacity: 0; }
+  .hero[data-weather="night"] { --sky-top: #0e1924; --sky-mid: #16293a; --sky-bot: #1d2c38; --sun-opacity: 0; }
+  .hero[data-cloud-density="low"] .cloud-layer { opacity: 0.55; }
+  .hero[data-cloud-density="high"] .cloud-layer { opacity: 1.15; }
+  .rain-layer { opacity: var(--rain-opacity, 0); transition: opacity 0.6s ease; }
+  .sky { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .sky-svg { width: 100%; height: 100%; display: block; }
+  .cloud-layer { will-change: transform; transition: opacity 0.6s ease; }
+  .cloud-layer-slow { animation: drift-slow 70s linear infinite alternate; }
+  .cloud-layer-medium { animation: drift-medium 44s linear infinite alternate; }
+  .cloud-layer-fast { animation: drift-fast 28s linear infinite alternate; }
+  @keyframes drift-slow { from { transform: translateX(-14%); } to { transform: translateX(14%); } }
+  @keyframes drift-medium { from { transform: translateX(-22%); } to { transform: translateX(22%); } }
+  @keyframes drift-fast { from { transform: translateX(-32%); } to { transform: translateX(32%); } }
+  @media (prefers-reduced-motion: reduce) { .cloud-layer { animation: none; } }
+
+  .hero-content {
+    position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column;
+    justify-content: center; padding: 0 1.5rem; max-width: 920px; margin: 0 auto; text-align: left;
+  }
+  .hero-kicker { font-family: var(--font-mono); font-size: clamp(0.72rem, 1.1vw, 0.82rem); text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal-deep); margin: 0 0 0.9rem; }
+  .hero-name { font-family: var(--font-sans); font-weight: 600; font-size: clamp(2.7rem, 7.5vw, 4.8rem); line-height: 1.03; letter-spacing: -0.025em; color: var(--ink); margin: 0 0 0.8rem; }
+  .hero-affiliation { font-family: var(--font-mono); font-size: clamp(0.85rem, 1.4vw, 1rem); color: var(--teal-deep); margin: 0 0 0.85rem; }
+  .hero-tag { font-family: var(--font-serif); font-style: italic; font-size: clamp(1rem, 1.7vw, 1.2rem); color: var(--ink-dim); max-width: 46ch; line-height: 1.5; margin: 0; }
+  .hero-hairline { display: block; height: 2px; width: 0; background: var(--teal); margin-top: 1.3rem; max-width: 240px; transform-origin: left; }
+  .hero[data-weather="night"] .hero-name, .hero[data-weather="storm"] .hero-name { color: #f3efe9; }
+  .hero[data-weather="night"] .hero-tag, .hero[data-weather="storm"] .hero-tag { color: #d6d1c4; }
+
+  .weather-readout {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; align-items: center;
+    justify-content: center; flex-wrap: wrap; gap: 0.5rem; padding: 0.7rem 1rem 0.85rem;
+    font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-dim); text-shadow: 0 1px 1px rgba(255,255,255,0.45);
+    opacity: 0; transform: translateY(6px); transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+  .hero.weather-live .weather-readout { opacity: 1; transform: translateY(0); }
+  .wr-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); animation: wr-pulse 2s ease-in-out infinite; }
+  @keyframes wr-pulse { 0%,100% { opacity: 0.5; transform: scale(0.85);} 50% { opacity: 1; transform: scale(1.18);} }
+  .wr-label, .wr-loc { color: var(--teal-deep); font-weight: 600; }
+  .wr-sep { color: var(--ink-faint); opacity: 0.6; }
+  .hero[data-weather="night"] .weather-readout, .hero[data-weather="storm"] .weather-readout, .hero[data-weather="rain"] .weather-readout { color: #ece8de; text-shadow: 0 1px 2px rgba(0,0,0,0.45); }
+  .hero[data-weather="night"] .wr-label, .hero[data-weather="night"] .wr-loc, .hero[data-weather="storm"] .wr-label, .hero[data-weather="storm"] .wr-loc, .hero[data-weather="rain"] .wr-label, .hero[data-weather="rain"] .wr-loc { color: #7fd3c4; }
+  @media (max-width: 720px) { .weather-readout { font-size: 0.66rem; } .wr-rh, .wr-sep-rh, .wr-time, .wr-sep-time { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .wr-dot { animation: none; opacity: 0.85; } }
+
+  /* ===== split-open veil (opt-in via ?fx=part; armed by JS) ===== */
+  .cloud-veil { position: fixed; inset: 0; z-index: 50; pointer-events: none; display: none; }
+  .hero-entrance .cloud-veil { display: block; }
+  .veil-half { position: absolute; left: 0; right: 0; height: 50%; }
+  .veil-top { top: 0; background: linear-gradient(180deg, #aab3bb 0%, #c3c8cb 80%, #cfd2d2 100%); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .veil-bot { bottom: 0; background: linear-gradient(0deg, #aab3bb 0%, #c3c8cb 80%, #cfd2d2 100%); box-shadow: 0 -8px 24px rgba(0,0,0,0.12); }
+
+  /* ===== Who ===== */
+  .who-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: start; }
+  @media (min-width: 760px) { .who-grid { grid-template-columns: 1fr 230px; gap: 2.5rem; } }
+  .who-text p { margin-bottom: 1.1rem; }
+  .station-card { font-family: var(--font-mono); font-size: 0.74rem; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg-raised); padding: 0.5rem 0.85rem; }
+  .sc-row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.4rem 0; border-bottom: 1px solid var(--rule-soft); letter-spacing: 0.06em; }
+  .sc-row:last-child { border-bottom: 0; }
+  .sc-row span { color: var(--ink-faint); } .sc-row b { color: var(--teal-deep); font-weight: 600; }
+
+  /* ===== Research / copula pin ===== */
+  .research { border-top: 1px solid var(--rule); }
+  .copula-scene { position: relative; }
+  .copula-scene.scroll-linked { min-height: 260vh; }
+  .copula-scene.scroll-linked .copula-pin { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; }
+  .copula-pin { padding: 3rem 1.5rem; }
+  .copula-grid { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 1.5rem; align-items: center; width: 100%; }
+  @media (min-width: 820px) { .copula-grid { grid-template-columns: 1.1fr 1fr; gap: 2.5rem; } }
+  .copula-canvas { width: 100%; aspect-ratio: 1.1; display: block; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg-raised); }
+  .copula-kicker { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--amber); margin: 0 0 0.6rem; }
+  .copula-head { font-family: var(--font-sans); font-weight: 600; font-size: clamp(1.6rem, 3.4vw, 2.2rem); letter-spacing: -0.02em; margin: 0 0 1rem; line-height: 1.1; }
+  .copula-caps { display: flex; flex-direction: column; gap: 0.8rem; }
+  .copula-cap { font-family: var(--font-serif); font-size: 1.05rem; line-height: 1.55; color: var(--ink-dim); margin: 0; }
+  .copula-scene.scroll-linked .copula-caps { position: relative; min-height: 6rem; display: block; }
+  .copula-scene.scroll-linked .copula-cap { position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s ease; }
+  .copula-scene.scroll-linked .copula-cap.cap-active { opacity: 1; }
+  .copula-readout { margin: 1.3rem 0 0.4rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-muted); display: flex; align-items: baseline; gap: 0.5rem; }
+  .cr-num { font-size: 2.4rem; font-weight: 600; color: var(--amber); line-height: 1; font-family: var(--font-sans); }
+  .copula-foot { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); margin: 0.8rem 0 0; }
+  .copula-foot a { color: var(--teal-deep); border-bottom: 0; }
+
+  /* ===== Projects ===== */
+  .section-label { font-family: var(--font-mono); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-faint); margin: 0 0 1.5rem; }
+  .proj-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  .proj-row { display: grid; grid-template-columns: auto 1fr auto; gap: 1.2rem; align-items: center; padding: 1.4rem 0; border-bottom: 1px solid var(--rule); }
+  .proj-n { font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-faint); }
+  .proj-title { font-family: var(--font-sans); font-weight: 600; font-size: 1.15rem; color: var(--ink); border-bottom: 0; }
+  .proj-row:hover .proj-title { color: var(--teal-deep); }
+  .proj-line { font-family: var(--font-serif); font-size: 0.97rem; color: var(--ink-muted); margin: 0.25rem 0 0; line-height: 1.5; max-width: 52ch; }
+  .proj-cta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
+  .proj-spark { width: 96px; height: 22px; color: var(--teal); opacity: 0.8; }
+  .proj-link { font-family: var(--font-mono); font-size: 0.78rem; color: var(--teal-deep); white-space: nowrap; border-bottom: 0; }
+  @media (max-width: 620px) { .proj-cta { display: none; } .proj-row { grid-template-columns: auto 1fr; } }
+
+  /* ===== Writing ===== */
+  .wr-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  .wr-item { border-bottom: 1px solid var(--rule); }
+  .wr-link-row { display: grid; grid-template-columns: 9rem 1fr; gap: 1rem; padding: 1rem 0; color: var(--ink); border-bottom: 0; align-items: baseline; }
+  .wr-link-row:hover { background: var(--bg-raised); }
+  .wr-date { font-family: var(--font-mono); font-size: 0.76rem; color: var(--ink-muted); }
+  .wr-title { font-family: var(--font-sans); font-weight: 600; font-size: 1.02rem; }
+  .wr-link-row:hover .wr-title { color: var(--teal-deep); }
+  .wr-more { margin: 1.2rem 0 0; } .wr-more a { font-family: var(--font-mono); font-size: 0.8rem; color: var(--teal-deep); border-bottom: 0; }
+  @media (max-width: 560px) { .wr-link-row { grid-template-columns: 1fr; gap: 0.2rem; } }
+
+  /* ===== Contact ===== */
+  .contact { text-align: center; }
+  .contact-rule { margin: 0 auto 1.4rem; max-width: 180px; }
+  .contact-status { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.08em; color: var(--ink-muted); text-transform: uppercase; margin: 0 0 1rem; }
+  .contact-line { font-family: var(--font-mono); font-size: 0.95rem; margin: 0; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+  .contact-line a { color: var(--teal-deep); font-weight: 600; border-bottom: 1.5px solid var(--teal-soft); padding-bottom: 1px; }
+  .contact-line a:hover { color: var(--amber); border-bottom-color: var(--amber); }
+  .contact-sep { color: var(--ink-faint); }
+</style>
+
+<script>
+  import { animate } from 'motion';
+  import { attachScrollScene, prefersReducedMotion, lerp, easeInOut } from '../scripts/scrolly.js';
+  import { attachReveals } from '../scripts/reveal.js';
+
+  const reduced = prefersReducedMotion();
+
+  /* ---------- live weather hero (kept verbatim from the homepage) ---------- */
+  (async function initWeatherHero() {
+    const hero = document.querySelector('[data-hero]');
+    if (!hero) return;
+    const CACHE_KEY = 'weather-reading-v1';
+    const TTL_MS = 30 * 60 * 1000;
+    const URL = 'https://api.open-meteo.com/v1/forecast?latitude=51.4543&longitude=-0.9781&current=temperature_2m,relative_humidity_2m,wind_speed_10m,cloud_cover,weather_code,is_day&timezone=Europe/London';
+    const codeToLabel = (c, isDay) => {
+      if (c === 0) return isDay ? 'CLEAR SKY' : 'CLEAR NIGHT';
+      if (c === 1) return 'MOSTLY CLEAR'; if (c === 2) return 'PARTLY CLOUDY'; if (c === 3) return 'OVERCAST';
+      if (c === 45 || c === 48) return 'FOG'; if (c >= 51 && c <= 57) return 'DRIZZLE';
+      if (c >= 61 && c <= 67) return 'RAIN'; if (c >= 71 && c <= 77) return 'SNOW';
+      if (c >= 80 && c <= 82) return 'RAIN SHOWERS'; if (c === 85 || c === 86) return 'SNOW SHOWERS';
+      if (c >= 95 && c <= 99) return 'THUNDERSTORM'; return 'LIVE';
+    };
+    const fmtClock = (d) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
+    function applyWeather(payload) {
+      const c = payload.current || payload;
+      const code = c.weather_code ?? 2, isDay = c.is_day ?? 1, cloudCover = c.cloud_cover ?? 50, temp = c.temperature_2m ?? 15;
+      let state = 'partly-cloudy';
+      if (isDay === 0) state = 'night'; else if (code === 0 || code === 1) state = 'clear'; else if (code === 2) state = 'partly-cloudy';
+      else if (code === 3 || code === 45 || code === 48) state = 'overcast';
+      else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) state = 'rain';
+      else if ((code >= 71 && code <= 77) || code === 85 || code === 86) state = 'snow';
+      else if (code >= 95 && code <= 99) state = 'storm';
+      hero.dataset.weather = state;
+      hero.dataset.cloudDensity = cloudCover < 25 ? 'low' : cloudCover > 70 ? 'high' : 'mid';
+      hero.classList.add('weather-live');
+      const humidity = c.relative_humidity_2m ?? null;
+      const fetchedAt = payload.fetchedAt ? new Date(payload.fetchedAt) : new Date();
+      const tempEl = hero.querySelector('[data-readout-temp]'), rhEl = hero.querySelector('[data-readout-rh]'),
+        condEl = hero.querySelector('[data-readout-cond]'), timeEl = hero.querySelector('[data-readout-time]');
+      // count-up only on the genuinely-live values
+      if (tempEl) countUp(tempEl, temp, (v) => v.toFixed(1) + '°C');
+      if (rhEl) rhEl.textContent = humidity != null ? `${Math.round(humidity)} %RH` : '-- %RH';
+      if (condEl) condEl.textContent = codeToLabel(code, isDay);
+      if (timeEl) timeEl.textContent = `UPDATED ${fmtClock(fetchedAt)}`;
+    }
+    function countUp(el, target, fmt) {
+      if (reduced) { el.textContent = fmt(target); return; }
+      const start = performance.now(), dur = 600;
+      function step(now) {
+        const t = Math.min(1, (now - start) / dur);
+        el.textContent = fmt(lerp(0, target, easeInOut(t)));
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) { const p = JSON.parse(cached); if (Date.now() - p.timestamp < TTL_MS) { applyWeather({ ...p.data, fetchedAt: p.timestamp }); return; } }
+    } catch (e) {}
+    try {
+      const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(URL, { signal: controller.signal }); clearTimeout(timer);
+      if (!res.ok) throw new Error('bad');
+      const data = await res.json(); const fetchedAt = Date.now();
+      try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: fetchedAt })); } catch (e) {}
+      applyWeather({ ...data, fetchedAt });
+    } catch (e) { hero.classList.add('weather-live'); }
+  })();
+
+  /* ---------- entrance: boot + hairline (+ optional split-open) ---------- */
+  function runEntrance() {
+    const hero = document.querySelector('[data-hero]');
+    if (!hero) return;
+    // gentle "clearing": start one density step heavier, settle to live density
+    if (!hero.dataset.cloudDensity) hero.dataset.cloudDensity = 'high';
+    const boots = Array.from(document.querySelectorAll('.hero-content [data-boot]'));
+    const hairlines = Array.from(document.querySelectorAll('[data-hairline]'));
+
+    if (reduced) {
+      boots.forEach((b) => (b.style.opacity = '1'));
+      hairlines.forEach((h) => (h.style.width = h.classList.contains('contact-rule') ? '180px' : '240px'));
+      return;
+    }
+    boots.forEach((b, i) => animate(b, { opacity: [0, 1], y: [14, 0] }, { duration: 0.6, delay: 0.15 + i * 0.1, ease: [0.22, 0.61, 0.36, 1] }));
+    const heroRule = document.querySelector('.hero-hairline:not(.contact-rule)');
+    if (heroRule) { heroRule.style.width = '240px'; animate(heroRule, { scaleX: [0, 1] }, { duration: 0.7, delay: 0.5, ease: [0.22, 0.61, 0.36, 1] }); }
+
+    // opt-in split-open: ?fx=part
+    if (new URLSearchParams(location.search).get('fx') === 'part') {
+      document.documentElement.classList.add('hero-entrance');
+      const top = document.querySelector('.veil-top'), bot = document.querySelector('.veil-bot');
+      const done = () => { const v = document.querySelector('[data-veil]'); if (v) v.style.display = 'none'; };
+      if (top && bot) {
+        animate(top, { y: ['0%', '-101%'] }, { duration: 1.0, delay: 0.15, ease: [0.22, 0.61, 0.36, 1] });
+        animate(bot, { y: ['0%', '101%'] }, { duration: 1.0, delay: 0.15, ease: [0.22, 0.61, 0.36, 1] }).finished.then(done).catch(done);
+        // safety: clear after 1.5s regardless
+        setTimeout(done, 1500);
+      } else { done(); }
+    }
+  }
+  runEntrance();
+
+  /* ---------- the wow: compound-risk copula pin ---------- */
+  (function copulaPin() {
+    const scene = document.querySelector('[data-copula-scene]');
+    if (!scene) return;
+    const canvas = scene.querySelector('.copula-canvas');
+    const ctx = canvas.getContext('2d');
+    const numEl = scene.querySelector('[data-copula-num]');
+    const caps = Array.from(scene.querySelectorAll('.copula-cap'));
+
+    // read brand tokens
+    const css = getComputedStyle(document.documentElement);
+    const tok = (n, f) => (css.getPropertyValue(n).trim() || f);
+    const INK = tok('--ink', '#1c1917'), MUTED = tok('--ink-muted', '#78716c'),
+      RULE = tok('--rule', '#ddd8d0'), TEAL = tok('--teal', '#0f766e'), AMBER = tok('--amber', '#b45309');
+
+    // deterministic point cloud: independent positions vs copula-coupled positions
+    let seed = 20260602;
+    const rng = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    const gauss = () => { let s = 0; for (let i = 0; i < 3; i++) s += rng(); return s / 3; }; // ~bell on [0,1]
+    const N = 240, THR = 0.70;
+    const pts = [];
+    for (let i = 0; i < N; i++) {
+      const ix = gauss(), iy = gauss();                         // independent
+      // copula: pull y towards x (positive dependence) + heavier joint tail
+      let cx = ix, cy = lerp(iy, ix, 0.5) + (gauss() - 0.5) * 0.18;
+      cy = Math.min(1, Math.max(0, cy));
+      pts.push({ ix, iy, cx, cy });
+    }
+    const inCorner = (x, y) => x >= THR && y >= THR;
+    const indepCount = pts.filter((p) => inCorner(p.ix, p.iy)).length;
+    const copulaCount = pts.filter((p) => inCorner(p.cx, p.cy)).length;
+    const MISSED = copulaCount > 0 ? Math.round((1 - indepCount / copulaCount) * 100) : 0;
+
+    let dims = null;
+    function fit() {
+      const r = canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, r.width) * dpr; canvas.height = Math.max(1, r.height) * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); dims = { w: r.width, h: r.height };
+    }
+    function draw(p) {
+      if (!dims) return;
+      const { w, h } = dims, m = 34;
+      const X = (v) => m + v * (w - 2 * m), Y = (v) => (h - m) - v * (h - 2 * m);
+      ctx.clearRect(0, 0, w, h);
+      // axes
+      ctx.strokeStyle = RULE; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(m, h - m); ctx.lineTo(w - m, h - m); ctx.moveTo(m, m); ctx.lineTo(m, h - m); ctx.stroke();
+      ctx.fillStyle = MUTED; ctx.font = '11px ui-monospace, monospace';
+      ctx.textAlign = 'center'; ctx.fillText('HEAT →', (w) / 2, h - 8);
+      ctx.save(); ctx.translate(12, h / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('HUMIDITY →', 0, 0); ctx.restore();
+      // danger corner (compound), amber fill grows with p
+      const e = easeInOut(p);
+      ctx.save(); ctx.globalAlpha = 0.06 + 0.16 * e;
+      ctx.fillStyle = AMBER; ctx.fillRect(X(THR), m, X(1) - X(THR), Y(THR) - m); ctx.restore();
+      ctx.strokeStyle = AMBER; ctx.globalAlpha = 0.5; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(X(THR), m); ctx.lineTo(X(THR), Y(THR)); ctx.lineTo(X(1), Y(THR)); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+      // points: lerp independent -> copula
+      for (const pt of pts) {
+        const x = lerp(pt.ix, pt.cx, e), y = lerp(pt.iy, pt.cy, e);
+        const danger = inCorner(x, y);
+        ctx.fillStyle = danger ? AMBER : TEAL;
+        ctx.globalAlpha = danger ? 0.92 : 0.5;
+        ctx.beginPath(); ctx.arc(X(x), Y(y), danger ? 2.6 : 2.0, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      // readout
+      if (numEl) numEl.textContent = Math.round(lerp(0, MISSED, e));
+      // captions
+      const idx = p < 0.34 ? 0 : p < 0.7 ? 1 : 2;
+      caps.forEach((c, i) => c.classList.toggle('cap-active', i === idx));
+    }
+
+    function resize() { fit(); }
+    window.addEventListener('resize', resize);
+    fit();
+    caps.forEach((c, i) => c.classList.toggle('cap-active', i === 0));
+
+    if (reduced) { draw(1); return; }            // static final frame
+    scene.classList.add('scroll-linked');
+    attachScrollScene(scene, (prog) => draw(prog));
+  })();
+
+  /* ---------- reveals + contact ---------- */
+  attachReveals(document);
+  (function email() {
+    const el = document.getElementById('contact-email'); if (!el) return;
+    const u = 'alfie', d = 'alfiemcglennon.com';
+    el.href = 'mailto:' + u + '@' + d; el.textContent = u + '@' + d;
+  })();
+</script>
