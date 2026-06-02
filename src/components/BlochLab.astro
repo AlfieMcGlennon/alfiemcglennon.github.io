@@ -60,17 +60,14 @@ const { measure = false } = Astro.props;
     margin: 2rem 0;
     padding: 1rem;
     border: 1px solid var(--rule);
-    border-radius: 12px;
-    background:
-      radial-gradient(120% 80% at 15% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 60%),
-      var(--bg-raised);
-    box-shadow: 0 10px 30px -24px rgba(0, 0, 0, 0.32);
+    border-radius: 8px;
+    background: var(--bg-raised);
   }
   .blab-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 1.25rem; align-items: center; }
   .blab-stage { display: flex; flex-direction: column; gap: 0.4rem; }
   .blab-canvas {
     width: 100%; aspect-ratio: 1; display: block;
-    border: 1px solid var(--rule); border-radius: 10px;
+    border: 1px solid var(--rule); border-radius: 8px;
     background: var(--bg-raised);
     cursor: grab; touch-action: none;
   }
@@ -98,12 +95,12 @@ const { measure = false } = Astro.props;
   .blab-btns button {
     font-family: var(--font-mono); font-size: 0.78rem; cursor: pointer;
     color: var(--ink-dim); background: var(--bg);
-    border: 1px solid var(--rule); border-radius: 7px; padding: 0.4rem 0.8rem;
+    border: 1px solid var(--rule); border-radius: 6px; padding: 0.4rem 0.8rem;
     transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease, transform 0.05s ease;
   }
   .blab-btns button:hover { color: var(--accent); border-color: var(--accent); }
   .blab-btns button:active { transform: translateY(1px); }
-  .blab-spark { width: 100%; height: 54px; display: block; border: 1px solid var(--rule); border-radius: 7px; background: var(--bg); }
+  .blab-spark { width: 100%; height: 54px; display: block; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); }
   .blab-result { margin: 0; min-height: 1.1rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); }
 
   @media (max-width: 640px) { .blab-grid { grid-template-columns: 1fr; } }

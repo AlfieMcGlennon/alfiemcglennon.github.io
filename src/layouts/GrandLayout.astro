@@ -70,7 +70,7 @@ const ogTitle = `${title} | Alfie McGlennon`;
     transition: color 0.15s ease, border-color 0.15s ease;
   }
   .grand-toc :global(a:hover) { color: var(--ink); }
-  .grand-toc :global(a.active) { color: var(--accent); border-left-color: var(--accent); }
+  .grand-toc :global(a.active) { color: var(--teal); border-left-color: var(--teal); }
 
   /* Wide figures, narrow prose: text holds a 680px measure, interactives fill the column. */
   .grand-article { font-size: 1.05rem; }
@@ -83,16 +83,15 @@ const ogTitle = `${title} | Alfie McGlennon`;
 
   .grand-article :global(h2) {
     margin-top: 3.25rem; font-size: clamp(1.5rem, 3vw, 1.95rem); letter-spacing: -0.02em;
-    padding-left: 0.9rem; border-left: 3px solid var(--accent); scroll-margin-top: 1.5rem;
+    scroll-margin-top: 1.5rem;
   }
   .grand-article :global(h3) { margin-top: 2rem; }
 
   /* Callouts */
   .grand-article :global(.callout) {
     max-width: 680px; margin: 1.9rem 0; padding: 1.1rem 1.35rem;
-    background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 8px;
+    background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 6px;
   }
-  .grand-article :global(.callout-key) { border-left: 3px solid var(--accent); }
   .grand-article :global(.callout-refuse) { border-left: 3px solid var(--amber); }
   .grand-article :global(.callout p:first-child) { margin-top: 0; }
   .grand-article :global(.callout p:last-child),
@@ -109,41 +108,15 @@ const ogTitle = `${title} | Alfie McGlennon`;
     .grand-article :global(.gloss) { float: right; clear: right; width: 220px; margin: 0.25rem 0 1rem 1.75rem; }
   }
 
-  /* Quick-check cards (the retrieval prompts; present in both modes) */
-  .grand-article :global(.qcheck) {
-    max-width: 680px; margin: 1.6rem 0; border: 1px solid var(--rule);
-    border-left: 3px solid var(--accent); border-radius: 8px; background: var(--bg-raised);
-  }
-  .grand-article :global(.qcheck > summary) {
-    cursor: pointer; list-style: none; padding: 0.85rem 1.1rem;
-    font-family: var(--font-serif); font-weight: 600; color: var(--ink);
-  }
-  .grand-article :global(.qcheck > summary::-webkit-details-marker) { display: none; }
-  .grand-article :global(.qcheck > summary::before) {
-    content: "Quick check"; display: block;
-    font-family: var(--font-mono); font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.16em;
-    color: var(--accent); margin-bottom: 0.35rem;
-  }
-  .grand-article :global(.qcheck > summary::after) { content: " \2192 reveal"; font-family: var(--font-mono); font-weight: 400; font-size: 0.72rem; color: var(--ink-faint); }
-  .grand-article :global(.qcheck[open] > summary::after) { content: ""; }
-  .grand-article :global(.qcheck p) { margin: 0; padding: 0 1.1rem 1rem; max-width: none; color: var(--ink-dim); }
-
   /* Quieter expander for limitation asides */
   .grand-article :global(.aside-note) { max-width: 680px; margin: 1.4rem 0; }
   .grand-article :global(.aside-note > summary) { cursor: pointer; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-muted); }
-  .grand-article :global(.aside-note[open] > summary) { color: var(--accent); margin-bottom: 0.5rem; }
+  .grand-article :global(.aside-note[open] > summary) { color: var(--teal); margin-bottom: 0.5rem; }
   .grand-article :global(.aside-note p) { max-width: none; font-size: 0.98rem; color: var(--ink-dim); }
-
-  /* Study-only furniture: hidden by default (Parchment) so the default read is
-     clean five-minute prose; the quick-check retrieval cards, recaps and step
-     counters appear only in Study mode. */
-  .grand-article :global(.recap),
-  .grand-article :global(.idea-step),
-  .grand-article :global(.qcheck) { display: none; }
 
   .grand-foot { max-width: 680px; margin: 4rem 0 0; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
   .back-link { font-family: var(--font-mono); font-size: 0.85rem; color: var(--ink-muted); border-bottom: 0; }
-  .back-link:hover { color: var(--accent); }
+  .back-link:hover { color: var(--teal); }
 
   @media (max-width: 960px) {
     .grand-body { grid-template-columns: 1fr; gap: 0; }
@@ -151,25 +124,6 @@ const ogTitle = `${title} | Alfie McGlennon`;
   }
   @media (max-width: 640px) {
     .grand { padding: 2.5rem 1.25rem 4.5rem; }
-  }
-
-  /* ── STUDY reading mode (warm, retention-first) ── */
-  :global(html[data-variant="study"]) { --bg: #efeae0; --bg-raised: #f8f4ea; --rule: #e0d8c8; }
-  :global(html[data-variant="study"]) .grand-article { border-left: 2px solid var(--rule); padding-left: 1.6rem; }
-  :global(html[data-variant="study"]) .grand-article :global(.recap) {
-    display: block; max-width: 680px; margin: 0 0 1.6rem;
-    font-family: var(--font-mono); font-size: 0.76rem; line-height: 1.5; color: var(--ink-dim);
-    border-left: 2px solid var(--accent); padding: 0.45rem 0.8rem;
-    background: color-mix(in srgb, var(--accent) 5%, transparent); border-radius: 0 6px 6px 0;
-  }
-  :global(html[data-variant="study"]) .grand-article :global(.idea-step) {
-    display: block; max-width: 680px; margin: 2.5rem 0 -0.75rem;
-    font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent);
-  }
-  :global(html[data-variant="study"]) .grand-article :global(.qcheck) {
-    display: block;
-    background: color-mix(in srgb, var(--accent) 6%, var(--bg-raised));
-    box-shadow: 0 6px 18px -16px rgba(0, 0, 0, 0.4);
   }
 </style>
 

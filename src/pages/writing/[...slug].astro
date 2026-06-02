@@ -9,7 +9,6 @@ import BlochLab from '../../components/BlochLab.astro';
 import PhaseLever from '../../components/PhaseLever.astro';
 import InterferenceLab from '../../components/InterferenceLab.astro';
 import Amplify from '../../components/Amplify.astro';
-import ReadingModes from '../../components/ReadingModes.astro';
 
 export async function getStaticPaths() {
   // Only generate routes for published posts. Set `draft: false` in a post's
@@ -31,7 +30,7 @@ const { Content } = await render(post);
 // are provided via the MDX components prop, so post .mdx files import nothing.
 const grand = !!d.grand;
 const components = grand
-  ? { ReadingModes, BlochLab, PhaseLever, InterferenceLab, Amplify }
+  ? { BlochLab, PhaseLever, InterferenceLab, Amplify }
   : { QubitArrow, TwoWaves, StyleVariants };
 ---
 

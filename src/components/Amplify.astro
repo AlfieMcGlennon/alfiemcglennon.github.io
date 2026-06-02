@@ -27,13 +27,10 @@
 <style>
   .amp {
     margin: 2rem 0; padding: 1rem;
-    border: 1px solid var(--rule); border-radius: 12px;
-    background:
-      radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%),
-      var(--bg-raised);
-    box-shadow: 0 10px 30px -24px rgba(0, 0, 0, 0.32);
+    border: 1px solid var(--rule); border-radius: 8px;
+    background: var(--bg-raised);
   }
-  .amp-canvas { width: 100%; aspect-ratio: 1.9; display: block; border: 1px solid var(--rule); border-radius: 10px; background: var(--bg-raised); }
+  .amp-canvas { width: 100%; aspect-ratio: 1.9; display: block; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg-raised); }
   .amp-controls { display: flex; align-items: center; gap: 0.9rem; margin-top: 0.8rem; flex-wrap: wrap; }
   .amp-ctl { display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 13rem; }
   .amp-ctl span { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-muted); white-space: nowrap; }
@@ -41,7 +38,7 @@
   .amp-look {
     font-family: var(--font-mono); font-size: 0.78rem; cursor: pointer;
     color: var(--ink-dim); background: var(--bg);
-    border: 1px solid var(--rule); border-radius: 7px; padding: 0.4rem 0.95rem;
+    border: 1px solid var(--rule); border-radius: 6px; padding: 0.4rem 0.95rem;
     transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease, transform 0.05s ease;
   }
   .amp-look:hover { color: var(--accent); border-color: var(--accent); }
@@ -49,8 +46,6 @@
   .amp-status { margin: 0.7rem 0 0; font-family: var(--font-serif); font-size: 0.95rem; line-height: 1.5; color: var(--ink-dim); min-height: 2.3rem; }
   .amp-status b { font-style: normal; font-weight: 600; color: var(--ink); }
   .amp-result { margin: 0.3rem 0 0; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); min-height: 1.1rem; }
-
-  @media (prefers-reduced-motion: no-preference) { .amp-canvas { } }
 </style>
 
 <script>

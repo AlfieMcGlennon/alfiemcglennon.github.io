@@ -16,16 +16,13 @@ grand: true
   reigned-in what-is-quantum (tight numbered spine, five-minute exit) with the
   grand version's interactives + strongest phrasing, per the audience panel.
   Components provided by the route via the MDX components prop (no imports):
-    <ReadingModes/>  Parchment | Study switcher (Study furniture is opt-in)
     <BlochLab/>      light 3D qubit (tilt); <BlochLab measure/> collapse + Monte-Carlo
     <PhaseLever/>    the hidden phase, invisible head-on, decisive from the side
     <Amplify/>       interference that picks ONE answer (wrong ones cancel, right reinforces)
   Warm/light, never dark. Honesty-verified; British English; no em dashes.
 */}
 
-<ReadingModes />
-
-## 1. What a quantum computer is actually for
+## What a quantum computer is actually for
 
 A quantum computer is not a faster laptop. It will not make your email load quicker or your spreadsheets recalculate sooner. For very nearly everything you do on a computer all day, a quantum machine would be no better than a pocket calculator, and usually much worse. That is not a flaw. It is the point: it is a different kind of machine, built for a different kind of job.
 
@@ -58,7 +55,7 @@ Quantum computing has also picked up a few catchy phrases that are repeated ever
 
 Each is half-pointing at something genuine, and the satisfying part is seeing exactly where it goes wrong. So the rest of this is not facts to take on trust. It is the small set of ideas that let you catch the dodgy phrasing yourself, and, by the end, say why it is wrong in a sentence.
 
-## 2. Why is everyone suddenly talking about it?
+## Why is everyone suddenly talking about it?
 
 Three real things happened at roughly the same time, and each comes with a caveat the headlines tend to drop. Keep both halves together and the picture stops feeling like hype.
 
@@ -76,9 +73,7 @@ Third, a wall of money. Investment in quantum start-ups reached around 12.6 bill
 
 So the headlines make sense, but put the three together and you land somewhere calmer. We are still in the small, noisy era, and the genuinely useful applications will need far more, and far steadier, qubits than the handful we have. Worth carrying with you: the loudest claims have tended to be the ones to distrust, and several of the biggest of the past couple of years drew serious public pushback from other scientists. That is not cynicism. It is the field correcting itself in public, which is exactly what you want to see.
 
-<p class="idea-step">Idea 1 of 3 &middot; the qubit</p>
-
-## 3. What is a qubit?
+## What is a qubit?
 
 A normal bit is a switch: 0 or 1, with nothing in between. The picture that finally made a qubit sit still for me is an **arrow you can tilt**.
 
@@ -94,20 +89,9 @@ Now the words people use. You will constantly hear that a qubit is "0 and 1 at t
 
 It is fair to ask how something can be definite and yet only give odds. Picture a coin not spinning in the air but resting on its edge: settled, doing something definite, yet not committed to heads or tails. That is a better image than a tumbling coin, because there is nothing frantic about a qubit in its tilt. But the coin smuggles in something untrue. A hidden coin secretly already has its answer; you just do not know it yet. A qubit genuinely does not: before you look, the answer is not already sitting there waiting to be uncovered. That difference sounds philosophical and is in fact the most practical thing in the subject. Keep it in your pocket.
 
-<details class="qcheck">
-<summary>Point the arrow so a look almost always gives 0, is that near the top or the bottom?</summary>
-
-Near the top. The tilt alone sets the odds: aim it towards 0 (the top) and a look almost always comes back 0.
-
-</details>
-
 So a qubit is a direction you set, where the tilt sets the odds, sitting in a state that is not already decided, with a sideways dial we have parked. The question that catches everyone out: if you cannot read the direction, how do you get an answer out of it?
 
-<p class="recap">Recap: a qubit is an arrow you tilt; the tilt sets the odds of 0 or 1. A parked sideways setting comes back later.</p>
-
-<p class="idea-step">Idea 2 of 3 &middot; measurement</p>
-
-## 4. How do you get an answer out?
+## How do you get an answer out?
 
 This is the one genuinely hard idea, so let me slow down. The hard part is not your ability; it is that it cuts against an instinct we never notice we lean on: that looking is reading. The number on the scale was there before you glanced at it.
 
@@ -123,18 +107,7 @@ One more thing, because it is easy to assume randomness lives everywhere. It doe
 
 So we leave with two facts. The tilt only ever sets odds, never the answer. And a look spends those odds on a single 0 or 1 and destroys the tilt. Hold tight to the second, because the obvious clever idea in the next section but one, just blur the qubit over every answer and read off the winner, dies precisely on it.
 
-<details class="qcheck">
-<summary>You looked and got 1. Try to recover the original tilt, what stops you?</summary>
-
-Nothing is left to look at. The look destroyed the tilt, so there is no direction still sitting there to recover. To learn the odds you would prepare a fresh, identically tilted qubit and look again.
-
-</details>
-
-<p class="recap">Recap: looking forces a single 0 or 1 and destroys the tilt; you learn the odds only by preparing the same arrow afresh and looking many times.</p>
-
-<p class="idea-step">Idea 3 of 3 &middot; the hidden lever</p>
-
-## 5. The hidden lever: phase
+## The hidden lever: phase
 
 Remember the setting I asked you to park. As well as tilting the arrow, you can turn it sideways, and that changed nothing about the odds when you looked. I called it pointless and promised it does the real work. This is where I make good, because it is the idea that takes you from "I get the pictures" to "I could follow what an algorithm is doing".
 
@@ -157,16 +130,7 @@ A fair question: the arrow lives in three dimensions, so are there settings I am
 
 </details>
 
-<details class="qcheck">
-<summary>The odds did not budge when you spun the setting, then they swept end to end. What changed, the setting or how you looked?</summary>
-
-How you looked. The setting was real and working the whole time; looking straight on simply cannot see it, and looking from the side is what lets it steer the answer. That steering is interference in miniature.
-
-</details>
-
-<p class="recap">Recap: phase is a real setting that is invisible head-on but steers the answer once you look from the side, and that steering is interference.</p>
-
-## 6. So how could it ever help?
+## So how could it ever help?
 
 This is the part almost every popular explanation gets wrong, mine included the first time I tried to explain it to a friend.
 
@@ -183,13 +147,6 @@ It is worth not skating over how strange cancellation is. For two contributions 
 (You will hear this dressed up as "computing in parallel universes". That is one way some physicists choose to talk, and others disagree just as firmly. It is a disputed interpretation, not the mechanism, and the cancelling works the same whether or not you find it appealing.)
 
 Arranging that cancellation on purpose is hard, and it only pays off when a problem has the right structure: simulating molecules and materials, certain optimisation, and, more speculatively, parts of machine learning. For most tasks there is no cancellation to arrange and no advantage at all, and even on the promising ones we are early and narrow. No curing every disease tomorrow, no breaking all encryption next year. The honest version is smaller and, I think, far more interesting.
-
-<details class="qcheck">
-<summary>A machine blurs itself over every answer, then you look. Why is that no better than guessing?</summary>
-
-Because a look pulls out one answer at random, and a blur on its own gives you no reason for it to be the right one. The craft is to make the wrong answers cancel first, so the right one is what is overwhelmingly left.
-
-</details>
 
 ## A short word on entanglement
 
