@@ -25,15 +25,12 @@ math: false
     Grover video and Charlie Thomas's "Basic Quantum Computing" intro. First-person warmth,
     direct address, "the hard part is the order you learn things in, not your ability";
     conversational but never hyped. Keep the honesty (no myths); add the warmth.
-  - Toys reuse the shared qsim.js + bloch.js core via the thin QubitArrow component.
+  - Toys: the richer light interactives (BlochLab 3D qubit + measurement,
+    Amplify interference) on the shared qsim.js + bloch.js core.
 */}
 
-{/* QubitArrow, TwoWaves and StyleVariants are provided by the rendering route
-    via the MDX `components` prop, so the same prose can be rendered with the
-    plain toys (/writing/what-is-quantum/) or the rich Lab toys (/lab/quantum/)
-    without duplicating this file. */}
-
-<StyleVariants />
+import BlochLab from '../../components/BlochLab.astro';
+import Amplify from '../../components/Amplify.astro';
 
 ## 1. What this is, and what a quantum computer is for
 
@@ -70,7 +67,7 @@ A normal bit is a switch: it is either 0 or 1. The picture that finally made a q
 
 A qubit is a direction you have chosen, and that tilt sets the odds. One more thing about the arrow matters later, so hold the thought: as well as tilting it up or down, you can turn it to face different sideways directions, and that sideways setting changes nothing about the odds when you look once. It seems pointless now. If a setting you can change but never see sounds pointless, that is the right reaction for the moment; we are deliberately leaving it parked. It turns out to be the part that does the real work in section 5.
 
-<QubitArrow />
+<BlochLab />
 
 Tilt the arrow and read off the odds. It is worth pausing on what this picture is *not*. You will often hear that a qubit is "0 and 1 at the same time". That is the wrong words. The arrow is set to one direction, and "both at once" wrongly suggests you could somehow read out both answers, which you cannot: when you look, you get one. It is not secretly storing both answers for later, and a row of qubits is not quietly holding every combination at once. Where the arrow points is real and specific. What you can *do* with it is the subject of the next two sections.
 
@@ -80,7 +77,7 @@ Everything so far has been friendly. This next part is the one genuinely hard id
 
 So a single look gives you one answer, 0 or 1, and erases the tilt that was hiding the odds. To see those odds, you have to prepare the same arrow again and again, a fresh, identically tilted arrow each time since the last one is spent, and look at each one.
 
-<QubitArrow measure />
+<BlochLab measure />
 
 Set a tilt, then look once: you get a single 0 or 1. Look a hundred times and the tally settles close to the odds the arrow was holding, though not exactly, because a hundred looks is still only a sample. The tilt sets the odds; each look spends them on one answer; only many looks reveal them. So we have two facts to carry forward: an arrow whose tilt only sets the odds, and a look that spends those odds on a single answer and destroys the tilt. Hold on to "looking is destructive", because it is exactly why the obvious idea in the next section does not work.
 
@@ -90,9 +87,9 @@ Set a tilt, then look once: you get a single 0 or 1. Look a hundred times and th
 
 Now the part almost everyone gets wrong. The tempting story is that the machine quietly tries every answer at once and hands you the winner. From the last section you can already see the hole in it: if the qubits were just a blur over all possible answers and you looked, you would get one of them at random, no better than a guess, and you could have saved a great deal of money.
 
-The real trick uses the arrow's hidden sideways setting from section 3. A quantum computation can reach the same answer by several different routes at once. Each route carries one of those sideways settings, like the crest or trough of a wave, and crests and troughs can add up or cancel out. You arrange things so the routes to the *wrong* answers arrive out of step and flatten each other to nothing, the way two sound waves can cancel to silence, while the routes to the *right* answer line up and reinforce. Then, when you look, the right answer is overwhelmingly the one you get. The slider below is the whole idea in miniature: two contributions can line up and add, or oppose and vanish.
+The real trick uses the arrow's hidden sideways setting from section 3. A quantum computation can reach the same answer by several different routes at once. Each route carries one of those sideways settings, like the crest or trough of a wave, and crests and troughs can add up or cancel out. You arrange things so the routes to the *wrong* answers arrive out of step and flatten each other to nothing, the way two sound waves can cancel to silence, while the routes to the *right* answer line up and reinforce. Then, when you look, the right answer is overwhelmingly the one you get. The toy below is the whole idea in miniature: a handful of possible answers start out equally likely, and the craft is to arrange the interference so the routes to the wrong answers cancel to nothing while the right one reinforces, until a look returns it.
 
-<TwoWaves />
+<Amplify />
 
 Cancelling wrong answers is the thing an ordinary computer cannot easily do, and arranging it on purpose is the actual craft of quantum computing. It only pays off for specially structured problems: simulating quantum systems like molecules and materials, some kinds of optimisation, and, more speculatively, parts of machine learning. For most tasks there is no advantage at all, and even where there might be, it is early days.
 
