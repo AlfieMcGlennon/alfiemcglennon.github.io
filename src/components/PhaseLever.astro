@@ -31,7 +31,7 @@
         <div class="plev-bar-row"><span class="plev-k">1</span><div class="plev-bar"><i class="plev-bar1"></i></div><span class="plev-p1"></span></div>
       </div>
 
-      <p class="plev-status" aria-live="polite"></p>
+      <p class="plev-status"></p>
     </div>
   </div>
 </div>
@@ -110,6 +110,8 @@
     const pal = labPalette();
     let dims = null;
     let fromSide = false;
+    let camAnim = null;  // current camera tween, cancelled on re-toggle / cleanup
+    let rafId = 0;       // coalesces slider-input redraws to one per frame
 
     const lam = () => (+lamIn.value) * PI / 180;
     // odds via the shared verified core: |+> then RZ(lambda), optionally H.
@@ -140,6 +142,9 @@
       bar1.style.width = (p1 * 100).toFixed(0) + '%';
       p0El.textContent = pc(p0) + '%';
       p1El.textContent = pc(p1) + '%';
+      lamIn.setAttribute('aria-valuetext', fromSide
+        ? lamIn.value + ' degrees, from the side: 0 about ' + pc(p0) + '% of the time'
+        : lamIn.value + ' degrees, straight on: odds locked at 50/50');
       statusEl.innerHTML = fromSide
         ? 'From the side, the <b>same</b> setting now steers the answer: a look gives <b>0</b> about ' + pc(p0) + '% of the time.'
         : 'Looking straight on, spin the setting all you like and the odds stay <b>50/50</b>. It is real, but invisible from here.';
@@ -153,23 +158,26 @@
       toggle.setAttribute('aria-pressed', String(side));
       toggle.textContent = side ? 'Look straight on again' : 'Turn to look from the side';
       const target = side ? PITCH_SIDE : PITCH_ON;
+      if (camAnim) { camAnim.pause(); camAnim = null; }
       if (reduced || !animateIt) { cam.pitch = target; render(); return; }
       const start = cam.pitch;
       const obj = { t: 0 };
-      animate(obj, {
+      camAnim = animate(obj, {
         t: 1, duration: 700, ease: 'inOut(2)',
         onUpdate: () => { cam.pitch = lerp(start, target, easeInOutCubic(obj.t)); drawScene(); },
-        onComplete: () => { cam.pitch = target; render(); },
+        onComplete: () => { cam.pitch = target; render(); camAnim = null; },
       });
     }
 
-    const onInput = () => render();
+    const onInput = () => { if (rafId) return; rafId = requestAnimationFrame(() => { rafId = 0; render(); }); };
     const onToggle = () => setView(!fromSide, true);
     lamIn.addEventListener('input', onInput);
     toggle.addEventListener('click', onToggle);
     window.addEventListener('resize', resize);
 
     root._cleanup = () => {
+      if (camAnim) { camAnim.pause(); camAnim = null; }
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
       lamIn.removeEventListener('input', onInput);
       toggle.removeEventListener('click', onToggle);
       window.removeEventListener('resize', resize);

@@ -12,6 +12,15 @@ import { prefersReducedMotion } from './scrolly.js';
 
 let io = null;
 
+// Reduced-motion rescue, registered exactly once at module load (not per call):
+// if a reader enables reduced motion mid-session, reveal anything still hidden.
+if (typeof window !== 'undefined' && window.matchMedia) {
+  const _mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const _onRM = () => { if (_mq.matches) revealAllNow(document); };
+  if (_mq.addEventListener) _mq.addEventListener('change', _onRM);
+  else if (_mq.addListener) _mq.addListener(_onRM);
+}
+
 function revealAllNow(scope) {
   scope.querySelectorAll('[data-reveal]:not(.is-revealed)')
     .forEach((el) => el.classList.add('is-revealed'));
@@ -39,13 +48,4 @@ export function attachReveals(scope = document) {
   }
 
   scope.querySelectorAll('[data-reveal]:not(.is-revealed)').forEach((el) => io.observe(el));
-
-  // If the reader switches reduced-motion on mid-session, reveal whatever is
-  // still hidden so nothing is ever stuck invisible.
-  if (window.matchMedia) {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const onChange = () => { if (mq.matches) revealAllNow(document); };
-    if (mq.addEventListener) mq.addEventListener('change', onChange);
-    else if (mq.addListener) mq.addListener(onChange);
-  }
 }

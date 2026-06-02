@@ -183,7 +183,13 @@ const ogTitle = `${title} | Alfie McGlennon`;
     if (!article || !toc) return;
 
     const hs = Array.from(article.querySelectorAll('h2'));
-    hs.forEach((h, i) => { if (!h.id) h.id = slug(h.textContent, i); });
+    const seen = new Set();
+    hs.forEach((h, i) => {
+      let id = h.id || slug(h.textContent, i);
+      const base = id; let n = 2;
+      while (seen.has(id)) id = base + '-' + (n++);
+      h.id = id; seen.add(id);
+    });
     toc.innerHTML = '<ol>' + hs.map((h) => `<li><a href="#${h.id}">${h.textContent}</a></li>`).join('') + '</ol>';
 
     const links = Array.from(toc.querySelectorAll('a'));
