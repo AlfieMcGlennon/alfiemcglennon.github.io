@@ -1,0 +1,221 @@
+---
+// Amplify.astro — interference that picks ONE answer (the honest computational
+// picture, replacing the double-slit for "how it helps"). Six candidate answers
+// each receive three contributions (little arrows). At the "blur" end every
+// answer's contributions are aligned, so all six are equally likely: look and
+// you get one at random. As you "arrange the interference", the contributions to
+// the WRONG answers fan out and cancel to nothing while the RIGHT answer's stay
+// aligned and reinforce, so its probability climbs to almost one. Then a look
+// gives that answer. Honest: signed contributions add or cancel, and only become
+// a probability when squared; no maths, light/parchment, reduced-motion safe.
+---
+
+<div class="amp" data-amplify>
+  <canvas class="amp-canvas" role="img"
+    aria-label="Six candidate answers, each with three contributions. A slider arranges the interference so the wrong answers cancel and the right one reinforces; a button looks and returns a single answer."></canvas>
+  <div class="amp-controls">
+    <label class="amp-ctl">
+      <span>arrange the interference</span>
+      <input class="amp-slider" type="range" min="0" max="100" value="0" step="1" aria-label="Arrange the interference, from a blur to the wrong answers cancelled" />
+    </label>
+    <button type="button" class="amp-look">Look</button>
+  </div>
+  <p class="amp-status"></p>
+  <p class="amp-result" aria-live="polite"></p>
+</div>
+
+<style>
+  .amp {
+    margin: 2rem 0; padding: 1rem;
+    border: 1px solid var(--rule); border-radius: 12px;
+    background:
+      radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%),
+      var(--bg-raised);
+    box-shadow: 0 10px 30px -24px rgba(0, 0, 0, 0.32);
+  }
+  .amp-canvas { width: 100%; aspect-ratio: 1.9; display: block; border: 1px solid var(--rule); border-radius: 10px; background: var(--bg-raised); }
+  .amp-controls { display: flex; align-items: center; gap: 0.9rem; margin-top: 0.8rem; flex-wrap: wrap; }
+  .amp-ctl { display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 13rem; }
+  .amp-ctl span { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-muted); white-space: nowrap; }
+  .amp-ctl input[type="range"] { flex: 1; accent-color: var(--accent); }
+  .amp-look {
+    font-family: var(--font-mono); font-size: 0.78rem; cursor: pointer;
+    color: var(--ink-dim); background: var(--bg);
+    border: 1px solid var(--rule); border-radius: 7px; padding: 0.4rem 0.95rem;
+    transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease, transform 0.05s ease;
+  }
+  .amp-look:hover { color: var(--accent); border-color: var(--accent); }
+  .amp-look:active { transform: translateY(1px); }
+  .amp-status { margin: 0.7rem 0 0; font-family: var(--font-serif); font-size: 0.95rem; line-height: 1.5; color: var(--ink-dim); min-height: 2.3rem; }
+  .amp-status b { font-style: normal; font-weight: 600; color: var(--ink); }
+  .amp-result { margin: 0.3rem 0 0; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); min-height: 1.1rem; }
+
+  @media (prefers-reduced-motion: no-preference) { .amp-canvas { } }
+</style>
+
+<script>
+  import { labPalette, fitCanvas, prefersReducedMotion, clamp, hexA } from '../scripts/labgfx.js';
+
+  const N = 6;        // candidate answers
+  const M = 3;        // contributions per answer
+  const TARGET = 3;   // the answer we want (0-indexed -> "answer 4")
+  const PI = Math.PI;
+
+  function initOne(root) {
+    if (root._cleanup) root._cleanup();
+    const reduced = prefersReducedMotion();
+    const canvas = root.querySelector('.amp-canvas');
+    const ctx = canvas.getContext('2d');
+    const slider = root.querySelector('.amp-slider');
+    const lookBtn = root.querySelector('.amp-look');
+    const statusEl = root.querySelector('.amp-status');
+    const resultEl = root.querySelector('.amp-result');
+    const pal = labPalette();
+
+    let dims = null;
+    let rafId = 0;
+    let lookedAt = -1;     // last sampled answer (for the highlight)
+
+    const t = () => (+slider.value) / 100;
+
+    // Each wrong answer's k-th contribution rotates from aligned (phase 0, so all
+    // six start equal) to a cancelling fan (0, 120, 240 degrees -> sum 0). The
+    // target's contributions stay aligned, so it alone survives.
+    function amplitude(j) {
+      let rx = 0, ry = 0;
+      for (let k = 0; k < M; k++) {
+        const phase = (j === TARGET) ? 0 : t() * (k * 2 * PI / M);
+        rx += Math.cos(phase - PI / 2); // -PI/2 so "aligned" points up
+        ry += Math.sin(phase - PI / 2);
+      }
+      return { rx, ry, mag: Math.hypot(rx, ry) };
+    }
+
+    function state() {
+      const amps = [];
+      let sumsq = 0;
+      for (let j = 0; j < N; j++) { const a = amplitude(j); amps.push(a); sumsq += a.mag * a.mag; }
+      const probs = amps.map((a) => (sumsq > 0 ? (a.mag * a.mag) / sumsq : 1 / N));
+      return { amps, probs };
+    }
+
+    function arrow(x0, y0, x1, y1, color, width) {
+      ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+      const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy);
+      if (len < 3) return;
+      const ux = dx / len, uy = dy / len, hs = Math.max(4, width * 2.2);
+      ctx.beginPath(); ctx.moveTo(x1, y1);
+      ctx.lineTo(x1 - hs * ux - hs * 0.55 * uy, y1 - hs * uy + hs * 0.55 * ux);
+      ctx.lineTo(x1 - hs * ux + hs * 0.55 * uy, y1 - hs * uy - hs * 0.55 * ux);
+      ctx.closePath(); ctx.fill();
+    }
+
+    function render() {
+      if (!dims) return;
+      const { w, h } = dims;
+      ctx.clearRect(0, 0, w, h);
+      const { amps, probs } = state();
+
+      const padX = 10, padTop = 12, labelH = 22;
+      const colW = (w - 2 * padX) / N;
+      const phaserCY = padTop + (h - padTop - labelH) * 0.30;
+      const R = Math.min(colW * 0.42, (h - padTop - labelH) * 0.22);
+      const cu = R / M;                       // contribution draw length (unit)
+      const barTop = phaserCY + R + 14;
+      const barBottomY = h - labelH - 6;
+      const barMaxH = Math.max(10, barBottomY - barTop);
+
+      ctx.font = Math.max(10, Math.round(w * 0.02)) + 'px ui-monospace, monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+      for (let j = 0; j < N; j++) {
+        const cx = padX + colW * (j + 0.5);
+        const isTarget = j === TARGET;
+        const isHit = j === lookedAt;
+
+        // faint guide circle
+        ctx.strokeStyle = hexA(pal.ink, 0.10); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(cx, phaserCY, R, 0, PI * 2); ctx.stroke();
+
+        // the three contributions (faint), from the origin
+        for (let k = 0; k < M; k++) {
+          const phase = isTarget ? 0 : t() * (k * 2 * PI / M);
+          const ang = phase - PI / 2;
+          arrow(cx, phaserCY, cx + Math.cos(ang) * cu * 0.92, phaserCY + Math.sin(ang) * cu * 0.92, hexA(pal.dim, 0.5), 1.3);
+        }
+        // the resultant (bold): their vector sum
+        const a = amps[j];
+        const rx = cx + a.rx * cu, ry = phaserCY + a.ry * cu;
+        arrow(cx, phaserCY, rx, ry, isTarget ? pal.accent : pal.ink, 2.6);
+
+        // probability bar
+        const bh = probs[j] * barMaxH;
+        ctx.fillStyle = isTarget ? pal.accent : hexA(pal.ink, 0.45);
+        ctx.fillRect(cx - colW * 0.28, barBottomY - bh, colW * 0.56, bh);
+        if (isHit) {
+          ctx.strokeStyle = pal.accent; ctx.lineWidth = 2;
+          ctx.strokeRect(cx - colW * 0.32, barTop - 2, colW * 0.64, (barBottomY - barTop) + 4);
+        }
+
+        // label
+        ctx.fillStyle = isTarget ? pal.accent : pal.dim;
+        ctx.fillText((isTarget ? '★ ' : '') + (j + 1), cx, h - labelH / 2);
+      }
+
+      const pc = (x) => Math.round(x * 100);
+      slider.setAttribute('aria-valuetext',
+        t() < 0.15 ? 'a blur: all six answers equally likely'
+        : t() > 0.85 ? 'arranged: answer 4 about ' + pc(probs[TARGET]) + '% likely, the rest near zero'
+        : 'part arranged: answer 4 about ' + pc(probs[TARGET]) + '% likely');
+    }
+
+    function schedule() { if (rafId) return; rafId = requestAnimationFrame(() => { rafId = 0; render(); }); }
+
+    function setCaption() {
+      const { probs } = state();
+      const pc = (x) => Math.round(x * 100);
+      if (t() < 0.15) {
+        statusEl.innerHTML = 'A <b>blur</b>: all six answers are equally likely. Look now and you get one at <b>random</b>, no better than a guess.';
+      } else if (t() > 0.85) {
+        statusEl.innerHTML = 'Arranged: the wrong answers have <b>cancelled</b> and answer <b>4</b> has <b>reinforced</b> to about <b>' + pc(probs[TARGET]) + '%</b>. Now a look almost always gives it.';
+      } else {
+        statusEl.innerHTML = 'Part arranged: the wrong answers are starting to cancel, and answer 4 is climbing (' + pc(probs[TARGET]) + '%).';
+      }
+    }
+
+    function onInput() { lookedAt = -1; resultEl.textContent = ''; schedule(); setCaption(); }
+
+    function look() {
+      const { probs } = state();
+      let r = Math.random(), acc = 0, out = N - 1;
+      for (let j = 0; j < N; j++) { acc += probs[j]; if (r < acc) { out = j; break; } }
+      lookedAt = out;
+      render();
+      resultEl.textContent = 'You looked and got answer ' + (out + 1) + '. '
+        + (out === TARGET ? 'That is the one we wanted.' : 'That is a wrong one; the interference was not arranged enough yet.');
+    }
+
+    function resize() { dims = fitCanvas(canvas, ctx); render(); }
+
+    slider.addEventListener('input', onInput);
+    lookBtn.addEventListener('click', look);
+    window.addEventListener('resize', resize);
+
+    root._cleanup = () => {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+      slider.removeEventListener('input', onInput);
+      lookBtn.removeEventListener('click', look);
+      window.removeEventListener('resize', resize);
+      root._cleanup = null;
+    };
+
+    resize();
+    setCaption();
+  }
+
+  function initAll() { document.querySelectorAll('[data-amplify]').forEach(initOne); }
+  initAll();
+  document.addEventListener('astro:after-swap', initAll);
+  window.addEventListener('variantchange', initAll);
+</script>

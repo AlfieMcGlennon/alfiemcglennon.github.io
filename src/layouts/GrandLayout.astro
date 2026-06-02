@@ -134,9 +134,12 @@ const ogTitle = `${title} | Alfie McGlennon`;
   .grand-article :global(.aside-note[open] > summary) { color: var(--accent); margin-bottom: 0.5rem; }
   .grand-article :global(.aside-note p) { max-width: none; font-size: 0.98rem; color: var(--ink-dim); }
 
-  /* Study-only furniture: hidden by default (Parchment) */
+  /* Study-only furniture: hidden by default (Parchment) so the default read is
+     clean five-minute prose; the quick-check retrieval cards, recaps and step
+     counters appear only in Study mode. */
   .grand-article :global(.recap),
-  .grand-article :global(.idea-step) { display: none; }
+  .grand-article :global(.idea-step),
+  .grand-article :global(.qcheck) { display: none; }
 
   .grand-foot { max-width: 680px; margin: 4rem 0 0; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
   .back-link { font-family: var(--font-mono); font-size: 0.85rem; color: var(--ink-muted); border-bottom: 0; }
@@ -164,6 +167,7 @@ const ogTitle = `${title} | Alfie McGlennon`;
     font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent);
   }
   :global(html[data-variant="study"]) .grand-article :global(.qcheck) {
+    display: block;
     background: color-mix(in srgb, var(--accent) 6%, var(--bg-raised));
     box-shadow: 0 6px 18px -16px rgba(0, 0, 0, 0.4);
   }
