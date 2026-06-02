@@ -1,0 +1,212 @@
+---
+// GrandLayout.astro — the "go big" warm/light layout for the grand interactive
+// intro. Reuses Base.astro (head/SEO/nav/fonts/parchment) but raises the register:
+// a strong hero, a sticky mini-TOC with scrollspy, a wide figure / narrow prose
+// grammar (interactives bleed wider than the 680px text), sidenote gutters for
+// citations, and the Study reading-mode furniture. Honesty + warmth, never dark.
+import Base from './Base.astro';
+
+const { title, description, date, tags = [], image, project, math } = Astro.props;
+const formatted = new Date(date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+const ogTitle = `${title} | Alfie McGlennon`;
+---
+
+<Base
+  title={ogTitle}
+  description={description}
+  ogTitle={ogTitle}
+  ogDescription={description}
+  image={image}
+  ogType="article"
+  publishedTime={new Date(date).toISOString()}
+  tags={tags}
+  headline={title}
+  math={math}
+>
+  <div class="grand" data-project={project}>
+    <header class="grand-hero">
+      <p class="kicker">Interactive &middot; a hands-on way in</p>
+      <h1>{title}</h1>
+      <p class="grand-meta">
+        <time datetime={new Date(date).toISOString()}>{formatted}</time>
+        {tags.length > 0 && <span class="sep">&middot;</span>}
+        {tags.length > 0 && <span>{tags.join(' · ')}</span>}
+      </p>
+      <p class="grand-lede">{description}</p>
+    </header>
+
+    <div class="grand-body">
+      <nav class="grand-toc" aria-label="On this page" data-grand-toc></nav>
+      <article class="grand-article post"><slot /></article>
+    </div>
+
+    <footer class="grand-foot">
+      <a href="/writing/" class="back-link">&larr; All writing</a>
+    </footer>
+  </div>
+</Base>
+
+<style>
+  .grand { max-width: 1180px; margin: 0 auto; padding: 3.5rem 1.5rem 6rem; }
+
+  .grand-hero { max-width: 760px; margin: 0 auto 3rem; }
+  .grand-hero h1 {
+    font-size: clamp(2.4rem, 5.5vw, 3.5rem);
+    line-height: 1.04; letter-spacing: -0.03em; margin: 0.6rem 0 1rem;
+  }
+  .grand-meta { font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-muted); margin: 0 0 1.4rem; }
+  .grand-meta .sep { color: var(--ink-faint); margin: 0 0.45rem; }
+  .grand-lede { font-family: var(--font-serif); font-size: 1.28rem; line-height: 1.6; color: var(--ink-dim); max-width: 60ch; }
+
+  .grand-body { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+
+  .grand-toc { position: sticky; top: 2rem; align-self: start; }
+  .grand-toc :global(ol) { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; border-left: 2px solid var(--rule); }
+  .grand-toc :global(li) { margin: 0; }
+  .grand-toc :global(a) {
+    display: block; font-family: var(--font-mono); font-size: 0.74rem; line-height: 1.35;
+    color: var(--ink-muted); text-decoration: none; border-bottom: 0;
+    padding: 0.1rem 0 0.1rem 0.8rem; margin-left: -2px; border-left: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .grand-toc :global(a:hover) { color: var(--ink); }
+  .grand-toc :global(a.active) { color: var(--accent); border-left-color: var(--accent); }
+
+  /* Wide figures, narrow prose: text holds a 680px measure, interactives fill the column. */
+  .grand-article { font-size: 1.05rem; }
+  .grand-article :global(p),
+  .grand-article :global(h2),
+  .grand-article :global(h3),
+  .grand-article :global(ul),
+  .grand-article :global(ol),
+  .grand-article :global(blockquote) { max-width: 680px; }
+
+  .grand-article :global(h2) {
+    margin-top: 3.25rem; font-size: clamp(1.5rem, 3vw, 1.95rem); letter-spacing: -0.02em;
+    padding-left: 0.9rem; border-left: 3px solid var(--accent); scroll-margin-top: 1.5rem;
+  }
+  .grand-article :global(h3) { margin-top: 2rem; }
+
+  /* Callouts */
+  .grand-article :global(.callout) {
+    max-width: 680px; margin: 1.9rem 0; padding: 1.1rem 1.35rem;
+    background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 8px;
+  }
+  .grand-article :global(.callout-key) { border-left: 3px solid var(--accent); }
+  .grand-article :global(.callout-refuse) { border-left: 3px solid var(--amber); }
+  .grand-article :global(.callout p:first-child) { margin-top: 0; }
+  .grand-article :global(.callout p:last-child),
+  .grand-article :global(.callout ol:last-child),
+  .grand-article :global(.callout ul:last-child) { margin-bottom: 0; }
+
+  /* Sidenote gloss: inline-distinct on narrow, floats into the right gutter on wide. */
+  .grand-article :global(.gloss) {
+    display: block; max-width: 680px; margin: 0.3rem 0 1.5rem;
+    font-family: var(--font-mono); font-size: 0.74rem; line-height: 1.55;
+    color: var(--ink-muted); border-left: 2px solid var(--rule); padding: 0.1rem 0 0.1rem 0.85rem;
+  }
+  @media (min-width: 1080px) {
+    .grand-article :global(.gloss) { float: right; clear: right; width: 220px; margin: 0.25rem 0 1rem 1.75rem; }
+  }
+
+  /* Quick-check cards (the retrieval prompts; present in both modes) */
+  .grand-article :global(.qcheck) {
+    max-width: 680px; margin: 1.6rem 0; border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent); border-radius: 8px; background: var(--bg-raised);
+  }
+  .grand-article :global(.qcheck > summary) {
+    cursor: pointer; list-style: none; padding: 0.85rem 1.1rem;
+    font-family: var(--font-serif); font-weight: 600; color: var(--ink);
+  }
+  .grand-article :global(.qcheck > summary::-webkit-details-marker) { display: none; }
+  .grand-article :global(.qcheck > summary::before) {
+    content: "Quick check"; display: block;
+    font-family: var(--font-mono); font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--accent); margin-bottom: 0.35rem;
+  }
+  .grand-article :global(.qcheck > summary::after) { content: " \2192 reveal"; font-family: var(--font-mono); font-weight: 400; font-size: 0.72rem; color: var(--ink-faint); }
+  .grand-article :global(.qcheck[open] > summary::after) { content: ""; }
+  .grand-article :global(.qcheck p) { margin: 0; padding: 0 1.1rem 1rem; max-width: none; color: var(--ink-dim); }
+
+  /* Quieter expander for limitation asides */
+  .grand-article :global(.aside-note) { max-width: 680px; margin: 1.4rem 0; }
+  .grand-article :global(.aside-note > summary) { cursor: pointer; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-muted); }
+  .grand-article :global(.aside-note[open] > summary) { color: var(--accent); margin-bottom: 0.5rem; }
+  .grand-article :global(.aside-note p) { max-width: none; font-size: 0.98rem; color: var(--ink-dim); }
+
+  /* Study-only furniture: hidden by default (Parchment) */
+  .grand-article :global(.recap),
+  .grand-article :global(.idea-step) { display: none; }
+
+  .grand-foot { max-width: 680px; margin: 4rem 0 0; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+  .back-link { font-family: var(--font-mono); font-size: 0.85rem; color: var(--ink-muted); border-bottom: 0; }
+  .back-link:hover { color: var(--accent); }
+
+  @media (max-width: 960px) {
+    .grand-body { grid-template-columns: 1fr; gap: 0; }
+    .grand-toc { display: none; }
+  }
+  @media (max-width: 640px) {
+    .grand { padding: 2.5rem 1.25rem 4.5rem; }
+  }
+
+  /* ── STUDY reading mode (warm, retention-first) ── */
+  :global(html[data-variant="study"]) { --bg: #efeae0; --bg-raised: #f8f4ea; --rule: #e0d8c8; }
+  :global(html[data-variant="study"]) .grand-article { border-left: 2px solid var(--rule); padding-left: 1.6rem; }
+  :global(html[data-variant="study"]) .grand-article :global(.recap) {
+    display: block; max-width: 680px; margin: 0 0 1.6rem;
+    font-family: var(--font-mono); font-size: 0.76rem; line-height: 1.5; color: var(--ink-dim);
+    border-left: 2px solid var(--accent); padding: 0.45rem 0.8rem;
+    background: color-mix(in srgb, var(--accent) 5%, transparent); border-radius: 0 6px 6px 0;
+  }
+  :global(html[data-variant="study"]) .grand-article :global(.idea-step) {
+    display: block; max-width: 680px; margin: 2.5rem 0 -0.75rem;
+    font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent);
+  }
+  :global(html[data-variant="study"]) .grand-article :global(.qcheck) {
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg-raised));
+    box-shadow: 0 6px 18px -16px rgba(0, 0, 0, 0.4);
+  }
+</style>
+
+<script>
+  import { attachReveals } from '../scripts/reveal.js';
+
+  function slug(s, i) {
+    return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || ('section-' + i);
+  }
+
+  let io = null;
+  function init() {
+    const article = document.querySelector('.grand-article');
+    const toc = document.querySelector('[data-grand-toc]');
+    if (!article || !toc) return;
+
+    const hs = Array.from(article.querySelectorAll('h2'));
+    hs.forEach((h, i) => { if (!h.id) h.id = slug(h.textContent, i); });
+    toc.innerHTML = '<ol>' + hs.map((h) => `<li><a href="#${h.id}">${h.textContent}</a></li>`).join('') + '</ol>';
+
+    const links = Array.from(toc.querySelectorAll('a'));
+    const byId = {};
+    links.forEach((a) => { byId[a.getAttribute('href').slice(1)] = a; });
+
+    if (io) io.disconnect();
+    if (typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            links.forEach((l) => l.classList.remove('active'));
+            const a = byId[e.target.id];
+            if (a) a.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-12% 0px -78% 0px' });
+      hs.forEach((h) => io.observe(h));
+    }
+
+    attachReveals(document);
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>

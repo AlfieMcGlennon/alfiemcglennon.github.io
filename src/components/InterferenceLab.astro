@@ -23,39 +23,40 @@
 </div>
 
 <style>
+  /* Token-driven: warm/light on the site, dark+glowing on the showcase. */
   .ilab {
     margin: 2rem 0;
     padding: 1rem;
-    border: 1px solid rgba(140, 150, 235, 0.18);
+    border: 1px solid var(--rule);
     border-radius: 12px;
     background:
-      radial-gradient(120% 90% at 85% 0%, rgba(99, 110, 210, 0.10), transparent 55%),
-      var(--lab-panel, #0f1320);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -28px rgba(0, 0, 0, 0.8);
+      radial-gradient(120% 90% at 85% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 55%),
+      var(--bg-raised);
+    box-shadow: 0 10px 30px -24px rgba(0, 0, 0, 0.32);
   }
   .ilab-canvas {
     width: 100%; aspect-ratio: 2.1; display: block;
-    border: 1px solid rgba(140, 150, 235, 0.12); border-radius: 10px;
-    background: radial-gradient(120% 120% at 50% 50%, #0c1020, #07090f);
+    border: 1px solid var(--rule); border-radius: 10px;
+    background: var(--bg-raised);
   }
   .ilab-controls { display: flex; align-items: center; gap: 0.9rem; margin-top: 0.8rem; flex-wrap: wrap; }
   .ilab-ctl { display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 12rem; }
-  .ilab-ctl span { font-family: var(--font-mono); font-size: 0.74rem; color: var(--lab-dim, #9aa3bd); white-space: nowrap; }
-  .ilab-ctl input[type="range"] { flex: 1; accent-color: var(--lab-accent, #8b93f8); }
+  .ilab-ctl span { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-muted); white-space: nowrap; }
+  .ilab-ctl input[type="range"] { flex: 1; accent-color: var(--accent); }
   .ilab-controls button {
     font-family: var(--font-mono); font-size: 0.78rem; cursor: pointer;
-    color: var(--lab-ink, #e7e9f0); background: rgba(139, 147, 248, 0.10);
-    border: 1px solid rgba(139, 147, 248, 0.35); border-radius: 7px; padding: 0.4rem 0.85rem;
-    transition: background 0.18s ease, border-color 0.18s ease, transform 0.05s ease;
+    color: var(--ink-dim); background: var(--bg);
+    border: 1px solid var(--rule); border-radius: 7px; padding: 0.4rem 0.85rem;
+    transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease, transform 0.05s ease;
   }
-  .ilab-controls button:hover { background: rgba(139, 147, 248, 0.22); border-color: var(--lab-accent-bright, #c2c8ff); }
+  .ilab-controls button:hover { color: var(--accent); border-color: var(--accent); }
   .ilab-controls button:active { transform: translateY(1px); }
-  .ilab-controls .ilab-clear { background: rgba(154, 163, 189, 0.08); border-color: rgba(154, 163, 189, 0.28); color: var(--lab-dim, #9aa3bd); }
-  .ilab-status { margin: 0.7rem 0 0; font-family: var(--font-mono); font-size: 0.76rem; color: var(--lab-accent-bright, #c2c8ff); min-height: 1.1rem; }
+  .ilab-controls .ilab-clear { color: var(--ink-muted); }
+  .ilab-status { margin: 0.7rem 0 0; font-family: var(--font-mono); font-size: 0.76rem; color: var(--accent); min-height: 1.1rem; }
 </style>
 
 <script>
-  import { LAB, fitCanvas, prefersReducedMotion, clamp, rand, rafLoop, glowStroke, glowDot } from '../scripts/labgfx.js';
+  import { labPalette, hexA, fitCanvas, prefersReducedMotion, clamp, rand, rafLoop, glowStroke, glowDot } from '../scripts/labgfx.js';
 
   const NB = 96;                 // intensity bins across the screen
   const TOTAL = 420;             // photons per "Fire"
@@ -71,7 +72,7 @@
     const fireBtn = root.querySelector('.ilab-fire');
     const clearBtn = root.querySelector('.ilab-clear');
     const statusEl = root.querySelector('.ilab-status');
-    const pal = LAB;
+    const pal = labPalette();
 
     let dims = null;
     const counts = new Array(NB).fill(0);
@@ -79,6 +80,7 @@
     let inflight = [];
     let fired = 0;
     let firing = false;
+    let inView = true;
 
     const spread = () => 6 + (+spreadIn.value) / 100 * 26;        // 6..32
     const intensity = (y) => Math.cos(spread() * y / 2) ** 2;     // y in [-1,1]
@@ -111,10 +113,10 @@
       ctx.clearRect(0, 0, w, h);
 
       // source
-      glowDot(ctx, sx, mid, 4, pal.accentBright, 14);
+      glowDot(ctx, sx, mid, 4, pal.accentBright, pal.glow);
 
       // barrier with two slits
-      ctx.fillStyle = 'rgba(150,160,235,0.16)';
+      ctx.fillStyle = hexA(pal.ink, 0.18);
       const gap = slit * 0.6;
       ctx.fillRect(bx - 3, 0, 6, mid - slit - gap);
       ctx.fillRect(bx - 3, mid - slit + gap, 6, 2 * (slit - gap));
@@ -122,7 +124,7 @@
 
       // faint wavefronts from each slit
       ctx.save();
-      ctx.strokeStyle = 'rgba(139,147,248,0.10)'; ctx.lineWidth = 1;
+      ctx.strokeStyle = hexA(pal.accent, 0.12); ctx.lineWidth = 1;
       for (const sy of [mid - slit, mid + slit]) {
         for (let r = 18; r < (scx - bx); r += 22) {
           ctx.beginPath(); ctx.arc(bx, sy, r, -0.9, 0.9); ctx.stroke();
@@ -131,12 +133,12 @@
       ctx.restore();
 
       // screen
-      ctx.strokeStyle = 'rgba(150,160,235,0.22)'; ctx.lineWidth = 1.5;
+      ctx.strokeStyle = hexA(pal.ink, 0.25); ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(scx, 6); ctx.lineTo(scx, h - 6); ctx.stroke();
 
       // intensity curve, glowing, just left of the screen
       const cw = w * 0.13;
-      glowStroke(ctx, pal.accent, 1.6, 8, () => {
+      glowStroke(ctx, pal.accent, 1.6, pal.glow, () => {
         for (let i = 0; i <= NB; i++) {
           const y = (i / NB) * 2 - 1;
           const xx = scx - intensity(y) * cw;
@@ -149,7 +151,7 @@
     function drawDots(g) {
       const { w, scx } = g;
       const maxPerRow = Math.max(8, Math.floor((w - 8 - scx) / 4));
-      ctx.fillStyle = 'rgba(220,225,255,0.9)';
+      ctx.fillStyle = hexA(pal.accent, 0.9);
       for (let b = 0; b < NB; b++) {
         const n = Math.min(counts[b], maxPerRow);
         if (!n) continue;
@@ -175,7 +177,7 @@
           const ty = screenY(g, ph.y);
           x = g.bx + (g.scx - g.bx) * u; y = slitY + (ty - slitY) * u;
         }
-        glowDot(ctx, x, y, 1.8, pal.accentBright, 8);
+        glowDot(ctx, x, y, 1.8, pal.accentBright, pal.glow);
       }
     }
 
@@ -189,7 +191,7 @@
 
     function setStatus(done) {
       statusEl.textContent = done
-        ? total + ' photons in. Bright bands = the two paths reinforce; dark = they cancel — yet each arrived as a single dot.'
+        ? total + ' photons in. Bright bands = the two paths reinforce, dark = they cancel, yet each arrived as a single dot.'
         : 'Firing… ' + total + ' photons landed.';
     }
 
@@ -207,26 +209,30 @@
           inflight.splice(i, 1);
         }
       }
-      frameDraw();
+      if (inView) frameDraw();
       if (fired % 24 === 0) setStatus(false);
       if (firing && fired >= TOTAL && inflight.length === 0) {
         firing = false; loop.stop(); setStatus(true); frameDraw();
       }
     });
 
+    function resetPattern() {
+      inflight = []; for (let i = 0; i < NB; i++) counts[i] = 0; total = 0;
+    }
+
     function fire() {
+      if (firing) return;
+      resetPattern();                      // each Fire is a fresh experiment
       if (reduced) {
         for (let i = 0; i < TOTAL; i++) { counts[binOf(sampleY())]++; total++; }
         frameDraw(); setStatus(true); return;
       }
-      if (firing) return;
       firing = true; fired = 0; loop.start();
     }
 
     function clearAll() {
-      firing = false; loop.stop(); inflight = [];
-      for (let i = 0; i < NB; i++) counts[i] = 0;
-      total = 0; statusEl.textContent = ''; frameDraw();
+      firing = false; loop.stop(); resetPattern();
+      statusEl.textContent = ''; frameDraw();
     }
 
     function resize() { dims = fitCanvas(canvas, ctx); frameDraw(); }
@@ -237,8 +243,15 @@
     clearBtn.addEventListener('click', clearAll);
     window.addEventListener('resize', resize);
 
+    let io = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver((es) => { inView = es[0].isIntersecting; }, { threshold: 0.05 });
+      io.observe(root);
+    }
+
     root._cleanup = () => {
       loop.stop();
+      if (io) io.disconnect();
       spreadIn.removeEventListener('input', onSpread);
       fireBtn.removeEventListener('click', fire);
       clearBtn.removeEventListener('click', clearAll);
@@ -252,4 +265,5 @@
   function initAll() { document.querySelectorAll('[data-interference-lab]').forEach(initOne); }
   initAll();
   document.addEventListener('astro:after-swap', initAll);
+  window.addEventListener('variantchange', initAll); // re-read palette on theme change
 </script>

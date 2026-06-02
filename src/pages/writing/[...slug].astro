@@ -1,9 +1,14 @@
 ---
 import Post from '../../layouts/Post.astro';
+import GrandLayout from '../../layouts/GrandLayout.astro';
 import { getCollection, render } from 'astro:content';
 import QubitArrow from '../../components/QubitArrow.astro';
 import TwoWaves from '../../components/TwoWaves.astro';
 import StyleVariants from '../../components/StyleVariants.astro';
+import BlochLab from '../../components/BlochLab.astro';
+import PhaseLever from '../../components/PhaseLever.astro';
+import InterferenceLab from '../../components/InterferenceLab.astro';
+import ReadingModes from '../../components/ReadingModes.astro';
 
 export async function getStaticPaths() {
   // Only generate routes for published posts. Set `draft: false` in a post's
@@ -17,17 +22,24 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+const d = post.data;
 const { Content } = await render(post);
+
+// `grand: true` posts get the wide, warm "go big" layout and the light rich
+// interactives; everything else uses the standard narrow Post layout. Components
+// are provided via the MDX components prop, so post .mdx files import nothing.
+const grand = !!d.grand;
+const components = grand
+  ? { ReadingModes, BlochLab, PhaseLever, InterferenceLab }
+  : { QubitArrow, TwoWaves, StyleVariants };
 ---
 
-<Post
-  title={post.data.title}
-  description={post.data.description}
-  date={post.data.date}
-  tags={post.data.tags}
-  image={post.data.image}
-  project={post.data.project}
-  math={post.data.math}
->
-  <Content components={{ QubitArrow, TwoWaves, StyleVariants }} />
-</Post>
+{grand ? (
+  <GrandLayout title={d.title} description={d.description} date={d.date} tags={d.tags} image={d.image} project={d.project} math={d.math}>
+    <Content components={components} />
+  </GrandLayout>
+) : (
+  <Post title={d.title} description={d.description} date={d.date} tags={d.tags} image={d.image} project={d.project} math={d.math}>
+    <Content components={components} />
+  </Post>
+)}

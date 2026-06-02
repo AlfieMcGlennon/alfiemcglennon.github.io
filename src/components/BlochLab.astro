@@ -30,7 +30,7 @@ const { measure = false } = Astro.props;
       <label class="blab-ctl">
         <span class="blab-ctl-top">Phase <span class="blab-sym">&phi;</span><output class="blab-phi-v"></output></span>
         <input class="blab-phi" type="range" min="0" max="360" value="40" step="1" />
-        <span class="blab-note">spins the arrow sideways &mdash; the odds do not change</span>
+        <span class="blab-note">spins the arrow sideways, and the odds do not change</span>
       </label>
 
       <div class="blab-odds">
@@ -54,55 +54,57 @@ const { measure = false } = Astro.props;
 </div>
 
 <style>
+  /* Token-driven: warm/light on the parchment site, dark+glowing on the showcase
+     (where body.showcase flips --bg-raised/--ink/--accent and sets --lab-glow). */
   .blab {
     margin: 2rem 0;
     padding: 1rem;
-    border: 1px solid rgba(140, 150, 235, 0.18);
+    border: 1px solid var(--rule);
     border-radius: 12px;
     background:
-      radial-gradient(120% 80% at 15% 0%, rgba(99, 110, 210, 0.10), transparent 60%),
-      var(--lab-panel, #0f1320);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -28px rgba(0, 0, 0, 0.8);
+      radial-gradient(120% 80% at 15% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 60%),
+      var(--bg-raised);
+    box-shadow: 0 10px 30px -24px rgba(0, 0, 0, 0.32);
   }
   .blab-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 1.25rem; align-items: center; }
   .blab-stage { display: flex; flex-direction: column; gap: 0.4rem; }
   .blab-canvas {
     width: 100%; aspect-ratio: 1; display: block;
-    border: 1px solid rgba(140, 150, 235, 0.12); border-radius: 10px;
-    background: radial-gradient(100% 100% at 50% 40%, #0d1120, #080a12);
+    border: 1px solid var(--rule); border-radius: 10px;
+    background: var(--bg-raised);
     cursor: grab; touch-action: none;
   }
   .blab-canvas:active { cursor: grabbing; }
-  .blab-hint { margin: 0; text-align: center; font-family: var(--font-mono); font-size: 0.7rem; color: rgba(154, 163, 189, 0.65); letter-spacing: 0.02em; }
+  .blab-hint { margin: 0; text-align: center; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); letter-spacing: 0.02em; }
 
   .blab-side { display: flex; flex-direction: column; gap: 0.9rem; }
   .blab-ctl { display: flex; flex-direction: column; gap: 0.35rem; }
-  .blab-ctl-top { display: flex; align-items: baseline; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--lab-dim, #9aa3bd); }
-  .blab-sym { color: var(--lab-accent-bright, #c2c8ff); font-weight: 600; }
-  .blab-ctl-top output { margin-left: auto; color: var(--lab-accent-bright, #c2c8ff); }
-  .blab-note { font-family: var(--font-mono); font-size: 0.68rem; color: rgba(154, 163, 189, 0.6); }
-  .blab input[type="range"] { width: 100%; accent-color: var(--lab-accent, #8b93f8); }
+  .blab-ctl-top { display: flex; align-items: baseline; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-muted); }
+  .blab-sym { color: var(--accent); font-weight: 600; }
+  .blab-ctl-top output { margin-left: auto; color: var(--accent); }
+  .blab-note { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-faint); }
+  .blab input[type="range"] { width: 100%; accent-color: var(--accent); }
 
   .blab-odds { display: flex; flex-direction: column; gap: 0.4rem; }
-  .blab-bar-row { display: grid; grid-template-columns: 1rem 1fr auto; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--lab-dim, #9aa3bd); }
-  .blab-bar { height: 0.75rem; background: rgba(140, 150, 235, 0.10); border-radius: 4px; overflow: hidden; }
+  .blab-bar-row { display: grid; grid-template-columns: 1rem 1fr auto; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-muted); }
+  .blab-bar { height: 0.75rem; background: var(--rule-soft); border-radius: 4px; overflow: hidden; }
   .blab-bar i { display: block; height: 100%; width: 0; border-radius: 4px; }
-  .blab-bar0 { background: linear-gradient(90deg, #1f8f86, #34e7c9); box-shadow: 0 0 12px rgba(52, 231, 201, 0.5); }
-  .blab-bar1 { background: linear-gradient(90deg, #b4690a, #fbbf24); box-shadow: 0 0 12px rgba(251, 191, 36, 0.45); }
-  .blab-p0, .blab-p1 { color: var(--lab-ink, #e7e9f0); min-width: 2.7rem; text-align: right; }
+  .blab-bar0 { background: var(--teal); }
+  .blab-bar1 { background: var(--amber); }
+  .blab-p0, .blab-p1 { color: var(--ink); min-width: 2.7rem; text-align: right; }
 
-  .blab-measure { display: flex; flex-direction: column; gap: 0.6rem; border-top: 1px solid rgba(140, 150, 235, 0.12); padding-top: 0.7rem; }
+  .blab-measure { display: flex; flex-direction: column; gap: 0.6rem; border-top: 1px solid var(--rule); padding-top: 0.7rem; }
   .blab-btns { display: flex; gap: 0.5rem; }
   .blab-btns button {
     font-family: var(--font-mono); font-size: 0.78rem; cursor: pointer;
-    color: var(--lab-ink, #e7e9f0); background: rgba(139, 147, 248, 0.10);
-    border: 1px solid rgba(139, 147, 248, 0.35); border-radius: 7px; padding: 0.4rem 0.8rem;
-    transition: background 0.18s ease, border-color 0.18s ease, transform 0.05s ease;
+    color: var(--ink-dim); background: var(--bg);
+    border: 1px solid var(--rule); border-radius: 7px; padding: 0.4rem 0.8rem;
+    transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease, transform 0.05s ease;
   }
-  .blab-btns button:hover { background: rgba(139, 147, 248, 0.22); border-color: var(--lab-accent-bright, #c2c8ff); }
+  .blab-btns button:hover { color: var(--accent); border-color: var(--accent); }
   .blab-btns button:active { transform: translateY(1px); }
-  .blab-spark { width: 100%; height: 54px; display: block; border: 1px solid rgba(140, 150, 235, 0.10); border-radius: 7px; background: #0a0d16; }
-  .blab-result { margin: 0; min-height: 1.1rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--lab-accent-bright, #c2c8ff); }
+  .blab-spark { width: 100%; height: 54px; display: block; border: 1px solid var(--rule); border-radius: 7px; background: var(--bg); }
+  .blab-result { margin: 0; min-height: 1.1rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); }
 
   @media (max-width: 640px) { .blab-grid { grid-template-columns: 1fr; } }
 </style>
@@ -111,7 +113,7 @@ const { measure = false } = Astro.props;
   import { StateVector } from '../scripts/qsim.js';
   import { animate } from 'animejs';
   import {
-    LAB, makeCamera, attachDrag, fitCanvas, prefersReducedMotion,
+    labPalette, hexA, makeCamera, attachDrag, fitCanvas, prefersReducedMotion,
     lerp, easeOutCubic, clamp, rand, rafLoop, glowStroke, glowDot,
     drawLabSphere, drawLabArrow, projectBloch, scaleFor,
   } from '../scripts/labgfx.js';
@@ -135,7 +137,7 @@ const { measure = false } = Astro.props;
     const p1El = root.querySelector('.blab-p1');
 
     const cam = makeCamera(-0.6, 0.42);
-    const pal = LAB;
+    const pal = labPalette();
     let dims = null;
     let busy = false;            // a collapse / monte-carlo is playing
     let inView = true;
@@ -143,6 +145,7 @@ const { measure = false } = Astro.props;
     let nowT = 0;
     let overlay = null;          // optional per-frame overlay (flash / sparks)
     let onResizeExtra = null;    // measure-only: re-fit the sparkline canvas
+    let collapsed = null;        // a measured pole: persists (never springs back) until a fresh tilt
 
     const theta = () => +thetaIn.value;
     const phi = () => +phiIn.value;
@@ -151,6 +154,8 @@ const { measure = false } = Astro.props;
       const th = thDeg * PI / 180, ph = phDeg * PI / 180;
       return { x: Math.sin(th) * Math.cos(ph), y: Math.sin(th) * Math.sin(ph), z: Math.cos(th) };
     }
+    // What to draw: a measured pole persists; otherwise the live tilt.
+    const currentVec = () => collapsed || vecFrom(theta(), phi());
 
     function drawScene(v) {
       if (!dims) return;
@@ -187,14 +192,17 @@ const { measure = false } = Astro.props;
       if (busy) return;
       if (!reduced && inView && (t - lastInteract) > 2.2) {
         cam.yaw += dt * 0.16;
-        drawScene(vecFrom(theta(), phi()));
+        drawScene(currentVec());
       }
     });
 
-    const onInput = () => { lastInteract = nowT; render(); };
+    // A fresh tilt clears any measured pole and recomputes the odds.
+    const onInput = () => { if (busy) return; collapsed = null; lastInteract = nowT; render(); };
     thetaIn.addEventListener('input', onInput);
     phiIn.addEventListener('input', onInput);
-    const detachDrag = attachDrag(canvas, cam, () => { lastInteract = nowT; render(); });
+    // Dragging orbits the camera only: redraw the scene (preserving a collapsed
+    // pole and the live bars), never reset the data.
+    const detachDrag = attachDrag(canvas, cam, () => { if (busy) return; lastInteract = nowT; drawScene(currentVec()); });
     window.addEventListener('resize', resize);
 
     // Pause the loop when off-screen.
@@ -220,13 +228,13 @@ const { measure = false } = Astro.props;
         const { w, h } = sdims;
         sctx.clearRect(0, 0, w, h);
         // truth line
-        sctx.strokeStyle = 'rgba(154,163,189,0.45)';
+        sctx.strokeStyle = hexA(pal.dim, 0.5);
         sctx.setLineDash([3, 3]); sctx.lineWidth = 1;
         const ty = (1 - truth) * h;
         sctx.beginPath(); sctx.moveTo(0, ty); sctx.lineTo(w, ty); sctx.stroke();
         sctx.setLineDash([]);
         if (series.length > 1) {
-          glowStroke(sctx, pal.accentBright, 1.6, 6, () => {
+          glowStroke(sctx, pal.accentBright, 1.6, pal.glow, () => {
             for (let i = 0; i < series.length; i++) {
               const x = (i / (series.length - 1)) * w;
               const y = (1 - series[i]) * h;
@@ -246,7 +254,7 @@ const { measure = false } = Astro.props;
         const announce = 'You looked once and got: ' + out + '. The tilt is gone.';
         const colour = out === 0 ? pal.teal : pal.amber;
 
-        if (reduced) { overlay = null; drawScene(finalV); resultEl.textContent = announce; busy = false; return; }
+        if (reduced) { overlay = null; collapsed = finalV; drawScene(finalV); resultEl.textContent = announce; busy = false; return; }
 
         // sparks fly from the tip toward the chosen pole as it collapses
         const sparks = Array.from({ length: 22 }, () => ({ ang: rand(0, PI * 2), spd: rand(0.5, 1.3) }));
@@ -269,25 +277,26 @@ const { measure = false } = Astro.props;
                 const x = lerp(tip.x, pole.x, e) + Math.cos(sp.ang) * r;
                 const y = lerp(tip.y, pole.y, e) + Math.sin(sp.ang) * r;
                 c.save(); c.globalAlpha = (1 - obj.p) * 0.9;
-                glowDot(c, x, y, 1.8, colour, 8); c.restore();
+                glowDot(c, x, y, 1.8, colour, pal.glow); c.restore();
               }
               // flash ring at destination, second half
               if (obj.p > 0.45) {
                 const fp = (obj.p - 0.45) / 0.55;
                 c.save(); c.globalAlpha = (1 - fp) * 0.8;
-                glowStroke(c, colour, 2, 16, () => c.arc(pole.x, pole.y, s * 0.12 + fp * s * 0.5, 0, PI * 2));
+                glowStroke(c, colour, 2, pal.glow, () => c.arc(pole.x, pole.y, s * 0.12 + fp * s * 0.5, 0, PI * 2));
                 c.restore();
               }
             };
             drawScene(vecFrom(th, ph));
           },
-          onComplete: () => { overlay = null; drawScene(finalV); resultEl.textContent = announce; busy = false; lastInteract = nowT; },
+          onComplete: () => { overlay = null; collapsed = finalV; drawScene(finalV); resultEl.textContent = announce; busy = false; lastInteract = nowT; },
         });
       };
 
       onMany = () => {
         if (busy) return;
         busy = true;
+        collapsed = null;            // re-prepares a fresh tilt each shot
         const N = 100;
         const truth = p0();
         let c0 = 0, c1 = 0, done = 0;
@@ -302,7 +311,7 @@ const { measure = false } = Astro.props;
         const step = () => { (Math.random() < truth ? (c0++) : (c1++)); done++; series.push(c0 / done); };
         const finishText = () => {
           resultEl.textContent = '100 looks: 0 came up ' + c0 + ', 1 came up ' + c1 +
-            ' — about ' + c0 + '%, close to the tilt’s ' + Math.round(truth * 100) + '%.';
+            '. About ' + c0 + '% zeros, close to the tilt’s ' + Math.round(truth * 100) + '%.';
         };
 
         if (reduced) {
@@ -348,4 +357,5 @@ const { measure = false } = Astro.props;
   function initAll() { document.querySelectorAll('[data-bloch-lab]').forEach(initOne); }
   initAll();
   document.addEventListener('astro:after-swap', initAll);
+  window.addEventListener('variantchange', initAll); // re-read palette on theme change
 </script>

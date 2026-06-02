@@ -1,0 +1,186 @@
+---
+// PhaseLever.astro — the NEW interactive: the hidden "sideways setting" (relative
+// phase) made visible. Built on the shared verified core (qsim.js):
+//   state = H|0> then RZ(lambda)  -> an arrow on the equator at longitude lambda.
+//   "look straight on"  (Z-basis)        -> odds locked at 50/50 for EVERY lambda
+//   "turn to look from the side" (apply H) -> odds sweep P(0)=cos^2(lambda/2), 0..100%
+// The same setting is invisible head-on and decisive from the side, and that
+// reveal is interference in miniature. No maths, single qubit, token-driven and
+// light on parchment (labgfx). Reduced motion: the camera turn is instant.
+// Honest: only the physically-real relative phase is movable; global phase is not.
+---
+
+<div class="plev" data-phase-lever data-reveal>
+  <div class="plev-grid">
+    <div class="plev-stage">
+      <canvas class="plev-canvas" role="img"
+        aria-label="A Bloch sphere with an arrow on the equator. A slider spins the arrow sideways; a toggle turns from looking straight on to looking from the side."></canvas>
+      <p class="plev-hint">spin the setting &middot; then turn to look from the side</p>
+    </div>
+
+    <div class="plev-side">
+      <label class="plev-ctl">
+        <span class="plev-ctl-top">The sideways setting<output class="plev-lam"></output></span>
+        <input class="plev-lambda" type="range" min="0" max="360" value="90" step="1" />
+      </label>
+
+      <button type="button" class="plev-toggle" aria-pressed="false">Turn to look from the side</button>
+
+      <div class="plev-odds">
+        <div class="plev-bar-row"><span class="plev-k">0</span><div class="plev-bar"><i class="plev-bar0"></i></div><span class="plev-p0"></span></div>
+        <div class="plev-bar-row"><span class="plev-k">1</span><div class="plev-bar"><i class="plev-bar1"></i></div><span class="plev-p1"></span></div>
+      </div>
+
+      <p class="plev-status" aria-live="polite"></p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .plev {
+    margin: 2rem 0; padding: 1rem;
+    border: 1px solid var(--rule); border-radius: 12px;
+    background:
+      radial-gradient(120% 80% at 15% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 60%),
+      var(--bg-raised);
+    box-shadow: 0 10px 30px -24px rgba(0, 0, 0, 0.32);
+  }
+  .plev-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 1.25rem; align-items: center; }
+  .plev-stage { display: flex; flex-direction: column; gap: 0.4rem; }
+  .plev-canvas {
+    width: 100%; aspect-ratio: 1; display: block;
+    border: 1px solid var(--rule); border-radius: 10px; background: var(--bg-raised);
+  }
+  .plev-hint { margin: 0; text-align: center; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); letter-spacing: 0.02em; }
+
+  .plev-side { display: flex; flex-direction: column; gap: 0.9rem; }
+  .plev-ctl { display: flex; flex-direction: column; gap: 0.35rem; }
+  .plev-ctl-top { display: flex; align-items: baseline; justify-content: space-between; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-muted); }
+  .plev-ctl-top output { color: var(--accent); }
+  .plev input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+  .plev-toggle {
+    font-family: var(--font-mono); font-size: 0.8rem; cursor: pointer; text-align: left;
+    color: var(--ink-dim); background: var(--bg);
+    border: 1px solid var(--rule); border-radius: 7px; padding: 0.5rem 0.8rem;
+    transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  }
+  .plev-toggle:hover { color: var(--accent); border-color: var(--accent); }
+  .plev-toggle[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, transparent); }
+
+  .plev-odds { display: flex; flex-direction: column; gap: 0.4rem; }
+  .plev-bar-row { display: grid; grid-template-columns: 1rem 1fr auto; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-muted); }
+  .plev-bar { height: 0.75rem; background: var(--rule-soft); border-radius: 4px; overflow: hidden; }
+  .plev-bar i { display: block; height: 100%; width: 50%; border-radius: 4px; }
+  .plev-bar0 { background: var(--teal); }
+  .plev-bar1 { background: var(--amber); }
+  .plev-p0, .plev-p1 { color: var(--ink); min-width: 2.7rem; text-align: right; }
+  .plev-status { margin: 0; min-height: 2.4rem; font-family: var(--font-serif); font-size: 0.95rem; line-height: 1.5; color: var(--ink-dim); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .plev-bar i { transition: width 0.3s ease; }
+  }
+  @media (max-width: 640px) { .plev-grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { StateVector } from '../scripts/qsim.js';
+  import { animate } from 'animejs';
+  import { labPalette, makeCamera, fitCanvas, prefersReducedMotion, lerp, easeInOutCubic, drawLabSphere, drawLabArrow } from '../scripts/labgfx.js';
+
+  const PI = Math.PI;
+  // straight-on: look down the pole (equator face-on); side: equatorial view.
+  const PITCH_ON = 1.32, PITCH_SIDE = 0.16;
+
+  function initOne(root) {
+    if (root._cleanup) root._cleanup();
+    const reduced = prefersReducedMotion();
+    const canvas = root.querySelector('.plev-canvas');
+    const ctx = canvas.getContext('2d');
+    const lamIn = root.querySelector('.plev-lambda');
+    const lamOut = root.querySelector('.plev-lam');
+    const toggle = root.querySelector('.plev-toggle');
+    const bar0 = root.querySelector('.plev-bar0');
+    const bar1 = root.querySelector('.plev-bar1');
+    const p0El = root.querySelector('.plev-p0');
+    const p1El = root.querySelector('.plev-p1');
+    const statusEl = root.querySelector('.plev-status');
+
+    const cam = makeCamera(-0.5, PITCH_ON);
+    const pal = labPalette();
+    let dims = null;
+    let fromSide = false;
+
+    const lam = () => (+lamIn.value) * PI / 180;
+    // odds via the shared verified core: |+> then RZ(lambda), optionally H.
+    function odds() {
+      const sv = new StateVector(1);
+      sv.applyH(0);
+      sv.applyRZ(0, lam());
+      if (fromSide) sv.applyH(0);
+      const p1 = sv.probOne(0);
+      return { p0: 1 - p1, p1 };
+    }
+
+    function drawScene() {
+      if (!dims) return;
+      const { w, h } = dims;
+      ctx.clearRect(0, 0, w, h);
+      drawLabSphere(ctx, cam, w, h, pal);
+      // the equatorial arrow at longitude lambda (the sideways setting)
+      const v = { x: Math.cos(lam()), y: Math.sin(lam()), z: 0 };
+      drawLabArrow(ctx, cam, w, h, v, pal);
+    }
+
+    function readout() {
+      const { p0, p1 } = odds();
+      const pc = (x) => Math.round(x * 100);
+      lamOut.textContent = lamIn.value + '°';
+      bar0.style.width = (p0 * 100).toFixed(0) + '%';
+      bar1.style.width = (p1 * 100).toFixed(0) + '%';
+      p0El.textContent = pc(p0) + '%';
+      p1El.textContent = pc(p1) + '%';
+      statusEl.innerHTML = fromSide
+        ? 'From the side, the <b>same</b> setting now steers the answer: a look gives <b>0</b> about ' + pc(p0) + '% of the time.'
+        : 'Looking straight on, spin the setting all you like and the odds stay <b>50/50</b>. It is real, but invisible from here.';
+    }
+
+    function render() { drawScene(); readout(); }
+    function resize() { dims = fitCanvas(canvas, ctx); render(); }
+
+    function setView(side, animateIt) {
+      fromSide = side;
+      toggle.setAttribute('aria-pressed', String(side));
+      toggle.textContent = side ? 'Look straight on again' : 'Turn to look from the side';
+      const target = side ? PITCH_SIDE : PITCH_ON;
+      if (reduced || !animateIt) { cam.pitch = target; render(); return; }
+      const start = cam.pitch;
+      const obj = { t: 0 };
+      animate(obj, {
+        t: 1, duration: 700, ease: 'inOut(2)',
+        onUpdate: () => { cam.pitch = lerp(start, target, easeInOutCubic(obj.t)); drawScene(); },
+        onComplete: () => { cam.pitch = target; render(); },
+      });
+    }
+
+    const onInput = () => render();
+    const onToggle = () => setView(!fromSide, true);
+    lamIn.addEventListener('input', onInput);
+    toggle.addEventListener('click', onToggle);
+    window.addEventListener('resize', resize);
+
+    root._cleanup = () => {
+      lamIn.removeEventListener('input', onInput);
+      toggle.removeEventListener('click', onToggle);
+      window.removeEventListener('resize', resize);
+      root._cleanup = null;
+    };
+
+    resize();
+  }
+
+  function initAll() { document.querySelectorAll('[data-phase-lever]').forEach(initOne); }
+  initAll();
+  document.addEventListener('astro:after-swap', initAll);
+  window.addEventListener('variantchange', initAll); // re-read palette on theme change
+</script>
