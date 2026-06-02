@@ -1,0 +1,292 @@
+---
+// index-wild.astro — the DELIBERATELY off-brand, off-theme "what would a crazy,
+// agency-tier homepage look like" concept. Dark, cinematic, full-on. NOT the
+// real site (that stays at index.astro) and NOT the brand direction — this is
+// the "show me the $10k website" exploration. Centrepiece: a live flow-field
+// particle storm (wind-map energy — secretly on-theme for a meteorologist),
+// big kinetic type, dramatic scroll reveals. Vanilla canvas + motion.dev, so no
+// heavy 3D deps. Reduced-motion gets a calm static gradient.
+const projects = [
+  { n: '01', label: 'GB Grid Scenario Tool', line: 'Browser DC power-flow model of GB transmission constraints.', href: 'https://alfiemcglennon.github.io/gb-grid-tool/', external: true },
+  { n: '02', label: 'RL Grid Dispatch', line: 'Reinforcement learning for network-constrained dispatch.', href: '/writing/rl-grid-dispatch-baseline/' },
+  { n: '03', label: 'Quantum ML', line: 'A single qubit as a tunable Fourier model, reported honestly.', href: '/writing/quantum-computing-explainer/' },
+  { n: '04', label: 'Compound Heat Stress', line: 'When heat and humidity combine beyond what either predicts.', href: '/research/' },
+];
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alfie McGlennon — wild concept</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+  </head>
+  <body class="wild">
+    <canvas class="ff" data-ff aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="wild-top">
+      <span class="wild-mark">A·M</span>
+      <span class="wild-tag">WILD CONCEPT · OFF-BRAND</span>
+      <a class="wild-back" href="/">← real site</a>
+    </div>
+
+    <header class="wild-hero">
+      <p class="wild-eyebrow" data-rise>Climate · ML · Quantum · Compound risk</p>
+      <h1 class="wild-name">
+        <span class="wn-line" data-rise>ALFIE</span>
+        <span class="wn-line wn-out" data-rise>McGLENNON</span>
+      </h1>
+      <p class="wild-sub" data-rise>I read the atmosphere through a data lens, and build the tools to do it.</p>
+      <div class="wild-ticker" data-rise>
+        <span class="tk-dot"></span> READING · 51.45°N 0.98°W &nbsp;·&nbsp; <span data-ff-count>0</span> PARTICLES IN FLIGHT &nbsp;·&nbsp; MOVE YOUR CURSOR
+      </div>
+      <div class="wild-scrollcue" aria-hidden="true"><span>SCROLL</span><i></i></div>
+    </header>
+
+    <section class="wild-statements" aria-label="What I do">
+      <p class="ws" data-rise><b>Compound risk.</b> When heat and humidity combine in ways neither alone would predict.</p>
+      <p class="ws" data-rise><b>The grid.</b> Reinforcement learning dispatching a constrained national network.</p>
+      <p class="ws" data-rise><b>Quantum ML.</b> A single qubit as a Fourier model — and the honesty about what it can't do.</p>
+    </section>
+
+    <section class="wild-work" aria-label="Work">
+      <p class="wild-section-label" data-rise>Selected work</p>
+      <div class="wild-cards">
+        {projects.map((p) => (
+          <a class="wild-card" data-tilt data-rise href={p.href} {...(p.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+            <span class="wc-n">{p.n}</span>
+            <span class="wc-title">{p.label}</span>
+            <span class="wc-line">{p.line}</span>
+            <span class="wc-go">→</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <footer class="wild-foot">
+      <p class="wild-cta" data-rise>Let's build something.</p>
+      <p class="wild-links" data-rise>
+        <a id="wild-email" href="#">email</a><span>/</span>
+        <a href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer">github</a><span>/</span>
+        <a href="https://www.linkedin.com/in/alfred-mcglennon-927589253/" target="_blank" rel="noopener noreferrer">linkedin</a>
+      </p>
+      <p class="wild-note">A deliberately off-brand experiment. The real, calmer site is <a href="/">here</a>.</p>
+    </footer>
+
+    <style is:global>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; }
+      body.wild {
+        background: #06070d; color: #e8eaf2;
+        font-family: 'Outfit', system-ui, sans-serif;
+        min-height: 100vh; overflow-x: hidden;
+        --c1: #2dd4bf; --c2: #818cf8; --c3: #f472b6;
+      }
+      .ff { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; display: block; }
+      .grain { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.05;
+        background-image: radial-gradient(rgba(255,255,255,0.6) 0.5px, transparent 0.6px); background-size: 3px 3px; mix-blend-mode: overlay; }
+      .wild-top, .wild-hero, .wild-statements, .wild-work, .wild-foot { position: relative; z-index: 2; }
+
+      .wild-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+        padding: 1.4rem clamp(1.2rem, 4vw, 3rem); font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.14em; }
+      .wild-mark { font-weight: 700; color: #fff; }
+      .wild-tag { color: var(--c3); opacity: 0.85; }
+      .wild-back { color: #9aa3bd; text-decoration: none; }
+      .wild-back:hover { color: #fff; }
+
+      .wild-hero { min-height: 92vh; display: flex; flex-direction: column; justify-content: center;
+        padding: 0 clamp(1.2rem, 6vw, 5rem); max-width: 1400px; margin: 0 auto; }
+      .wild-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: clamp(0.72rem, 1.1vw, 0.9rem);
+        letter-spacing: 0.3em; text-transform: uppercase; color: var(--c1); margin-bottom: 1.4rem; }
+      .wild-name { font-weight: 900; line-height: 0.88; letter-spacing: -0.04em;
+        font-size: clamp(3.4rem, 15vw, 13rem); margin-bottom: 1.6rem; }
+      .wn-line { display: block; }
+      .wn-out { background: linear-gradient(100deg, var(--c1), var(--c2) 45%, var(--c3));
+        -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+      .wild-sub { font-family: 'Source Serif 4', Georgia, serif; font-style: italic;
+        font-size: clamp(1.1rem, 2.2vw, 1.7rem); color: #c2c7d8; max-width: 30ch; line-height: 1.4; margin-bottom: 1.8rem; }
+      .wild-ticker { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; letter-spacing: 0.12em;
+        text-transform: uppercase; color: #7e879e; display: flex; align-items: center; flex-wrap: wrap; }
+      .tk-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c1); margin-right: 0.7rem;
+        box-shadow: 0 0 14px var(--c1); animation: tk 1.8s ease-in-out infinite; }
+      @keyframes tk { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+      .wild-scrollcue { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+        font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.3em; color: #5a6178;
+        display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+      .wild-scrollcue i { width: 1px; height: 38px; background: linear-gradient(#5a6178, transparent); animation: cue 2s ease-in-out infinite; }
+      @keyframes cue { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+      .wild-statements { max-width: 1100px; margin: 0 auto; padding: 14vh clamp(1.2rem, 6vw, 5rem); display: flex; flex-direction: column; gap: 3.5vh; }
+      .ws { font-family: 'Outfit', sans-serif; font-weight: 500; font-size: clamp(1.5rem, 4.5vw, 3.4rem);
+        line-height: 1.1; letter-spacing: -0.02em; color: #6b7390; max-width: 22ch; }
+      .ws b { color: #fff; font-weight: 800; }
+
+      .wild-work { max-width: 1200px; margin: 0 auto; padding: 8vh clamp(1.2rem, 6vw, 5rem); }
+      .wild-section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; letter-spacing: 0.28em;
+        text-transform: uppercase; color: #7e879e; margin-bottom: 2rem; }
+      .wild-cards { display: grid; grid-template-columns: 1fr; gap: 1px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; overflow: hidden; }
+      @media (min-width: 760px) { .wild-cards { grid-template-columns: 1fr 1fr; } }
+      .wild-card { position: relative; display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: 'n title go' 'n line go';
+        column-gap: 1rem; align-items: center; padding: 2rem 1.8rem; background: #0a0c15; color: #e8eaf2; text-decoration: none;
+        transition: background 0.3s ease, transform 0.2s ease; will-change: transform; }
+      .wild-card:hover { background: #10131f; }
+      .wc-n { grid-area: n; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--c2); }
+      .wc-title { grid-area: title; font-weight: 800; font-size: clamp(1.2rem, 2.4vw, 1.7rem); letter-spacing: -0.02em; }
+      .wc-line { grid-area: line; font-family: 'Source Serif 4', serif; font-size: 0.95rem; color: #8a92a8; margin-top: 0.3rem; }
+      .wc-go { grid-area: go; font-size: 1.6rem; color: #5a6178; transition: transform 0.25s ease, color 0.25s ease; }
+      .wild-card:hover .wc-go { transform: translateX(6px); color: var(--c1); }
+
+      .wild-foot { max-width: 1200px; margin: 0 auto; padding: 14vh clamp(1.2rem, 6vw, 5rem) 8vh; text-align: center; }
+      .wild-cta { font-weight: 900; font-size: clamp(2.4rem, 9vw, 7rem); letter-spacing: -0.04em; line-height: 1;
+        background: linear-gradient(100deg, var(--c1), var(--c2) 50%, var(--c3)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem; }
+      .wild-links { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; display: flex; gap: 1rem; justify-content: center; margin-bottom: 3rem; }
+      .wild-links a { color: #c2c7d8; text-decoration: none; border-bottom: 1px solid transparent; }
+      .wild-links a:hover { color: #fff; border-bottom-color: var(--c1); }
+      .wild-links span { color: #3a4156; }
+      .wild-note { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #5a6178; }
+      .wild-note a { color: #9aa3bd; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .tk-dot, .wild-scrollcue i { animation: none; }
+        html { scroll-behavior: auto; }
+      }
+    </style>
+
+    <script>
+      import { animate, stagger, inView } from 'motion';
+
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* ---------- flow-field particle storm ---------- */
+      (function flowField() {
+        const canvas = document.querySelector('[data-ff]');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const countEl = document.querySelector('[data-ff-count]');
+        let w = 0, h = 0, dpr = 1;
+        const area = () => window.innerWidth * window.innerHeight;
+        let N = 0;
+        let parts = [];
+        const mouse = { x: -9999, y: -9999, on: false };
+
+        function resize() {
+          dpr = Math.min(window.devicePixelRatio || 1, 2);
+          w = window.innerWidth; h = window.innerHeight;
+          canvas.width = w * dpr; canvas.height = h * dpr;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.fillStyle = '#06070d'; ctx.fillRect(0, 0, w, h);
+          N = Math.max(260, Math.min(1100, Math.round(area() / 1700)));
+          parts = Array.from({ length: N }, spawn);
+          if (countEl) countEl.textContent = String(N);
+        }
+        function spawn() {
+          const x = Math.random() * w, y = Math.random() * h;
+          return { x, y, px: x, py: y, life: Math.random() * 200, max: 120 + Math.random() * 160 };
+        }
+        // smooth pseudo-noise angle field
+        function field(x, y, t) {
+          const s = 0.0016;
+          return (Math.sin(x * s + t * 0.00022) + Math.cos(y * s - t * 0.00016) + Math.sin((x + y) * s * 0.7 + t * 0.0003)) * Math.PI;
+        }
+        function colorFor(a, speed) {
+          // map field angle -> teal..indigo..magenta
+          const hue = 168 + ((a / (Math.PI * 2)) % 1 + 1) % 1 * 152; // 168..320
+          return `hsla(${hue}, 80%, ${52 + speed * 6}%, 0.5)`;
+        }
+        let raf = 0;
+        function frame(t) {
+          // fade for trails
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.fillStyle = 'rgba(6,7,13,0.075)';
+          ctx.fillRect(0, 0, w, h);
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.lineWidth = 1.1; ctx.lineCap = 'round';
+          for (const p of parts) {
+            let a = field(p.x, p.y, t);
+            // cursor swirl
+            if (mouse.on) {
+              const dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx * dx + dy * dy;
+              if (d2 < 240 * 240) {
+                const d = Math.sqrt(d2) || 1, f = (1 - d / 240);
+                a = Math.atan2(dy, dx) + Math.PI / 2 * (1 + f); // tangential swirl
+              }
+            }
+            const sp = 1.4;
+            p.px = p.x; p.py = p.y;
+            p.x += Math.cos(a) * sp; p.y += Math.sin(a) * sp;
+            p.life++;
+            ctx.strokeStyle = colorFor(a, 1);
+            ctx.beginPath(); ctx.moveTo(p.px, p.py); ctx.lineTo(p.x, p.y); ctx.stroke();
+            if (p.x < -5 || p.x > w + 5 || p.y < -5 || p.y > h + 5 || p.life > p.max) {
+              const s = spawn(); p.x = s.x; p.y = s.y; p.px = s.x; p.py = s.y; p.life = 0; p.max = s.max;
+            }
+          }
+          ctx.globalCompositeOperation = 'source-over';
+          raf = requestAnimationFrame(frame);
+        }
+        function staticRender() {
+          // calm gradient + one frozen pass for reduced motion
+          const g = ctx.createLinearGradient(0, 0, w, h);
+          g.addColorStop(0, '#0a0e1c'); g.addColorStop(0.5, '#0c0a18'); g.addColorStop(1, '#120a16');
+          ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+          ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = 1;
+          for (const p of parts) {
+            const a = field(p.x, p.y, 0);
+            ctx.strokeStyle = colorFor(a, 0.6);
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + Math.cos(a) * 6, p.y + Math.sin(a) * 6); ctx.stroke();
+          }
+          ctx.globalCompositeOperation = 'source-over';
+        }
+        window.addEventListener('resize', () => { resize(); if (reduced) staticRender(); });
+        window.addEventListener('pointermove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.on = true; }, { passive: true });
+        window.addEventListener('pointerleave', () => { mouse.on = false; });
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) { if (raf) cancelAnimationFrame(raf), raf = 0; }
+          else if (!reduced && !raf) raf = requestAnimationFrame(frame);
+        });
+        resize();
+        if (reduced) staticRender(); else raf = requestAnimationFrame(frame);
+      })();
+
+      /* ---------- kinetic reveals ---------- */
+      function reveal() {
+        const rises = Array.from(document.querySelectorAll('[data-rise]'));
+        if (reduced) { rises.forEach((el) => (el.style.opacity = '1')); return; }
+        rises.forEach((el) => { el.style.opacity = '0'; });
+        // hero rises immediately (staggered); the rest on scroll-in
+        const hero = rises.filter((el) => el.closest('.wild-hero'));
+        animate(hero, { opacity: [0, 1], y: [28, 0] }, { duration: 0.9, delay: stagger(0.08, { start: 0.1 }), ease: [0.16, 1, 0.3, 1] });
+        rises.filter((el) => !el.closest('.wild-hero')).forEach((el) => {
+          inView(el, () => {
+            animate(el, { opacity: [0, 1], y: [32, 0] }, { duration: 0.8, ease: [0.16, 1, 0.3, 1] });
+          }, { amount: 0.3 });
+        });
+      }
+      reveal();
+
+      /* ---------- card tilt on pointer ---------- */
+      if (!reduced) {
+        document.querySelectorAll('[data-tilt]').forEach((card) => {
+          card.addEventListener('pointermove', (e) => {
+            const r = card.getBoundingClientRect();
+            const rx = ((e.clientY - r.top) / r.height - 0.5) * -6;
+            const ry = ((e.clientX - r.left) / r.width - 0.5) * 6;
+            card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+          });
+          card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+        });
+      }
+
+      /* ---------- email ---------- */
+      (function () { const el = document.getElementById('wild-email'); if (!el) return;
+        el.href = 'mailto:alfie@alfiemcglennon.com'; })();
+    </script>
+  </body>
+</html>
