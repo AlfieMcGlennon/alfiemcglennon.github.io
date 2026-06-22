@@ -1,0 +1,167 @@
+---
+title: "Reading a Quantum Weather Model"
+description: "Most AI is a black box. Here is how a 200-year-old idea from the study of heat let me see what a quantum circuit had learned about the weather, and what happened when I ran it on a real IBM quantum computer."
+date: 2026-06-22
+project: "quantum-ml"
+accent: "#4338ca"
+tags: ["quantum-machine-learning", "interpretability", "fourier", "weather", "ibm-quantum"]
+image: "/images/quantum-weather/og-card.png"
+draft: false
+math: true
+---
+
+{/*
+  "Reading a Quantum Weather Model": a standalone piece (Alfie's first public
+  quantum post; do NOT link to the unpublished explainer/intro drafts). Standard
+  Post layout (not grand). Source of truth
+  for the prose is Alfie's latest Word draft (reading-a-quantum-weather-model (1).docx):
+  personalised voice + honesty edits carried verbatim in meaning. Conventions:
+  British English, no em dashes, KaTeX ($...$ inline, $$...$$ display). Figures are
+  static, native SVG components imported below; "Go deeper" material sits in <details
+  class="fold"> folds so a general reader can skim and a technical reader can expand.
+*/}
+
+import QWSignatureWave from '../../components/QWSignatureWave.astro';
+import QWFrequencyMenu from '../../components/QWFrequencyMenu.astro';
+import QWCircuit from '../../components/QWCircuit.astro';
+import QWResultsCard from '../../components/QWResultsCard.astro';
+
+<QWSignatureWave />
+
+Train a machine learning model, and it will happily make predictions for you. Ask it *why*, and you usually get silence. This is the black box problem: you get a good answer, but it is hard to pin down exactly why. Quantum models have it too, but with an extra catch: the thing doing the computing lives in a state you cannot directly look at.
+
+This is the story of a way around that for one kind of model, and of a small weather forecaster I built to prove it works, all the way to quantum hardware. There are three ideas: a surprising fact about these circuits, a piece of old maths, and one wiring choice that ties them together.
+
+<p class="kicker">The result</p>
+
+## A quantum circuit is secretly a stack of waves
+
+A variational quantum circuit, or VQC, is simpler than it sounds. You feed in your data by using it to set the dials on a row of quantum gates. You pass that through a second set of dials the computer is free to adjust. Then you measure the result, and that is your prediction. Tuning the free dials until the predictions are good is the "training", and you can run the whole thing on a normal laptop by simulating it. I used [PennyLane](https://pennylane.ai), because it offers a variety of learning materials and a large Python module built around it.
+
+The surprising fact, proved by Maria Schuld, Ryan Sweke and Johannes Jakob Meyer in 2021, is that whatever such a circuit computes, it is always a sum of simple waves (a truncated Fourier series). The two sets of dials have cleanly separated roles: **the way you feed the data in decides which waves are on the menu, and the training decides how loud each one plays.** This is a simplification, and [their paper](https://arxiv.org/abs/2008.08605) will give you the fuller picture.
+
+Think of a piano. The keys in front of you fix which notes are possible at all; playing only decides how hard and how often you strike each one. A few low keys give you something slow and smooth. Add the high notes, and you can play something more intricate. Feeding the data in simply hands the circuit a few low keys; feeding it in richly hands it the whole keyboard.
+
+<QWFrequencyMenu />
+
+That was very evident across my data and my different approaches. Next-day temperature is a smooth, slow-moving variable, and the simplest way to feed the data in worked best. Giving the circuit access to the higher notes only let it chase noise. The theory told me why before the experiments confirmed it.
+
+<details class="fold">
+<summary>Go deeper: the maths of the menu</summary>
+
+Written out, the output of the circuit as a function of a single encoded input $x$ is a partial Fourier series:
+
+$$
+f(x) = a_0 + a_1\cos x + b_1\sin x + a_2\cos 2x + b_2\sin 2x + \dots
+$$
+
+truncated at whatever top frequency the encoding allows. The available frequencies are set by the eigenvalues of the gate used to encode the data: a single Pauli rotation has eigenvalues that differ by one, so the circuit can only produce frequency-1 terms, a single $\cos x$ and $\sin x$. The function is degree-1 in that input.
+
+Encoding the same input several times (a trick called data re-uploading), or using generators with a richer spectrum, widens the gaps between eigenvalues and unlocks $\cos 2x$, $\cos 3x$, and beyond. The trainable layers do not invent new frequencies. Given the menu the encoding makes available, they only set the coefficients, how much of each frequency is present. Encoding picks the alphabet; training writes with it.
+
+</details>
+
+<p class="kicker">The method</p>
+
+## Fourier decomposition, the 200-year-old part
+
+If the circuit's output is a sum of waves, then to understand it you only need to find out which waves, and how much of each. That is exactly what Fourier decomposition does, and it is not new. Joseph Fourier worked it out in 1822 while studying how heat spreads through a solid.
+
+His insight: any repeating signal, however complicated, can be rebuilt by stacking simple waves of different frequencies. The list of how much of each wave you need is the signal's fingerprint. Decomposing a signal means recovering that fingerprint.
+
+<details class="fold">
+<summary>Go deeper: how you actually recover the waves</summary>
+
+Each frequency component is orthogonal to every other. That means you can isolate how much $\cos(kx)$ a function contains by multiplying the function by $\cos(kx)$ and integrating over a full period: everything not at frequency $k$ averages to zero, and what survives is the coefficient you wanted.
+
+In practice, with a circuit you can only sample rather than integrate, so you sweep the input across one full period, record the output, and project that sampled curve onto the basis of sines and cosines by least squares. The coefficients fall straight out.
+
+One warning, learned the hard way. The sweep has to cover a *complete* period. The circuit's natural period in an encoded angle is $2\pi$, so the sweep must run over $[0, 2\pi)$. Sample only half of it and treat that as a period, and the true frequency-1 component lands on a fractional bin and smears across all the others. I spent a while chasing fake structure that turned out to be this leakage. Sweep the full period and the spectrum comes out clean to machine precision.
+
+</details>
+
+<p class="kicker">The application</p>
+
+## Giving each qubit a name
+
+Now the two ideas meet. Decompose the trained circuit, and the fingerprint you recover describes what it learned and between which qubits. The trouble is that those numbers are normally anonymous. They tell you the circuit learned *some* interaction, but not between which variables: you can tell that two qubits talked, but not what they said. A bit like seeing a call log, knowing someone called, but not knowing what the two people said.
+
+My fix was to be strict about the wiring: put exactly one thing on each qubit. Temperature on the first, pressure on the second, wind on the third, and so on. For the map version, one location per qubit.
+
+Once you do that, the fingerprint becomes readable in plain terms. Some numbers describe how the model uses each variable on its own. The more interesting ones describe pairs. On a circuit with one weather variable per qubit, the number linking the temperature qubit and the pressure qubit is, literally, how strongly the model relies on the temperature-and-pressure interaction. On a circuit with one map location per qubit, the number linking two cells is how strongly the model couples those two places, so you can read straight off how the northwest cell works together with the one to its northeast.
+
+<QWCircuit />
+
+Entanglement is the quantum effect that lets qubits influence one another. Without it, the circuit treats every input in isolation, and all of those pairing numbers are zero. Switch it on, and the pairings light up. So reading those numbers means reading what the entanglement in the circuit has learned to do, written in the language of weather.
+
+I have read both kinds out in simulation. The circuit I then ran on real hardware was the spatial one, one location per qubit, so the coupling I could verify on the device was place against place, not variable against variable.
+
+<details class="fold">
+<summary>Go deeper: where the interaction terms come from</summary>
+
+With one variable per qubit the model becomes a multi-dimensional Fourier series, a sum over frequency vectors $\mathbf{k} = (k_1, \dots, k_d)$:
+
+$$
+f(x_1, \dots, x_d) = \sum_{\mathbf{k}} c_{\mathbf{k}}\,(\text{products of }\cos\text{ and }\sin)
+$$
+
+The terms where two components of $\mathbf{k}$ are non-zero at once are the interaction terms. A circuit with no entanglement between the qubits carrying different variables factorises into independent single-variable series, and every one of those cross coefficients is zero. The entangling gates are what populate them.
+
+With single-layer encoding, each variable is degree-1, so the only non-zero interaction order is the lowest one, frequency-1 in each variable. That makes the readout clean: there is exactly one interaction coefficient per pair of qubits, and the higher orders are structurally absent rather than just small. To extract it you sweep two inputs jointly across the full $2\pi \times 2\pi$ grid, record the output surface, and project onto the two-dimensional Fourier basis.
+
+</details>
+
+<p class="kicker">The test</p>
+
+## Onto a real quantum computer
+
+Simulation is the easy part. The harder question is whether this holds up on quantum hardware, where the machine is noisy and the fragile quantum state gets corrupted as the circuit runs.
+
+I trained the model entirely in simulation on ERA5, the standard reanalysis record of past weather, then ran the finished circuit on IBM's quantum processors through the cloud. Only the final forecasting pass runs on the quantum computer; the training stays classical. That matters, because there is no good way yet to train a model directly on a quantum computer at scale, unless you have a lot of cash to burn. The trick is that you do not need to: up to a certain size you can simulate small quantum circuits classically to train them, then run them forward only on the hardware.
+
+The forecast beat persistence, the simple benchmark of guessing that tomorrow looks like today, even if only marginally. That is a modest bar, but it is the right first one, and the noise did not sink it, only sprang a small leak. More importantly, the interpretability survived. When I decomposed the hardware output, the same learned structure was largely there. The map of which places the model couples matched the simulation closely: the strongest spatial coupling, the northwest cell with the northeast, stayed clearly the strongest. That is the coupling this model learned to lean on, not a universal fact about European weather. The noise roughly halved the strength of everything, but it kept the shapes.
+
+<QWResultsCard />
+
+What it suggests, for this problem, is a simple rule: the structure survives wherever the model's response is strong enough to stand out above the hardware's noise, and fades where the response was faint to begin with. The noise doubles as a filter, though whether you want it to is a separate question. What comes through is what the model leaned on most.
+
+<details class="fold">
+<summary>Go deeper: the numbers</summary>
+
+Hardware: IBM Heron processors, 156 qubits, run via Qiskit. The model was 9 qubits with a few hundred parameters, and the rebuilt circuit matched the trained simulation to within rounding.
+
+- **Skill ($n = 50$):** hardware 2.55 °C versus persistence 2.68 °C; simulation 2.30 °C. Hardware beats persistence despite a noise penalty of about 0.25 °C. (A small test sample.)
+- **Single-variable:** pooled correlation between hardware and simulation $r = 0.989$ ($p \approx 10^{-52}$); shape preserved, amplitude retained at roughly 55 to 66 per cent.
+- **Interaction map:** the full coupling map between cells correlated at $r \approx 0.96$. The dominant coupling, the northwest cell with the northeast, fell from 0.93 in simulation to 0.51 on hardware, still far above the next pair at 0.11.
+- **Noise limit:** readout-error mitigation did not recover the damping, which places the limit at the gate level rather than at the measurement error.
+- **Single runs:** each hardware figure is a single realisation, so there are no cross-repeat error bars yet; the $p$-values quoted are within a run, not across hardware drift.
+
+</details>
+
+<p class="kicker">The honest part</p>
+
+## Where this sits
+
+I want to be straight about the limits. At the size a circuit like this can run today, ordinary classical methods match it. This is not a speed-up, not a quantum advantage, and I am not going to pretend otherwise.
+
+What it does have is real, if narrow. It is interpretable, in a setting where most models are not. It is remarkably lean, a few hundred numbers rather than the millions in a typical network. And the interpretability is sturdy enough to partly withstand the noise of a quantum device.
+
+Many quantum machine learning approaches pair a circuit with classical layers and ask whether the resulting score improves. The question I cared about was narrower: what the quantum part itself had learned. And reading it off the Fourier coefficients is only one way to ask it. Others attribute importance gate by gate, or rebuild the trained model as a classical surrogate. Mine is the route that happened to map onto a domain I know. It also will not scale in the cleanest way: the trick leans on strict wiring, one thing per qubit, and on the circuit staying small enough to decompose in full, and neither holds for an arbitrary dense circuit or a much larger one. What I did not expect was that it would work as well as it did. The circuit surfaces the dominant drivers it learned from, you can read which ones, and that much survives the move onto hardware.
+
+My background is in weather and climate modelling, and reading the circuit was partly how I taught myself what these models do. Pointing an unfamiliar tool at a domain I know was what made the quantum side concrete rather than abstract, and it is one of the first steps in moving the way I work across into quantum.
+
+The bigger picture is a bet rather than a result. This circuit is one module of a larger, modular quantum weather model, built to grow onto hardware too large to simulate by brute force, somewhere past fifty qubits. That threshold is softer than it sounds. Passing fifty defeats the direct method of tracking every amplitude, but cleverer classical methods still keep pace whenever a circuit stays lightly entangled, and light entanglement is exactly the regime where these models stay trainable. So the frontier is narrower than a qubit count, and it is where any genuine advantage would have to live: whether a circuit can stay trainable while entangling strongly enough that no classical shortcut can follow. Whether that point is reachable is the open question, and building the model in interpretable, independently trainable pieces is how you put yourself in a position to find out. The readout is meant to travel with the model as it grows, accepting that a much larger or denser circuit only ever gives a partial view, never the clean one a small circuit gives.
+
+> A quantum model you can actually read is a good place to begin. For me, that is what moving into quantum looks like so far.
+
+## References and links
+
+- Schuld, M., Sweke, R., and Meyer, J. J. (2021). Effect of data encoding on the expressive power of variational quantum-machine-learning models. *Physical Review A* **103**, 032430. [arXiv:2008.08605](https://arxiv.org/abs/2008.08605).
+- Pérez-Salinas, A., Cervera-Lierta, A., Gil-Fuster, E., and Latorre, J. I. (2020). Data re-uploading for a universal quantum classifier. *Quantum* **4**, 226. [arXiv:1907.02085](https://arxiv.org/abs/1907.02085).
+- Casas, B., and Cervera-Lierta, A. (2023). Multidimensional Fourier series with quantum circuits. *Physical Review A* **107**, 062612. [arXiv:2302.03389](https://arxiv.org/abs/2302.03389).
+- Wiedmann, M., Periyasamy, M., and Scherer, D. D. (2024). Fourier analysis of variational quantum circuits for supervised learning. [arXiv:2411.03450](https://arxiv.org/abs/2411.03450).
+- Schreiber, F. J., Eisert, J., and Meyer, J. J. (2023). Classical surrogates for quantum learning models. *Physical Review Letters* **131**, 100803.
+- Heese, R., Gerlach, T., Mücke, S., Müller, S., Jakobs, M., and Piatkowski, N. (2023). Explaining quantum circuits with Shapley values: towards explainable quantum machine learning. [arXiv:2301.09138](https://arxiv.org/abs/2301.09138).
+- PennyLane demo, "Quantum models as Fourier series": [pennylane.ai/qml/demos/tutorial_expressivity_fourier_series](https://pennylane.ai/qml/demos/tutorial_expressivity_fourier_series).
+- Fourier, J. (1822). *Théorie analytique de la chaleur*. The original treatment of heat conduction in which Fourier series were introduced.
+- ERA5 reanalysis: Copernicus Climate Change Service / ECMWF. Hardware: IBM Quantum Heron processors, via Qiskit.

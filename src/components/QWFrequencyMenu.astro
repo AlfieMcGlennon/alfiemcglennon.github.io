@@ -1,0 +1,98 @@
+---
+// "Encoding sets the menu" — the new schematic figure for the stack-of-waves
+// section. Left: feed the data in simply, and the circuit gets a few low,
+// smooth waves (a short spectrum). Right: feed it in richly, and the spectrum
+// widens to faster, choppier waves. Illustrative, not measured. Native SVG on
+// the site palette; geometry generated at build time.
+const c = {
+  ink: '#1c1917', inkDim: '#44403c', inkMuted: '#78716c', inkFaint: '#a8a29e',
+  rule: '#ddd8d0', accent: '#4338ca', teal: '#0f766e',
+};
+
+const TAU = Math.PI * 2;
+function wave(x0, x1, yb, amp, fn, K = 160) {
+  // normalise the function to unit peak so both panels share an amplitude
+  let peak = 0;
+  for (let i = 0; i <= K; i++) peak = Math.max(peak, Math.abs(fn(i / K)));
+  let d = '';
+  for (let i = 0; i <= K; i++) {
+    const t = i / K;
+    const x = x0 + (x1 - x0) * t;
+    const y = yb - (amp * fn(t)) / peak;
+    d += (i ? 'L' : 'M') + x.toFixed(2) + ' ' + y.toFixed(2) + ' ';
+  }
+  return d.trim();
+}
+const simpleFn = (t) => Math.sin(TAU * t);
+const richFn = (t) =>
+  Math.sin(TAU * t) + 0.55 * Math.sin(2 * TAU * t + 0.5) + 0.45 * Math.sin(3 * TAU * t + 1.0) + 0.32 * Math.sin(4 * TAU * t + 1.7);
+
+const dSimple = wave(40, 318, 70, 30, simpleFn);
+const dRich = wave(362, 640, 70, 30, richFn);
+
+// spectra (bar heights are illustrative magnitudes per integer frequency)
+const baseY = 246;
+const barW = 22;
+const simpleBars = [{ f: 0, h: 12 }, { f: 1, h: 60 }].map((b, i) => ({ ...b, x: 120 + i * 56 }));
+const richBars = [{ f: 0, h: 12 }, { f: 1, h: 60 }, { f: 2, h: 44 }, { f: 3, h: 31 }, { f: 4, h: 20 }].map((b, i) => ({ ...b, x: 388 + i * 42 }));
+---
+
+<figure class="qw-fig" data-reveal>
+  <svg viewBox="0 0 680 284" role="img" aria-label="Two panels. Feeding data in simply gives a slow smooth wave and a short spectrum of one or two low frequencies. Feeding it in richly gives a choppier wave and a wider spectrum of several frequencies.">
+    <!-- panel titles -->
+    <text x="179" y="24" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" fill={c.teal} letter-spacing="0.04em">FEED IT IN SIMPLY</text>
+    <text x="501" y="24" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" fill={c.accent} letter-spacing="0.04em">FEED IT IN RICHLY</text>
+
+    <!-- waves -->
+    <line x1="40" y1="70" x2="318" y2="70" stroke={c.rule} stroke-width="1" stroke-dasharray="2 4" />
+    <line x1="362" y1="70" x2="640" y2="70" stroke={c.rule} stroke-width="1" stroke-dasharray="2 4" />
+    <path d={dSimple} fill="none" stroke={c.teal} stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+    <path d={dRich} fill="none" stroke={c.accent} stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- divider -->
+    <line x1="340" y1="14" x2="340" y2="270" stroke={c.rule} stroke-width="1" />
+
+    <!-- spectra -->
+    <line x1="92" y1={baseY} x2="232" y2={baseY} stroke={c.inkFaint} stroke-width="1.2" />
+    <line x1="364" y1={baseY} x2="600" y2={baseY} stroke={c.inkFaint} stroke-width="1.2" />
+    {simpleBars.map((b) => (
+      <g>
+        <rect x={b.x - barW / 2} y={baseY - b.h} width={barW} height={b.h} rx="2" fill={c.teal} opacity="0.92" />
+        <text x={b.x} y={baseY + 16} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill={c.inkMuted}>{b.f}</text>
+      </g>
+    ))}
+    {richBars.map((b) => (
+      <g>
+        <rect x={b.x - barW / 2} y={baseY - b.h} width={barW} height={b.h} rx="2" fill={c.accent} opacity="0.92" />
+        <text x={b.x} y={baseY + 16} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill={c.inkMuted}>{b.f}</text>
+      </g>
+    ))}
+
+    <!-- captions under spectra -->
+    <text x="162" y="278" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill={c.inkDim}>a few low notes</text>
+    <text x="482" y="278" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill={c.inkDim}>the whole keyboard</text>
+  </svg>
+  <figcaption>The encoding sets which frequencies are on the menu; training only sets how loud each one plays. Feed the data in richly and the circuit unlocks faster, choppier waves. (Illustrative.)</figcaption>
+</figure>
+
+<style>
+  .qw-fig { margin: 2.25rem 0 1.25rem; }
+  .qw-fig svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: var(--bg-raised, #f7f6f2);
+    border: 1px solid var(--rule, #ddd8d0);
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+  }
+  .qw-fig figcaption {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--ink-muted, #78716c);
+    text-align: center;
+    margin-top: 0.7rem;
+    letter-spacing: 0.01em;
+  }
+</style>

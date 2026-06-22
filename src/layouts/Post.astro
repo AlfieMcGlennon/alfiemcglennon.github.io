@@ -1,7 +1,7 @@
 ---
 import Base from './Base.astro';
 
-const { title, description, date, tags, image, project } = Astro.props;
+const { title, description, date, tags, image, project, math } = Astro.props;
 
 const formatted = new Date(date).toLocaleDateString('en-GB', {
   year: 'numeric',
@@ -23,8 +23,9 @@ const ogDescription = description;
   publishedTime={new Date(date).toISOString()}
   tags={tags}
   headline={title}
+  math={math}
 >
-  <article class="page-narrow post">
+  <article class="page-narrow post" data-project={project}>
     <header class="post-head">
       <p class="kicker">Writing</p>
       <h1>{title}</h1>
@@ -146,5 +147,77 @@ const ogDescription = description;
 
   .back-link:hover {
     color: var(--teal);
+  }
+
+  /* Section kicker sitting tight above its heading (quantum-weather post). */
+  .post-body :global(.kicker) {
+    margin-top: 3.25rem;
+    margin-bottom: 0;
+  }
+
+  .post-body :global(.kicker + h2) {
+    margin-top: 0.35rem;
+  }
+
+  /* "Go deeper" collapsible folds for standard (non-grand) posts. */
+  .post-body :global(details.fold) {
+    margin: 1.6rem 0 1.9rem;
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    background: var(--bg-raised);
+    padding: 0 1.15rem;
+    overflow: hidden;
+  }
+
+  .post-body :global(details.fold > summary) {
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.01em;
+    color: var(--accent);
+    font-weight: 500;
+    padding: 0.85rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .post-body :global(details.fold > summary::-webkit-details-marker) {
+    display: none;
+  }
+
+  .post-body :global(details.fold > summary::before) {
+    content: "+";
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    line-height: 1;
+    width: 1rem;
+    text-align: center;
+    color: var(--accent);
+  }
+
+  .post-body :global(details.fold[open] > summary::before) {
+    content: "−";
+  }
+
+  .post-body :global(details.fold[open] > summary) {
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 0.5rem;
+  }
+
+  .post-body :global(details.fold > :not(summary)) {
+    font-size: 0.98rem;
+  }
+
+  .post-body :global(details.fold > :last-child) {
+    margin-bottom: 1.1rem;
+  }
+
+  .post-body :global(details.fold summary:focus-visible) {
+    outline: 2px solid var(--teal);
+    outline-offset: 3px;
+    border-radius: 3px;
   }
 </style>
