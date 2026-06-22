@@ -59,6 +59,8 @@ truncated at whatever top frequency the encoding allows. The available frequenci
 
 Encoding the same input several times (a trick called data re-uploading), or using generators with a richer spectrum, widens the gaps between eigenvalues and unlocks $\cos 2x$, $\cos 3x$, and beyond. The trainable layers do not invent new frequencies. Given the menu the encoding makes available, they only set the coefficients, how much of each frequency is present. Encoding picks the alphabet; training writes with it.
 
+One honest caveat, since it is easy to overstate: training sets the coefficients, but not freely. A given circuit can only reach certain combinations of them, so the menu of available frequencies flatters how expressive the model really is; a frequency being on the menu does not mean the circuit can turn it up to any level. Here that mattered little, because the structure worth having sat at the lowest frequencies anyway.
+
 </details>
 
 <p class="kicker">The method</p>
