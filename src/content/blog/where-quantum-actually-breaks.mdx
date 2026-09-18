@@ -1,0 +1,285 @@
+---
+title: "Where Quantum Actually Breaks"
+description: "Five bottlenecks that decide whether quantum computing helps with your problem, in plain terms. What would have to change for each one, and which industries are actually affected."
+date: 2026-08-15
+project: "quantum-ml"
+accent: "#4338ca"
+tags: ["quantum-computing", "quantum-machine-learning", "explainer", "limitations"]
+draft: true
+math: true
+---
+
+{/*
+  Companion to "A Quantum Weather Model at Full Scale". Conventions: British English,
+  NO em dashes, KaTeX, <details class="fold"> for depth. Step-down structure: the main
+  line is for anyone, the folds are for people who want the citation. Sections are
+  named bottlenecks, not numbered, because they are not a sequence.
+*/}
+
+import QWTopology from '../../components/QWTopology.astro';
+import QWWireLab from '../../components/QWWireLab.astro';
+
+Most explanations of quantum computing's limits stop at "the hardware is noisy". True, and
+the least interesting constraint, because it is the one already getting the money.
+
+I spent months building a quantum weather model. Noise turned out not to be the binding
+problem at all. On real IBM hardware it kept
+[96 per cent of its simulated skill](/writing/quantum-weather-model-full-scale). It still
+did not beat doing nothing, for reasons that had nothing to do with noise.
+
+So here is the other list. Five things that decide whether a quantum computer helps with
+your problem, what would have to change for each, and who is actually affected. They are not
+a sequence. Any one of them alone is enough to sink you.
+
+## Getting data in
+
+A quantum computer's power lives in a space that grows exponentially with the number of
+qubits. The catch is filling it.
+
+If you have a million classical numbers, loading them takes about a million operations. The
+exponential space you gained is paid for in linear time, **every time you run the circuit**.
+For machine learning that means every sample, every pass, every epoch.
+
+In my weather model this was the whole story. The circuit only ever saw a squeezed summary
+of the input and only ever handed back a handful of numbers. Everything quantum happened
+between an ordinary map in and an ordinary map out. You cannot tune your way out of a
+doorway: I swept the encoding settings and the best available option moved the result by
+about 0.019, barely above noise.
+
+**What would fix it:** not loading classical data at all. If your input is *already* a
+quantum thing, like a molecule, you skip this entirely. That is not a footnote. It is the
+single strongest filter on what is plausible.
+
+<details class="fold">
+<summary>The paper that says this is permanent</summary>
+
+[The Input Problem: Permanent Bottleneck for QML](https://arxiv.org/abs/2608.08433)
+(August 2026) argues the encoding cost is structural rather than an engineering phase we
+grow out of. I found it after arriving at the same conclusion the slow way.
+</details>
+
+## Quantum models are kernel methods
+
+This one should change how you read most quantum machine learning papers.
+
+A quantum model with a fixed way of loading data can be written as a **kernel method**, a
+well understood classical technique from the 1990s. That reframing is due to Maria Schuld.
+
+So a kernel baseline belongs in every comparison, and it usually is not there. But do not
+take the stronger version of this, which I got wrong at first: kernels do not *replace*
+neural networks as the peer class. Schuld's own follow-up work benchmarks quantum models
+against support vector machines **and** neural networks, and finds ordinary classical models
+win. And the kernel view is not a universal stand-in either, since some quantum models
+provably need less data than any kernel method on certain tasks.
+
+**What would fix it:** a way of loading data whose kernel is genuinely hard to compute
+classically *and* happens to suit a real problem. Both halves are needed. A hard kernel that
+encodes the wrong assumptions is just an expensive way to be wrong.
+
+<details class="fold">
+<summary>The citation, and the caveat I nearly missed</summary>
+
+The result is [Schuld (2021), arXiv:2101.11020](https://arxiv.org/abs/2101.11020), a single
+author preprint. I originally cited it as "Schuld et al." in *Phys. Rev. A* 103, 032430,
+which is a **different paper** (Schuld, Sweke and Meyer,
+[arXiv:2008.08605](https://arxiv.org/abs/2008.08605), on encoding and expressive power). I
+had merged two papers into one citation, and a fact check caught it before publication.
+
+The caveat that matters: [Bowles, Ahmed and Schuld](https://arxiv.org/abs/2403.07059)
+benchmark twelve quantum models against SVMs, feed-forward networks and CNNs, so the author
+of the kernel result keeps neural networks in the comparison. And Jerbi et al.
+(*Nat. Commun.* 14, 517, 2023) prove kernel methods can need exponentially more data than
+data re-uploading models on some tasks, so "quantum models are just kernels" is too strong.
+
+Worth adding that my circuit was **not** feeble. I tested whether a classical formula using
+all single frequencies plus all 351 pairs could reproduce its output, and it managed only
+$R^2 = 0.177$. Switch the entangling off and the same formula gets 0.845. So the circuit
+does create real structure that simple classical maps cannot copy. It just is not structure
+that helps predict weather.
+
+I have now had that same answer four times: on weather patches, on chaotic toy systems, on a
+vertical column model, and on a full forecast. Every time, once the right baseline is in the
+table, the advantage disappears.
+</details>
+
+## Getting answers out
+
+Measuring a quantum state destroys it, and you get very little back. The Holevo bound caps
+the information you can extract from nine qubits at nine bits, and that is the cap for the
+*best possible* measurement strategy, not the one you happen to run. Any actual measurement
+usually recovers far less.
+
+So even a perfect quantum computer holding a gorgeous exponentially large answer has to hand
+it over a few bits at a time. If what you want is a **whole field**, like tomorrow's
+temperature at every point on a map, you are reading all of it out anyway and the quantum
+part was a detour.
+
+<details class="fold">
+<summary>Two things people get wrong about this, including me</summary>
+
+The bound is on **accessible information**, the maximum over all measurement strategies, not
+"bits per measurement". The gap between a given measurement and that maximum can be
+arbitrarily large.
+
+And the cap is not absolute: with pre-shared entanglement, superdense coding sends two
+classical bits per transmitted qubit, exactly double.
+
+Most importantly, Holevo limits how much you can **read out**, not how much computation
+produced it. That is why exponential quantum advantages in communication complexity and in
+learning coexist with it perfectly happily.
+</details>
+
+**What would fix it:** problems whose *answer is small*. An energy. A yes or no. One optimal
+setting. Quantum chemistry fits perfectly: huge internal state, one number out. Full field
+weather forecasting is close to the worst possible fit, which is worth knowing before you
+spend a year on it, as I did.
+
+## The chip's wiring is part of your model
+
+This is the most practical of the five, and the one that surprised me.
+
+With a graphics card, hardware is interchangeable. The same code runs anywhere and only the
+speed changes. With a quantum computer it is not. Each qubit is physically wired to only a
+few neighbours, and if your circuit wants a different shape, the compiler has to shuffle
+qubits around. Every shuffle costs accuracy.
+
+<QWTopology />
+
+<QWWireLab />
+
+My circuit connected qubits in a 3x3 grid to match map cells. IBM's chips allow three
+connections per qubit. A grid centre needs four. It simply cannot be laid down. The compiler
+turned 60 operations into 198, and the errors followed.
+
+Reordering the same nine cells as a snake keeps every connection a real neighbour but forms
+a line, and lines fit. Forty operations, no shuffling, and double the accuracy on hardware
+for identical simulated skill.
+
+**What would fix it:** designing the circuit and the chip choice together, or hardware with
+richer wiring. Trapped ion machines connect everything to everything and would have run my
+original circuit with no penalty at all.
+
+<details class="fold">
+<summary>This is a trade, not a mistake, and I should not have called it one</summary>
+
+Building the circuit around the chip's wiring has a name, the
+[hardware efficient ansatz](https://arxiv.org/abs/1704.05018) (Kandala et al., *Nature* 549,
+2017). I first wrote that ignoring it was "a beginner's mistake". A fact check pushed back,
+and it was right to.
+
+Qubit routing is a mature compiler job, and a connectivity-agnostic circuit still runs
+correctly, just deeper. Deliberately choosing a problem-shaped entangler and paying the
+routing cost is expert judgement, not an error: chemistry-motivated circuits do it
+routinely, in exchange for better trainability. So the honest framing is that ignoring
+topology has a **fidelity price** you should measure, which in my case was more than half my
+hardware accuracy, and which I had not measured.
+
+Going the other way is not free either. Hardware-shaped circuits are more prone to
+[barren plateaus](https://arxiv.org/abs/1803.11173), where the training signal vanishes, and
+an earlier paper from 2022
+[questions whether they are practically useful at all](https://arxiv.org/abs/2211.01477).
+</details>
+
+## The simulability trap
+
+The uncomfortable one.
+
+Quantum models suffer from vanishing training signal as they get bigger. So people add
+structure to keep them trainable. The trap is that the structure which makes a circuit
+trainable tends to be the same structure that makes it **easy to simulate on a normal
+computer**.
+
+That leaves a narrow and possibly empty window: circuits interesting enough to matter,
+structured enough to train, and still hard to simulate.
+
+There is a sharp practical consequence. If you can simulate your quantum model on a laptop,
+as I did, then by definition it is doing something a laptop can do.
+
+**What would fix it:** nobody knows. This is an open research problem, not a roadmap item,
+and it is the honest answer to "when will quantum machine learning work".
+
+## So who is actually affected
+
+I first wrote this as a single ranking. A fact check pointed out that my ranking quietly
+switched axes halfway down, which is exactly the move I accuse optimisation vendors of. So
+here are two rankings, and the axis is stated first.
+
+**Ranked by what has actually been delivered:**
+
+1. **Sensing, first by a wide margin.** This is the only area with systems in production.
+   SQUID magnetometers, atomic vapour magnetometers and atomic clocks are old news, not
+   near-term promises. Squeezed light runs in LIGO's production detectors and now pushes
+   quantum noise below the standard quantum limit.
+2. **Cryptography**, as a planning problem. Nothing has been broken, but the migration to
+   post-quantum encryption is real work happening now.
+3. **Chemistry, optimisation and machine learning.** None has demonstrated a practical
+   advantage on a real problem.
+
+**Ranked by the quality of the theoretical case, which comes out differently:**
+
+1. **Optimisation and machine learning on classical data** both have proven separations on
+   structured problems. That surprised me, given the next section.
+2. **Chemistry** has the most careful cost estimates of anything in the field, but no
+   evidence of exponential advantage for ground-state energy.
+
+So chemistry does not top either list on its own. What it leads on is **how precisely we
+understand what it would cost**, which is a real and underrated thing to lead on.
+
+<details class="fold">
+<summary>Where I had chemistry wrong, and the strongest pushback on my optimisation take</summary>
+
+I wrote that chemistry fits because "the input is already quantum". **That is false as
+stated.** In every serious resource estimate the input is classical: a nuclear geometry plus
+a basis set. The quantum state is an *output* that has to be prepared, at cost. The Feynman
+intuition is exactly what the field's own senior figures now decline to endorse. Lee et al.
+(*Nat. Commun.* 14, 1952, 2023) conclude that evidence for exponential advantage across
+chemical space "has yet to be found".
+
+On optimisation, my "no demonstrated speedup" line is defensible about *deployed* systems
+but ignores recent theory. Decoded Quantum Interferometry has a superpolynomial advantage
+claim on structured optimisation problems (*Nature* 646, 831, 2025). Someone in that field
+would lead with it, and they would be entitled to.
+
+And on machine learning, my own worst-fit category, Liu, Arunachalam and Temme
+(*Nature Physics*, 2021) proved a rigorous exponential separation for a learning problem
+built on discrete logarithms. It is a constructed problem rather than a natural dataset, but
+it means "quantum ML cannot help" is too strong. The correct claim is narrower: on *ordinary
+classical data*, of the kind I was using, all five bottlenecks apply at once.
+</details>
+
+## The narrower goal
+
+None of this says quantum computing does not work. It says the shape of the problem is not
+the shape of the hype.
+
+The hype is that quantum computers are faster computers that will speed up whatever you
+already do. The reality is that they are a **different kind of machine suited to a narrow
+class of problems**, mostly defined by whether your data is already quantum and whether your
+answer is small.
+
+For everyday impact, quantum sensing is already reaching you, in navigation, medical imaging
+and timekeeping. Chemistry is the most plausible route to better batteries and catalysts,
+but be honest about the distance: the cheapest known algorithm puts an industrial catalyst
+like FeMoco at roughly **four million physical qubits and four days of runtime**, which is a
+harder hardware target than breaking RSA, against today's devices in the low thousands. Then
+add materials qualification and manufacturing on top. I would not put a decade on it, and
+anyone who does is guessing.
+
+Your weather forecast stays classical, and my own experiments are a small piece of the
+evidence for why.
+
+That is narrower than the marketing. It is also more useful, because it tells you where to
+point the effort. The best thing a negative result does is stop someone else spending a year
+finding out the same thing.
+
+<details class="fold">
+<summary>Two more recent papers worth your time</summary>
+
+[The Fourier Wall](https://arxiv.org/abs/2607.15815) looks at why standard benchmark
+datasets are the wrong place to hunt for an advantage.
+
+And for an independent null with the same shape as mine, from a completely different field,
+[ten class MNIST on a 127 qubit IBM processor](https://arxiv.org/abs/2607.17705) reports no
+per parameter accuracy advantage at this scale, and finds that fine tuning on hardware gives
+no measurable gain.
+</details>

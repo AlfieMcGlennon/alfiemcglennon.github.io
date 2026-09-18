@@ -1,0 +1,105 @@
+---
+// Why the same circuit costs 5x more on real hardware, and how reordering fixes it.
+// Three panels: the 3x3 grid the model wants, the heavy-hex lattice the chip offers,
+// and the snake path that satisfies both. Palette matches QWCircuit.astro. Static.
+const c = {
+  ink: '#1c1917', inkDim: '#44403c', inkMuted: '#78716c', inkFaint: '#a8a29e',
+  bg: '#f7f6f2', rule: '#ddd8d0', accent: '#4338ca', teal: '#0f766e',
+  amber: '#b45309', warn: '#b91c1c',
+};
+
+// panel geometry
+const py = 78, gap = 24;
+const pw = (680 - 36 - gap * 2) / 3;
+const pxs = [18, 18 + pw + gap, 18 + (pw + gap) * 2];
+
+// 3x3 node positions inside a panel
+const cell = 42;
+const nodes = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({
+  i, cx: (i % 3) * cell, cy: Math.floor(i / 3) * cell,
+}));
+const gridEdges = [[0,1],[1,2],[3,4],[4,5],[6,7],[7,8],[0,3],[3,6],[1,4],[4,7],[2,5],[5,8]];
+const snakeOrder = [0, 1, 2, 5, 4, 3, 6, 7, 8];
+const snakeEdges = snakeOrder.slice(0, 8).map((v, k) => [v, snakeOrder[k + 1]]);
+
+const gx = (p) => pxs[p] + pw / 2 - cell;      // left of the 3x3 block
+const gy = py + 46;
+
+// a small heavy-hex fragment: hexagon corners with an extra qubit on each edge
+const hexR = 40, hcx = pxs[1] + pw / 2, hcy = gy + cell;
+const corners = [0, 1, 2, 3, 4, 5].map((k) => {
+  const a = (Math.PI / 3) * k - Math.PI / 2;
+  return { x: hcx + hexR * Math.cos(a), y: hcy + hexR * Math.sin(a) };
+});
+const mids = corners.map((p, k) => {
+  const q = corners[(k + 1) % 6];
+  return { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
+});
+---
+
+<figure class="qw-fig" data-reveal>
+  <svg viewBox="0 0 680 264" role="img" aria-label="Three panels. The model wants a three by three grid of connections whose centre cell needs four links. IBM's heavy hex chip offers at most three links per qubit, so the grid cannot be embedded and the compiler inserts swaps, turning sixty two-qubit gates into one hundred and ninety eight. Reordering the same nine cells as a snake path needs only eight links, every one still a true neighbour, and fits the chip natively at forty gates.">
+    <text x="20" y="26" font-family="'Outfit', system-ui, sans-serif" font-size="19" font-weight="600" fill={c.ink}>The chip's wiring is part of the model</text>
+    <text x="20" y="46" font-family="'JetBrains Mono', monospace" font-size="11.5" fill={c.inkMuted}>same circuit, same weights, five times the gates</text>
+
+    <text x={pxs[0] + pw / 2} y={py} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="0.07em" fill={c.warn}>WHAT THE MODEL WANTS</text>
+    <text x={pxs[1] + pw / 2} y={py} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="0.07em" fill={c.inkDim}>WHAT THE CHIP OFFERS</text>
+    <text x={pxs[2] + pw / 2} y={py} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="0.07em" fill={c.teal}>THE FIX</text>
+
+    {gridEdges.map(([a, b]) => (
+      <line x1={gx(0) + nodes[a].cx} y1={gy + nodes[a].cy} x2={gx(0) + nodes[b].cx} y2={gy + nodes[b].cy} stroke={c.warn} stroke-width="1.6" opacity="0.75" />
+    ))}
+    {nodes.map((n) => (
+      <circle cx={gx(0) + n.cx} cy={gy + n.cy} r={n.i === 4 ? 7 : 5}
+              fill={n.i === 4 ? c.warn : c.bg} stroke={c.warn} stroke-width="1.8" />
+    ))}
+    <text x={pxs[0] + pw / 2} y={gy + cell * 2 + 30} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10.5" fill={c.inkDim}>centre cell needs 4 links</text>
+    <text x={pxs[0] + pw / 2} y={gy + cell * 2 + 46} text-anchor="middle" font-family="'Outfit', system-ui, sans-serif" font-size="13" font-weight="600" fill={c.warn}>198 gates on hardware</text>
+
+    <g>
+      {corners.map((p, k) => (
+        <line x1={p.x} y1={p.y} x2={corners[(k + 1) % 6].x} y2={corners[(k + 1) % 6].y} stroke={c.rule} stroke-width="1.6" />
+      ))}
+      {corners.map((p) => (<circle cx={p.x} cy={p.y} r="5" fill={c.bg} stroke={c.inkDim} stroke-width="1.6" />))}
+      {mids.map((p) => (<circle cx={p.x} cy={p.y} r="4" fill={c.inkFaint} stroke="none" />))}
+    </g>
+    <text x={pxs[1] + pw / 2} y={gy + cell * 2 + 30} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10.5" fill={c.inkDim}>at most 3 links per qubit</text>
+    <text x={pxs[1] + pw / 2} y={gy + cell * 2 + 46} text-anchor="middle" font-family="'Outfit', system-ui, sans-serif" font-size="13" font-weight="600" fill={c.inkDim}>no 4-way junctions exist</text>
+
+    {snakeEdges.map(([a, b]) => (
+      <line x1={gx(2) + nodes[a].cx} y1={gy + nodes[a].cy} x2={gx(2) + nodes[b].cx} y2={gy + nodes[b].cy} stroke={c.teal} stroke-width="2.4" stroke-linecap="round" />
+    ))}
+    {nodes.map((n) => (
+      <circle cx={gx(2) + n.cx} cy={gy + n.cy} r="5" fill={c.bg} stroke={c.teal} stroke-width="1.8" />
+    ))}
+    <text x={pxs[2] + pw / 2} y={gy + cell * 2 + 30} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10.5" fill={c.inkDim}>8 links, all still neighbours</text>
+    <text x={pxs[2] + pw / 2} y={gy + cell * 2 + 46} text-anchor="middle" font-family="'Outfit', system-ui, sans-serif" font-size="13" font-weight="600" fill={c.teal}>40 gates on hardware</text>
+  </svg>
+  <figcaption>
+    A three by three grid has a centre with four neighbours; the chip tops out at three, so
+    the grid provably cannot be laid down and the compiler pads it with swaps. Walking the
+    same nine cells as a snake keeps every link a real neighbour and fits as it is.
+  </figcaption>
+</figure>
+
+<style>
+  .qw-fig { margin: 2.25rem 0 1.25rem; }
+  .qw-fig svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: var(--bg-raised, #f7f6f2);
+    border: 1px solid var(--rule, #ddd8d0);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+  }
+  .qw-fig figcaption {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--ink-muted, #78716c);
+    text-align: center;
+    margin-top: 0.7rem;
+    letter-spacing: 0.01em;
+  }
+</style>

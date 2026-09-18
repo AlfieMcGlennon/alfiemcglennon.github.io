@@ -1,0 +1,499 @@
+---
+// hero-lab.astro — private preview of three candidate homepage hero
+// restyles, all sharing one upgraded live-weather feed (see
+// src/scripts/weather.js). NOT part of the live site: noindex/nofollow,
+// standalone shell (not Base.astro, which has no noindex hook and is left
+// untouched), and every variant lives in its own new component. The live
+// homepage (src/pages/index.astro) is not imported or modified anywhere
+// here.
+//
+// Direct-linkable per variant via /hero-lab?variant=synoptic|almanac|
+// atmosphere (hash equivalents also work) — see the is:inline script below,
+// which resolves the initial panel synchronously (before any module script
+// runs) so a direct link to one variant doesn't flash a different one first.
+import Nav from '../components/Nav.astro';
+import HeroSynoptic from '../components/HeroSynoptic.astro';
+import HeroAlmanac from '../components/HeroAlmanac.astro';
+import HeroAtmosphere from '../components/HeroAtmosphere.astro';
+import HeroPhysical from '../components/HeroPhysical.astro';
+import HeroVolumetric from '../components/HeroVolumetric.astro';
+import '../styles/global.css';
+
+const VARIANTS = [
+  { id: 'synoptic', label: 'Synoptic', blurb: 'A drifting isoline field behind the hero — spacing tightens as pressure drops, drift follows the real wind.' },
+  { id: 'almanac', label: 'Almanac', blurb: 'Minimal motion, maximal craft: hand-drawn condition glyphs and an aligned mono instrument panel.' },
+  { id: 'atmosphere', label: 'Atmosphere', blurb: 'A layered sky band painted from the actual current sky — cloud cover, precipitation, and dusk/dawn warmth.' },
+  { id: 'physical', label: 'Physical', blurb: 'The computed sky: sun and moon drawn at their true positions over Reading, palette from real solar elevation, parallax cloud forms, downland horizon.' },
+  { id: 'volumetric', label: 'Volumetric', blurb: 'The three.js ceiling: a shader sky with physical light scattering and sun-lit noise clouds — golden hour emerges from the physics.' },
+];
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hero Lab (private preview) — Alfie McGlennon</title>
+    <meta
+      name="description"
+      content="Internal preview of three candidate homepage hero restyles powered by live Reading weather telemetry. Not for public indexing."
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <Nav />
+    <main>
+      <section class="lab-intro">
+        <p class="lab-kicker">Internal preview &middot; noindex, not linked from the site</p>
+        <h1>Hero Lab</h1>
+        <p class="lab-lede">
+          Three candidate homepage hero restyles, all reading the same upgraded
+          live-weather feed for Reading, UK: temperature, feels-like, dew point,
+          humidity, wind speed/direction, cloud cover, precipitation, pressure and
+          day/night. This page is not linked from the live site and doesn't touch it.
+        </p>
+
+        <div class="lab-switch" role="tablist" aria-label="Hero variant">
+          {VARIANTS.map((v) => (
+            <button type="button" class="lab-tab" role="tab" data-lab-tab={v.id} aria-pressed="false">
+              {v.label}
+            </button>
+          ))}
+        </div>
+        <p class="lab-blurb" data-lab-blurb aria-live="polite"></p>
+
+        <details class="lab-override" data-lab-override>
+          <summary>Dev override — force the weather state <span class="lo-warn">(lab only — never ships live)</span></summary>
+          <div class="lo-body">
+            <div class="lo-row">
+              <span class="lo-badge" data-lo-badge data-state="live">LIVE</span>
+              <button type="button" class="lo-reset" data-lo-reset>Reset to live</button>
+            </div>
+
+            <div class="lo-controls">
+              <label class="lo-field">
+                <span>Condition</span>
+                <select data-lo-condition>
+                  <option value="clear">Clear</option>
+                  <option value="partly-cloudy">Partly cloudy</option>
+                  <option value="overcast">Overcast</option>
+                  <option value="fog">Fog</option>
+                  <option value="drizzle">Drizzle</option>
+                  <option value="rain">Rain</option>
+                  <option value="snow">Snow</option>
+                  <option value="thunderstorm">Thunderstorm</option>
+                </select>
+              </label>
+
+              <button type="button" class="lo-cycle" data-lo-cycle>Cycle condition &rarr;</button>
+
+              <label class="lo-field lo-toggle">
+                <span>Day / night</span>
+                <button type="button" class="lo-daynight" data-lo-daynight aria-pressed="true">Day</button>
+              </label>
+
+              <label class="lo-field lo-slider">
+                <span>Wind speed — <output data-lo-wind-speed-val>14</output> km/h</span>
+                <input type="range" min="0" max="70" step="1" value="14" data-lo-wind-speed />
+              </label>
+
+              <label class="lo-field lo-slider">
+                <span>Wind direction — <output data-lo-wind-dir-val>235</output>&deg;</span>
+                <input type="range" min="0" max="360" step="5" value="235" data-lo-wind-dir />
+              </label>
+
+              <label class="lo-field lo-slider">
+                <span>Cloud cover — <output data-lo-cloud-val>45</output>%</span>
+                <input type="range" min="0" max="100" step="5" value="45" data-lo-cloud />
+              </label>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <HeroSynoptic />
+      <HeroAlmanac />
+      <HeroAtmosphere />
+      <HeroPhysical />
+      <HeroVolumetric />
+
+      <script is:inline>
+        // Resolve the initial visible panel SYNCHRONOUSLY, during HTML
+        // parsing, before the module scripts below (which are deferred)
+        // ever run. This is what makes /hero-lab?variant=almanac (or
+        // #almanac) show the right variant immediately instead of flashing
+        // Synoptic first.
+        (function () {
+          var VARIANTS = ['synoptic', 'almanac', 'atmosphere', 'physical', 'volumetric'];
+          var params = new URLSearchParams(location.search);
+          var v = params.get('variant') || (location.hash || '').replace('#', '');
+          if (VARIANTS.indexOf(v) === -1) v = 'synoptic';
+          document.querySelectorAll('[data-lab-panel]').forEach(function (p) {
+            p.hidden = p.getAttribute('data-lab-panel') !== v;
+          });
+          document.querySelectorAll('[data-lab-tab]').forEach(function (t) {
+            t.setAttribute('aria-pressed', String(t.getAttribute('data-lab-tab') === v));
+          });
+        })();
+      </script>
+
+      <section class="lab-notes">
+        <h2>What&rsquo;s real here</h2>
+        <p>
+          Every readout comes from one Open-Meteo <code>current</code> call for Reading, UK
+          (51.4543, &minus;0.9781): temperature, apparent temperature, relative humidity, dew
+          point, weather code, cloud cover, wind speed/direction, precipitation, mean sea-level
+          pressure and day/night. The fetch has a 2s timeout, caches to
+          <code>sessionStorage</code> for 30 minutes, and fails silently to a plausible static
+          reading if the network is unreachable &mdash; the same pattern as the live homepage
+          hero, extended with the fields these variants needed (dew point especially &mdash; it's
+          the variable the compound heat-stress dissertation actually turns on).
+        </p>
+        <p>
+          The dev override panel above lets you force any condition, day/night, wind and cloud
+          cover to see how each variant reacts without waiting for the weather to change. It is
+          isolated to this page only and is not part of any live-rollout plan.
+        </p>
+      </section>
+    </main>
+
+    <style>
+      .lab-intro {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 2rem;
+      }
+
+      .lab-kicker {
+        font-family: var(--font-mono);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--amber);
+        margin-bottom: 0.75rem;
+      }
+
+      .lab-lede {
+        font-family: var(--font-serif);
+        font-size: 1.1rem;
+        line-height: 1.7;
+        color: var(--ink-dim);
+        max-width: 64ch;
+      }
+
+      .lab-switch {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 1.5rem;
+      }
+
+      .lab-tab {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        cursor: pointer;
+        background: var(--bg-raised);
+        color: var(--ink-muted);
+        border: 1px solid var(--rule);
+        border-radius: 999px;
+        padding: 0.4rem 1.1rem;
+        transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      }
+
+      .lab-tab:hover { color: var(--ink); }
+
+      .lab-tab[aria-pressed="true"] {
+        color: var(--teal-deep);
+        border-color: var(--teal);
+        background: var(--teal-soft);
+      }
+
+      .lab-blurb {
+        margin-top: 0.9rem;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        color: var(--ink-muted);
+        min-height: 1.4em;
+      }
+
+      .lab-override {
+        margin-top: 1.5rem;
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        background: var(--bg-raised);
+      }
+
+      .lab-override summary {
+        cursor: pointer;
+        list-style: none;
+        padding: 0.75rem 1rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--ink-dim);
+      }
+
+      .lab-override summary::-webkit-details-marker { display: none; }
+
+      .lab-override summary::before {
+        content: '\25B8';
+        display: inline-block;
+        margin-right: 0.5rem;
+        color: var(--ink-faint);
+        transition: transform 0.15s ease;
+      }
+
+      .lab-override[open] summary::before {
+        transform: rotate(90deg);
+      }
+
+      .lo-warn {
+        color: var(--amber);
+        font-weight: 600;
+      }
+
+      .lo-body {
+        padding: 0 1rem 1.1rem;
+        border-top: 1px solid var(--rule);
+      }
+
+      .lo-row {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 0.9rem 0 0.2rem;
+      }
+
+      .lo-badge {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background: var(--teal-soft);
+        color: var(--teal-deep);
+      }
+
+      .lo-badge[data-state="override"] {
+        background: var(--amber-soft);
+        color: #7c3a05;
+      }
+
+      .lo-badge[data-state="static"] {
+        background: var(--rule-soft);
+        color: var(--ink-muted);
+      }
+
+      .lo-reset {
+        font-family: var(--font-mono);
+        font-size: 0.76rem;
+        cursor: pointer;
+        background: none;
+        color: var(--teal-deep);
+        border: 1px solid var(--teal);
+        border-radius: 999px;
+        padding: 0.3rem 0.85rem;
+      }
+
+      .lo-reset:hover { background: var(--teal-soft); }
+
+      .lo-controls {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.9rem 1.5rem;
+        padding-top: 0.9rem;
+      }
+
+      @media (min-width: 640px) {
+        .lo-controls { grid-template-columns: 1fr 1fr; }
+      }
+
+      .lo-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        font-family: var(--font-mono);
+        font-size: 0.76rem;
+        color: var(--ink-muted);
+      }
+
+      .lo-field select,
+      .lo-field input[type="range"] {
+        font-family: var(--font-mono);
+        accent-color: var(--teal);
+      }
+
+      .lo-field select {
+        padding: 0.35rem 0.5rem;
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      .lo-toggle .lo-daynight,
+      .lo-cycle {
+        font-family: var(--font-mono);
+        font-size: 0.76rem;
+        cursor: pointer;
+        background: var(--bg);
+        color: var(--ink-dim);
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        padding: 0.4rem 0.7rem;
+        align-self: flex-start;
+      }
+
+      .lo-cycle {
+        align-self: flex-end;
+        margin-bottom: 0.1rem;
+      }
+
+      .lo-toggle .lo-daynight:hover,
+      .lo-cycle:hover {
+        border-color: var(--teal);
+        color: var(--teal-deep);
+      }
+
+      .lab-notes {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 5rem;
+      }
+
+      .lab-notes h2 {
+        font-size: 1.3rem;
+        margin-bottom: 0.9rem;
+      }
+
+      .lab-notes p {
+        font-family: var(--font-serif);
+        font-size: 1rem;
+        line-height: 1.7;
+        color: var(--ink-dim);
+        margin-bottom: 1.1rem;
+      }
+
+      .lab-notes code {
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        background: var(--bg-raised);
+        padding: 0.1em 0.4em;
+        border-radius: 3px;
+        border: 1px solid var(--rule-soft);
+      }
+    </style>
+
+    <script>
+      import { initLive, subscribe, applyOverride, cycleCondition, resetToLive } from '../scripts/hero-lab-state.js';
+
+      const VARIANTS = ['synoptic', 'almanac', 'atmosphere', 'physical', 'volumetric'];
+      const BLURBS = {
+        synoptic: 'A drifting isoline field behind the hero — spacing tightens as pressure drops, drift follows the real wind.',
+        almanac: 'Minimal motion, maximal craft: hand-drawn condition glyphs and an aligned mono instrument panel.',
+        atmosphere: 'A layered sky band painted from the actual current sky — cloud cover, precipitation, and dusk/dawn warmth.',
+        physical: 'The computed sky: sun and moon drawn at their true positions over Reading, palette from real solar elevation, parallax cloud forms, downland horizon.',
+        volumetric: 'The three.js ceiling: a shader sky with physical light scattering and sun-lit noise clouds — golden hour emerges from the physics.',
+      };
+
+      function currentVariant() {
+        const params = new URLSearchParams(location.search);
+        const v = params.get('variant') || (location.hash || '').replace('#', '');
+        return VARIANTS.includes(v) ? v : 'synoptic';
+      }
+
+      function showVariant(name, opts) {
+        const updateUrl = !opts || opts.updateUrl !== false;
+        document.querySelectorAll('[data-lab-panel]').forEach((p) => {
+          p.hidden = p.dataset.labPanel !== name;
+        });
+        document.querySelectorAll('[data-lab-tab]').forEach((t) => {
+          t.setAttribute('aria-pressed', String(t.dataset.labTab === name));
+        });
+        const blurb = document.querySelector('[data-lab-blurb]');
+        if (blurb) blurb.textContent = BLURBS[name] || '';
+        if (updateUrl) {
+          const url = new URL(location.href);
+          url.hash = '';
+          url.searchParams.set('variant', name);
+          history.replaceState(null, '', `${url.pathname}?variant=${name}`);
+        }
+        // Panels that were hidden had zero size; let their canvases pick up
+        // their real dimensions now that they're visible.
+        window.dispatchEvent(new Event('resize'));
+      }
+
+      function initSwitcher() {
+        document.querySelectorAll('[data-lab-tab]').forEach((t) => {
+          t.addEventListener('click', () => showVariant(t.dataset.labTab));
+        });
+        showVariant(currentVariant(), { updateUrl: false });
+      }
+
+      function initOverridePanel() {
+        const panel = document.querySelector('[data-lab-override]');
+        if (!panel) return;
+
+        const badge = panel.querySelector('[data-lo-badge]');
+        const condSel = panel.querySelector('[data-lo-condition]');
+        const cycleBtn = panel.querySelector('[data-lo-cycle]');
+        const dayNightBtn = panel.querySelector('[data-lo-daynight]');
+        const windSpeed = panel.querySelector('[data-lo-wind-speed]');
+        const windSpeedVal = panel.querySelector('[data-lo-wind-speed-val]');
+        const windDir = panel.querySelector('[data-lo-wind-dir]');
+        const windDirVal = panel.querySelector('[data-lo-wind-dir-val]');
+        const cloud = panel.querySelector('[data-lo-cloud]');
+        const cloudVal = panel.querySelector('[data-lo-cloud-val]');
+        const resetBtn = panel.querySelector('[data-lo-reset]');
+
+        function sync(reading) {
+          if (!reading) return;
+          condSel.value = reading.condition;
+          dayNightBtn.textContent = reading.isDay ? 'Day' : 'Night';
+          dayNightBtn.setAttribute('aria-pressed', String(reading.isDay));
+          windSpeed.value = String(Math.round(reading.windSpeed));
+          windSpeedVal.textContent = String(Math.round(reading.windSpeed));
+          windDir.value = String(Math.round(reading.windDir));
+          windDirVal.textContent = String(Math.round(reading.windDir));
+          cloud.value = String(Math.round(reading.cloudCover));
+          cloudVal.textContent = String(Math.round(reading.cloudCover));
+          badge.textContent = reading.overridden ? 'OVERRIDE' : reading.live ? 'LIVE' : 'STATIC';
+          badge.dataset.state = reading.overridden ? 'override' : reading.live ? 'live' : 'static';
+        }
+
+        subscribe(sync);
+
+        condSel.addEventListener('change', () => applyOverride({ condition: condSel.value }));
+        cycleBtn.addEventListener('click', () => { condSel.value = cycleCondition(); });
+        dayNightBtn.addEventListener('click', () => {
+          const isDay = dayNightBtn.getAttribute('aria-pressed') !== 'true';
+          applyOverride({ isDay });
+        });
+        windSpeed.addEventListener('input', () => {
+          windSpeedVal.textContent = windSpeed.value;
+          applyOverride({ windSpeed: Number(windSpeed.value) });
+        });
+        windDir.addEventListener('input', () => {
+          windDirVal.textContent = windDir.value;
+          applyOverride({ windDir: Number(windDir.value) });
+        });
+        cloud.addEventListener('input', () => {
+          cloudVal.textContent = cloud.value;
+          applyOverride({ cloudCover: Number(cloud.value) });
+        });
+        resetBtn.addEventListener('click', () => resetToLive());
+      }
+
+      initSwitcher();
+      initOverridePanel();
+      initLive();
+    </script>
+  </body>
+</html>

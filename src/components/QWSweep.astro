@@ -1,0 +1,101 @@
+---
+// How nine qubits cover a mesh far bigger than nine nodes: the same circuit is
+// slid over the mesh in overlapping 3x3 patches, and the overlaps are averaged.
+// This is the step most people assume is impossible, so it gets its own figure.
+// Palette and type match QWCircuit.astro. Static.
+const c = {
+  ink: '#1c1917', inkDim: '#44403c', inkMuted: '#78716c', inkFaint: '#a8a29e',
+  bg: '#f7f6f2', rule: '#ddd8d0', accent: '#4338ca', teal: '#0f766e', amber: '#b45309',
+};
+
+// left: the latent mesh as a dot lattice with one 3x3 window picked out
+const cols = 9, rows = 5, dx = 20, dy = 20, mx = 34, my = 96;
+const mesh = [];
+for (let r = 0; r < rows; r++) for (let k = 0; k < cols; k++) mesh.push({ r, k, x: mx + k * dx, y: my + r * dy });
+const win = { r0: 1, k0: 2 };           // highlighted patch
+const inWin = (m) => m.r >= win.r0 && m.r < win.r0 + 3 && m.k >= win.k0 && m.k < win.k0 + 3;
+const winX = mx + win.k0 * dx - 9, winY = my + win.r0 * dy - 9;
+
+// right: the 9 qubits and their 27 outputs
+const qx = 470, qy0 = 92, qStep = 17;
+const paulis = ['Z', 'X', 'Y'];
+---
+
+<figure class="qw-fig" data-reveal>
+  <svg viewBox="0 0 680 236" role="img" aria-label="A nine qubit circuit is slid across a much larger latent mesh in overlapping three by three patches. Each patch loads its nine nodes onto nine qubits, the circuit is run, twenty seven measurements come back, and those become an update for those nine nodes. Overlapping patches are averaged, so one small circuit covers a mesh of thousands of nodes.">
+    <text x="20" y="26" font-family="'Outfit', system-ui, sans-serif" font-size="19" font-weight="600" fill={c.ink}>Nine qubits, thousands of nodes</text>
+    <text x="20" y="46" font-family="'JetBrains Mono', monospace" font-size="11.5" fill={c.inkMuted}>one circuit, slid over the mesh, overlaps averaged</text>
+
+    <text x={mx} y="74" font-family="'JetBrains Mono', monospace" font-size="10.5" letter-spacing="0.07em" fill={c.inkDim}>HIDDEN MESH</text>
+    {mesh.map((m) => (
+      <circle cx={m.x} cy={m.y} r={inWin(m) ? 4.2 : 3}
+              fill={inWin(m) ? c.accent : c.inkFaint} opacity={inWin(m) ? 1 : 0.5} />
+    ))}
+    <rect x={winX} y={winY} width={2 * dx + 18} height={2 * dy + 18} rx="4"
+          fill="none" stroke={c.accent} stroke-width="1.6" stroke-dasharray="4 3" />
+    <rect x={winX + dx} y={winY + dy} width={2 * dx + 18} height={2 * dy + 18} rx="4"
+          fill="none" stroke={c.accent} stroke-width="1" opacity="0.35" />
+    <text x={mx} y={my + rows * dy + 10} font-family="'JetBrains Mono', monospace" font-size="10" fill={c.inkMuted}>patches overlap, so every node is covered more than once</text>
+
+    <g>
+      <line x1="252" y1="136" x2="292" y2="136" stroke={c.inkFaint} stroke-width="1.2" />
+      <path d="M 292 136 l -5 -3.2 l 0 6.4 z" fill={c.inkFaint} />
+      <text x="272" y="128" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9.5" fill={c.inkMuted}>load</text>
+    </g>
+
+    <text x="308" y="74" font-family="'JetBrains Mono', monospace" font-size="10.5" letter-spacing="0.07em" fill={c.accent}>9 QUBITS</text>
+    {[0,1,2,3,4,5,6,7,8].map((i) => (
+      <g>
+        <line x1="308" y1={qy0 + i * qStep} x2="404" y2={qy0 + i * qStep} stroke={c.rule} stroke-width="1.2" />
+        <circle cx="308" cy={qy0 + i * qStep} r="3.2" fill={c.accent} />
+      </g>
+    ))}
+    <rect x="338" y={qy0 - 10} width="36" height={8 * qStep + 20} rx="4" fill="#4338ca10" stroke={c.accent} stroke-width="1.2" />
+    <text x="356" y={qy0 + 4 * qStep + 4} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9.5" fill={c.accent} transform={`rotate(-90 356 ${qy0 + 4 * qStep + 4})`}>entangle</text>
+
+    <g>
+      <line x1="412" y1="136" x2="452" y2="136" stroke={c.inkFaint} stroke-width="1.2" />
+      <path d="M 452 136 l -5 -3.2 l 0 6.4 z" fill={c.inkFaint} />
+      <text x="432" y="128" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9.5" fill={c.inkMuted}>measure</text>
+    </g>
+
+    <text x={qx} y="74" font-family="'JetBrains Mono', monospace" font-size="10.5" letter-spacing="0.07em" fill={c.teal}>27 NUMBERS</text>
+    {[0,1,2,3,4,5,6,7,8].map((i) => (
+      <g>
+        {paulis.map((p, j) => (
+          <rect x={qx + j * 17} y={qy0 + i * qStep - 5.5} width="13" height="11" rx="2"
+                fill={c.bg} stroke={c.teal} stroke-width="1" opacity="0.85" />
+        ))}
+      </g>
+    ))}
+    <text x={qx + 62} y={qy0 + 4 * qStep + 4} font-family="'JetBrains Mono', monospace" font-size="9.5" fill={c.inkMuted}>3 per qubit</text>
+    <text x={qx} y={my + rows * dy + 10} font-family="'JetBrains Mono', monospace" font-size="10" fill={c.inkMuted}>&#8594; an update for those 9 nodes</text>
+  </svg>
+  <figcaption>
+    The circuit is weight-shared: the same nine qubits are reused for every patch, so a mesh
+    of thousands of nodes costs thousands of short circuit runs rather than thousands of qubits.
+    That is also why the quantum arm is slow.
+  </figcaption>
+</figure>
+
+<style>
+  .qw-fig { margin: 2.25rem 0 1.25rem; }
+  .qw-fig svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: var(--bg-raised, #f7f6f2);
+    border: 1px solid var(--rule, #ddd8d0);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+  }
+  .qw-fig figcaption {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--ink-muted, #78716c);
+    text-align: center;
+    margin-top: 0.7rem;
+    letter-spacing: 0.01em;
+  }
+</style>

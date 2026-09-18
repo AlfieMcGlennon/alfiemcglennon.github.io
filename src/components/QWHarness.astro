@@ -1,0 +1,124 @@
+---
+// The processor-swap experiment, drawn as a pipeline with one removable part.
+// Encoder and decoder are fixed classical blocks; only the middle box changes.
+// Palette and type match QWCircuit.astro. Static SVG, no script.
+const c = {
+  ink: '#1c1917', inkDim: '#44403c', inkMuted: '#78716c', inkFaint: '#a8a29e',
+  bg: '#f7f6f2', rule: '#ddd8d0', accent: '#4338ca', teal: '#0f766e', amber: '#b45309',
+};
+
+const boxW = 92, boxH = 74, y = 96;
+const gap = 18;
+const x0 = 22;
+const xs = [0, 1, 2, 3, 4, 5].map((i) => x0 + i * (boxW + gap));
+const stages = [
+  { t: 'ERA5 state', s: '1,214,201', kind: 'data' },
+  { t: 'encoder', s: 'classical', kind: 'fixed' },
+  { t: 'hidden mesh', s: '2,698 nodes', kind: 'data' },
+  { t: 'PROCESSOR', s: 'swappable', kind: 'swap' },
+  { t: 'decoder', s: 'classical', kind: 'fixed' },
+  { t: 'tomorrow', s: '1,214,201', kind: 'data' },
+];
+const fillOf = (k) => (k === 'swap' ? '#4338ca' : k === 'fixed' ? '#ffffff' : '#efede6');
+const strokeOf = (k) => (k === 'swap' ? c.accent : c.rule);
+
+// what gets dropped into the one slot that changes
+const arms = [
+  { n: 'nothing', d: 'encoder to decoder', col: c.inkFaint },
+  { n: 'frozen random', d: 'never trained', col: c.inkMuted },
+  { n: 'AIFS style', d: 'transformer block', col: c.teal },
+  { n: 'quantum', d: '9-qubit circuit', col: c.amber },
+];
+const armY = 236, armW = 156, armH = 58;
+const armXs = [0, 1, 2, 3].map((i) => x0 + i * (armW + 12));
+const VBW = x0 * 2 + boxW * 6 + gap * 5;
+---
+
+<figure class="qw-fig" data-reveal>
+  <svg viewBox={`0 0 ${VBW} 310`} role="img" aria-label="The processor swap experiment. A fixed classical encoder turns the ERA5 state into a hidden mesh, a swappable processor evolves that mesh, and a fixed classical decoder writes tomorrow's state back out. Four things are tried in the processor slot: nothing at all, a frozen random block, an AIFS style transformer, and a nine qubit quantum circuit.">
+    <defs>
+      <linearGradient id="qwh-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#4338ca" stop-opacity="0.09" />
+        <stop offset="100%" stop-color="#4338ca" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+
+    <rect x={xs[3] - 12} y="64" width={boxW + 24} height="196" rx="10" fill="url(#qwh-wash)" />
+
+    <text x={x0} y="34" font-family="'Outfit', system-ui, sans-serif" font-size="22" font-weight="600" fill={c.ink}>One experiment, one moving part</text>
+    <text x={x0} y="56" font-family="'JetBrains Mono', monospace" font-size="12" fill={c.inkMuted}>everything except the middle box is held identical</text>
+
+    {xs.slice(0, 5).map((x) => (
+      <g>
+        <line x1={x + boxW} y1={y + boxH / 2} x2={x + boxW + gap} y2={y + boxH / 2}
+              stroke={c.inkFaint} stroke-width="1.5" />
+        <path d={`M ${x + boxW + gap} ${y + boxH / 2} l -5 -3.4 l 0 6.8 z`} fill={c.inkFaint} />
+      </g>
+    ))}
+
+    {stages.map((s, i) => (
+      <g>
+        <rect x={xs[i]} y={y} width={boxW} height={boxH} rx="7"
+              fill={fillOf(s.kind)} stroke={strokeOf(s.kind)}
+              stroke-width={s.kind === 'swap' ? 2 : 1.3}
+              stroke-dasharray={s.kind === 'swap' ? '6 4' : undefined} />
+        <text x={xs[i] + boxW / 2} y={y + 32} text-anchor="middle"
+              font-family="'Outfit', system-ui, sans-serif" font-size="14"
+              font-weight={s.kind === 'swap' ? 700 : 500}
+              fill={s.kind === 'swap' ? '#ffffff' : c.ink}>{s.t}</text>
+        <text x={xs[i] + boxW / 2} y={y + 52} text-anchor="middle"
+              font-family="'JetBrains Mono', monospace" font-size="10.5"
+              fill={s.kind === 'swap' ? '#ffffffcc' : c.inkMuted}>{s.s}</text>
+      </g>
+    ))}
+
+    <line x1={xs[3] + boxW / 2} y1={y + boxH} x2={xs[3] + boxW / 2} y2={armY - 26}
+          stroke={c.accent} stroke-width="1.4" stroke-dasharray="4 4" />
+    <text x={xs[3] + boxW / 2} y={armY - 34} text-anchor="middle"
+          font-family="'JetBrains Mono', monospace" font-size="11"
+          letter-spacing="0.1em" fill={c.accent}>WHAT GOES IN THE SLOT</text>
+
+    {arms.map((a, i) => (
+      <g>
+        <rect x={armXs[i]} y={armY} width={armW} height={armH} rx="7"
+              fill="#ffffff" stroke={c.rule} stroke-width="1.3" />
+        <rect x={armXs[i]} y={armY} width="4" height={armH} rx="2" fill={a.col} />
+        <text x={armXs[i] + 16} y={armY + 25}
+              font-family="'Outfit', system-ui, sans-serif" font-size="14"
+              font-weight="600" fill={c.ink}>{a.n}</text>
+        <text x={armXs[i] + 16} y={armY + 43}
+              font-family="'JetBrains Mono', monospace" font-size="10"
+              fill={c.inkMuted}>{a.d}</text>
+      </g>
+    ))}
+  </svg>
+  <figcaption>
+    Same data, same encoder, same decoder, same seed. Any difference in skill belongs to the
+    middle box. The first two arms are the controls most benchmarks leave out.
+  </figcaption>
+</figure>
+
+<style>
+  .qw-fig { margin: 2.4rem 0 1.4rem; }
+  .qw-fig svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: var(--bg-raised, #f7f6f2);
+    border: 1px solid var(--rule, #ddd8d0);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+  }
+  .qw-fig figcaption {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.72rem;
+    line-height: 1.55;
+    color: var(--ink-muted, #78716c);
+    text-align: center;
+    margin-top: 0.8rem;
+    letter-spacing: 0.01em;
+    max-width: 58ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>

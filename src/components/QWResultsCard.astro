@@ -1,0 +1,84 @@
+---
+// "What survived on IBM Heron" — the results figure, rebuilt as native SVG on
+// the site palette. Left: the headline numbers. Right: the 3x3 cell grid with
+// the dominant C11-C13 coupling drawn as an arc. The full numeric detail also
+// lives as real text in the post's "Go deeper: the numbers" fold, so nothing
+// here is the only home of a figure. Static.
+const c = {
+  ink: '#1c1917', inkDim: '#44403c', inkMuted: '#78716c', inkFaint: '#a8a29e',
+  bg: '#f7f6f2', rule: '#ddd8d0', accent: '#4338ca', teal: '#0f766e', amber: '#b45309',
+};
+
+// right-hand 3x3 grid geometry
+const cell = 52, gap = 10, gx = 470, gy = 120;
+const cx = (col) => gx + col * (cell + gap);
+const cy = (row) => gy + row * (cell + gap);
+const grid = ['C11', 'C12', 'C13', 'C21', 'C22', 'C23', 'C31', 'C32', 'C33'].map((lab, i) => ({
+  lab, col: i % 3, row: Math.floor(i / 3), hi: lab === 'C11' || lab === 'C13',
+}));
+const c11Top = { x: cx(0) + cell / 2, y: cy(0) };
+const c13Top = { x: cx(2) + cell / 2, y: cy(0) };
+const arc = `M ${c11Top.x} ${c11Top.y} Q ${(c11Top.x + c13Top.x) / 2} ${c11Top.y - 36} ${c13Top.x} ${c13Top.y}`;
+const apexX = (c11Top.x + c13Top.x) / 2;
+---
+
+<figure class="qw-fig" data-reveal>
+  <svg viewBox="0 0 680 340" role="img" aria-label="Results from running the trained nine-qubit circuit on an IBM Heron processor. Forecast error 2.55 degrees C against 2.68 for persistence and 2.30 in simulation. Single-variable readout correlates with simulation at r equals 0.989. The full coupling map correlates at r approximately 0.96. The strongest coupling, between cells C11 and C13, falls from 0.93 in simulation to 0.51 on hardware, and stays the strongest.">
+    <!-- header -->
+    <text x="24" y="32" font-family="'Outfit', system-ui, sans-serif" font-size="20" font-weight="600" fill={c.ink}>What survived on IBM Heron <tspan fill={c.inkMuted} font-size="15">(156 qubits)</tspan></text>
+    <text x="24" y="54" font-family="'JetBrains Mono', monospace" font-size="11.5" fill={c.inkMuted}>trained in simulation on ERA5, the final forecast run on hardware</text>
+
+    <!-- left: stat rows -->
+    <text x="24" y="98" font-family="'JetBrains Mono', monospace" font-size="10.5" letter-spacing="0.06em" fill={c.teal}>FORECAST ERROR&#8201;&#8201;(MAE, °C)</text>
+    <text x="24" y="122" font-family="'Outfit', system-ui, sans-serif" font-size="17" fill={c.ink}><tspan font-weight="600" fill={c.accent}>2.55</tspan> vs <tspan font-weight="600">2.68</tspan> persistence&#8194;<tspan font-size="13" fill={c.inkMuted} font-style="italic">2.30 in simulation</tspan></text>
+    <line x1="24" y1="140" x2="404" y2="140" stroke={c.rule} stroke-width="1" />
+
+    <text x="24" y="166" font-family="'JetBrains Mono', monospace" font-size="10.5" letter-spacing="0.06em" fill={c.teal}>SINGLE-VARIABLE READOUT</text>
+    <text x="24" y="190" font-family="'Outfit', system-ui, sans-serif" font-size="17" fill={c.ink}>r = <tspan font-weight="600" fill={c.accent}>0.989</tspan></text>
+    <line x1="24" y1="208" x2="404" y2="208" stroke={c.rule} stroke-width="1" />
+
+    <text x="24" y="234" font-family="'JetBrains Mono', monospace" font-size="10.5" letter-spacing="0.06em" fill={c.teal}>COUPLING MAP&#8201;&#8201;(SIM VS HARDWARE)</text>
+    <text x="24" y="258" font-family="'Outfit', system-ui, sans-serif" font-size="17" fill={c.ink}>r &#8776; <tspan font-weight="600" fill={c.accent}>0.96</tspan></text>
+    <line x1="24" y1="276" x2="404" y2="276" stroke={c.rule} stroke-width="1" />
+
+    <text x="24" y="302" font-family="'JetBrains Mono', monospace" font-size="10.5" letter-spacing="0.06em" fill={c.teal}>STRONGEST COUPLING, C11&#8211;C13</text>
+    <text x="24" y="326" font-family="'Outfit', system-ui, sans-serif" font-size="17" fill={c.ink}><tspan font-weight="600">0.93</tspan> &#8594; <tspan font-weight="600" fill={c.amber}>0.51</tspan></text>
+
+    <!-- right: 3x3 grid + coupling arc -->
+    <text x={apexX} y="58" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10.5" fill={c.amber} letter-spacing="0.03em">strongest learned</text>
+    <text x={apexX} y="72" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10.5" fill={c.amber} letter-spacing="0.03em">coupling</text>
+    <path d={arc} fill="none" stroke={c.amber} stroke-width="2.4" stroke-linecap="round" />
+    <circle cx={c11Top.x} cy={c11Top.y} r="3.4" fill={c.amber} />
+    <circle cx={c13Top.x} cy={c13Top.y} r="3.4" fill={c.amber} />
+    {grid.map((g) => (
+      <g>
+        <rect x={cx(g.col)} y={cy(g.row)} width={cell} height={cell} rx="6" fill={c.bg} stroke={g.hi ? c.accent : c.rule} stroke-width={g.hi ? 1.8 : 1.2} />
+        <text x={cx(g.col) + cell / 2} y={cy(g.row) + cell / 2 + 4} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill={g.hi ? c.accent : c.inkMuted}>{g.lab}</text>
+      </g>
+    ))}
+
+  </svg>
+  <figcaption>Persistence = guessing tomorrow looks like today; lower error is better. The forecast edged it, and the learned structure held: the strongest coupling stayed strongest after the noise.</figcaption>
+</figure>
+
+<style>
+  .qw-fig { margin: 2.25rem 0 1.25rem; }
+  .qw-fig svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: var(--bg-raised, #f7f6f2);
+    border: 1px solid var(--rule, #ddd8d0);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+  }
+  .qw-fig figcaption {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--ink-muted, #78716c);
+    text-align: center;
+    margin-top: 0.7rem;
+    letter-spacing: 0.01em;
+  }
+</style>

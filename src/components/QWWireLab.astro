@@ -1,0 +1,335 @@
+---
+// Wire your own entangler and find out whether IBM's chip can run it.
+// Click two map cells to link them. The panel judges the shape live against the two
+// real constraints of a heavy-hex lattice:
+//   1. no qubit may have more than 3 links (max degree 3)
+//   2. no loops, because the shortest loop the chip supports is 12 long and we have 9 cells
+// Gate count is edges x 5, the five entangling passes in the trained circuit
+// (3 encoding rounds + 2 variational layers), which reproduces the measured
+// 12 links -> 60 gates and 8 links -> 40 gates exactly.
+//
+// Interaction uses ONE delegated listener on the <svg>, plus a generous transparent
+// hit circle per cell. Per-element listeners on <g> nodes are fragile in SVG because
+// a <g> only receives events where a child actually paints.
+const PAD = 40, S = 64, R = 18, HIT = 28;
+const VB = PAD * 2 + S * 2;
+const cells = [0,1,2,3,4,5,6,7,8];
+const pos = (i) => ({ x: PAD + (i % 3) * S, y: PAD + Math.floor(i / 3) * S });
+---
+
+<div class="wire" data-wirelab>
+  <div class="wire-head">
+    <p class="eyebrow">Try it</p>
+    <h3>Wire your own circuit</h3>
+    <p class="lede">Click one cell, then another, to link them. Each link is one
+    interaction you are asking the circuit to compute. The chip then tells you whether
+    it can actually run the shape you drew.</p>
+  </div>
+
+  <div class="wire-body">
+    <div class="wire-stage">
+      <svg class="wire-svg" viewBox={`0 0 ${VB} ${VB}`} data-svg
+           aria-label="A three by three grid of map cells. Select two cells to add or remove a link between them.">
+        <defs>
+          <filter id="wl-soft" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="5" result="b" />
+            <feComposite in="b" operator="over" />
+          </filter>
+        </defs>
+        <g data-glow opacity="0.5" filter="url(#wl-soft)"></g>
+        <g data-edges></g>
+        {cells.map((i) => (
+          <g class="cellg" data-cell={i} tabindex="0" role="button"
+             aria-label={`cell ${i + 1}`}>
+            <circle cx={pos(i).x} cy={pos(i).y} r={HIT} class="hit" />
+            <circle cx={pos(i).x} cy={pos(i).y} r={R} class="cell" />
+            <text x={pos(i).x} y={pos(i).y + 4.5} text-anchor="middle" class="cellt">{i + 1}</text>
+          </g>
+        ))}
+      </svg>
+      <p class="hint" data-hint>Click a cell to start a link</p>
+    </div>
+
+    <div class="wire-panel">
+      <div class="presets">
+        <button type="button" data-preset="grid">3&#215;3 grid</button>
+        <button type="button" data-preset="snake">snake</button>
+        <button type="button" data-preset="ring">ring</button>
+        <button type="button" data-preset="clear">clear</button>
+      </div>
+
+      <dl class="stats">
+        <div><dt>links</dt><dd data-stat="links">0</dd></div>
+        <div><dt>busiest cell</dt><dd data-stat="deg">0</dd></div>
+        <div><dt>gates</dt><dd data-stat="gates">0</dd></div>
+      </dl>
+
+      <div class="verdict" data-verdict>
+        <strong data-vtitle>Nothing wired yet</strong>
+        <span data-vwhy>Add a link, or load one of the presets.</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="wire-foot">
+    The chip allows at most three links per qubit and no closed loops among nine cells.
+    Anything else gets faked by shuffling qubits, and every shuffle costs accuracy. My
+    original 3&#215;3 grid needed 198 gates on hardware instead of 60.
+  </p>
+</div>
+
+<style>
+  .wire {
+    margin: 2.4rem 0 1.4rem;
+    border: 1px solid var(--rule, #ddd8d0);
+    border-radius: 10px;
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgba(67,56,202,0.05), transparent 60%),
+      var(--bg-raised, #f7f6f2);
+    padding: 1.3rem 1.4rem 1rem;
+  }
+  .wire .eyebrow {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #4338ca; margin: 0 0 0.4rem;
+  }
+  .wire-head h3 {
+    font-family: var(--font-display, 'Outfit', system-ui, sans-serif);
+    font-size: 1.22rem; line-height: 1.2; margin: 0 0 0.45rem;
+    color: var(--ink, #1c1917); text-wrap: balance;
+  }
+  .wire-head .lede {
+    font-size: 0.9rem; line-height: 1.6; margin: 0 0 1.15rem;
+    color: var(--ink-dim, #44403c); max-width: 52ch;
+  }
+
+  .wire-body { display: flex; gap: 1.8rem; flex-wrap: wrap; align-items: flex-start; }
+  .wire-stage { flex: 0 0 auto; }
+  .wire-svg {
+    width: 232px; height: auto; display: block;
+    touch-action: manipulation; user-select: none; cursor: pointer;
+  }
+  .hint {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.66rem; color: var(--ink-faint, #a8a29e);
+    text-align: center; margin: 0.5rem 0 0; min-height: 1em;
+  }
+  .wire-panel { flex: 1 1 250px; min-width: 236px; }
+
+  .hit { fill: transparent; stroke: none; }
+  .cell {
+    fill: #ffffff; stroke: #a8a29e; stroke-width: 2;
+    transition: fill 130ms ease, stroke 130ms ease, r 130ms ease;
+  }
+  .cellg { cursor: pointer; }
+  .cellg:hover .cell { stroke: #4338ca; }
+  .cellg:focus-visible { outline: none; }
+  .cellg:focus-visible .cell { stroke: #4338ca; stroke-width: 3.4; }
+  .cellg[data-armed="1"] .cell { fill: #4338ca; stroke: #4338ca; }
+  .cellg[data-armed="1"] .cellt { fill: #ffffff; }
+  .cellt {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 13px; font-weight: 500;
+    fill: var(--ink-muted, #78716c); pointer-events: none;
+  }
+  .edge { stroke: #4338ca; stroke-width: 4; stroke-linecap: round; }
+  .edge.bad { stroke: #b91c1c; }
+  .glow { stroke: #4338ca; stroke-width: 9; stroke-linecap: round; opacity: 0.35; }
+  .glow.bad { stroke: #b91c1c; }
+
+  .presets { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+  .presets button {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.72rem; padding: 0.34rem 0.66rem;
+    border: 1px solid var(--rule, #ddd8d0); border-radius: 999px;
+    background: transparent; color: var(--ink-dim, #44403c); cursor: pointer;
+    transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+  }
+  .presets button:hover { border-color: #4338ca; color: #4338ca; background: rgba(67,56,202,0.06); }
+  .presets button:focus-visible { outline: 2px solid #4338ca; outline-offset: 2px; }
+
+  .stats { display: flex; gap: 1.5rem; margin: 0 0 1.1rem; flex-wrap: wrap; }
+  .stats > div { display: flex; flex-direction: column; }
+  .stats dt {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-faint, #a8a29e); margin-bottom: 0.2rem;
+  }
+  .stats dd {
+    font-family: var(--font-display, 'Outfit', system-ui, sans-serif);
+    font-size: 1.5rem; line-height: 1; margin: 0; color: var(--ink, #1c1917);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .verdict {
+    border-left: 3px solid var(--rule, #ddd8d0);
+    padding: 0.6rem 0 0.6rem 0.85rem;
+    display: flex; flex-direction: column; gap: 0.3rem;
+  }
+  .verdict strong {
+    font-family: var(--font-display, 'Outfit', system-ui, sans-serif);
+    font-size: 1rem; color: var(--ink, #1c1917);
+  }
+  .verdict span { font-size: 0.84rem; line-height: 1.55; color: var(--ink-dim, #44403c); }
+  .verdict[data-ok="1"] { border-left-color: #0f766e; }
+  .verdict[data-ok="1"] strong { color: #0f766e; }
+  .verdict[data-ok="0"] { border-left-color: #b91c1c; }
+  .verdict[data-ok="0"] strong { color: #b91c1c; }
+
+  .wire-foot {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.7rem; line-height: 1.6; color: var(--ink-muted, #78716c);
+    margin: 1.2rem 0 0; padding-top: 0.8rem;
+    border-top: 1px solid var(--rule, #ddd8d0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cell, .presets button { transition: none; }
+  }
+</style>
+
+<script>
+  function init() {
+    const root = document.querySelector('[data-wirelab]');
+    if (!root) return;
+    if (root._cleanup) root._cleanup();
+
+    const PAD = 40, S = 64;
+    const pos = (i) => ({ x: PAD + (i % 3) * S, y: PAD + Math.floor(i / 3) * S });
+    const key = (a, b) => (a < b ? a + '-' + b : b + '-' + a);
+    const SVGNS = 'http://www.w3.org/2000/svg';
+
+    const PRESETS = {
+      grid:  [[0,1],[1,2],[3,4],[4,5],[6,7],[7,8],[0,3],[3,6],[1,4],[4,7],[2,5],[5,8]],
+      snake: [[0,1],[1,2],[2,5],[5,4],[4,3],[3,6],[6,7],[7,8]],
+      ring:  [[0,1],[1,2],[2,5],[5,8],[8,7],[7,6],[6,3],[3,0]],
+      clear: [],
+    };
+
+    let edges = new Map();
+    let armed = null;
+
+    const svg = root.querySelector('[data-svg]');
+    const edgeLayer = root.querySelector('[data-edges]');
+    const glowLayer = root.querySelector('[data-glow]');
+    const cellGroups = [...root.querySelectorAll('[data-cell]')];
+    const elLinks = root.querySelector('[data-stat="links"]');
+    const elDeg = root.querySelector('[data-stat="deg"]');
+    const elGates = root.querySelector('[data-stat="gates"]');
+    const elHint = root.querySelector('[data-hint]');
+    const vBox = root.querySelector('[data-verdict]');
+    const vTitle = root.querySelector('[data-vtitle]');
+    const vWhy = root.querySelector('[data-vwhy]');
+
+    // A cycle exists iff an edge joins two cells already connected. Union-find.
+    function analyse() {
+      const deg = new Array(9).fill(0);
+      const parent = [...Array(9).keys()];
+      const find = (x) => { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+      let hasCycle = false;
+      for (const [a, b] of edges.values()) {
+        deg[a]++; deg[b]++;
+        const ra = find(a), rb = find(b);
+        if (ra === rb) hasCycle = true; else parent[ra] = rb;
+      }
+      return { maxDeg: Math.max(0, ...deg), hasCycle, n: edges.size };
+    }
+
+    function line(cls, a, b) {
+      const p = pos(a), q = pos(b);
+      const ln = document.createElementNS(SVGNS, 'line');
+      ln.setAttribute('x1', p.x); ln.setAttribute('y1', p.y);
+      ln.setAttribute('x2', q.x); ln.setAttribute('y2', q.y);
+      ln.setAttribute('class', cls);
+      return ln;
+    }
+
+    function render() {
+      const { maxDeg, hasCycle, n } = analyse();
+      const bad = maxDeg > 3 || hasCycle;
+      while (edgeLayer.firstChild) edgeLayer.removeChild(edgeLayer.firstChild);
+      while (glowLayer.firstChild) glowLayer.removeChild(glowLayer.firstChild);
+      for (const [a, b] of edges.values()) {
+        glowLayer.appendChild(line('glow' + (bad ? ' bad' : ''), a, b));
+        edgeLayer.appendChild(line('edge' + (bad ? ' bad' : ''), a, b));
+      }
+      cellGroups.forEach((g, i) => g.setAttribute('data-armed', armed === i ? '1' : '0'));
+
+      elLinks.textContent = String(n);
+      elDeg.textContent = String(maxDeg);
+      elGates.textContent = String(n * 5);
+      elHint.textContent = armed === null
+        ? 'Click a cell to start a link'
+        : 'Now click another cell, or the same one to cancel';
+
+      if (n === 0) {
+        vBox.removeAttribute('data-ok');
+        vTitle.textContent = 'Nothing wired yet';
+        vWhy.textContent = 'Add a link, or load one of the presets.';
+      } else if (maxDeg > 3) {
+        vBox.setAttribute('data-ok', '0');
+        vTitle.textContent = 'Will not fit the chip';
+        vWhy.textContent = 'One cell needs ' + maxDeg + ' links, and the chip gives every qubit at most 3. This is exactly why my 3x3 grid could not be laid down: its centre needs four.';
+      } else if (hasCycle) {
+        vBox.setAttribute('data-ok', '0');
+        vTitle.textContent = 'Will not fit the chip';
+        vWhy.textContent = 'This shape closes a loop. The shortest loop a heavy-hex chip supports is twelve qubits long and we only have nine, so any loop has to be faked with shuffling.';
+      } else {
+        vBox.setAttribute('data-ok', '1');
+        vTitle.textContent = 'Runs natively';
+        vWhy.textContent = 'No loops, nothing busier than three links. The chip lays this out as it is, with no shuffling and no wasted accuracy.';
+      }
+    }
+
+    function toggle(i) {
+      if (armed === null) armed = i;
+      else if (armed === i) armed = null;
+      else {
+        const k = key(armed, i);
+        if (edges.has(k)) edges.delete(k); else edges.set(k, [armed, i]);
+        armed = null;
+      }
+      render();
+    }
+
+    // ONE delegated listener: a <g> only receives events where a child paints, so
+    // per-group listeners miss clicks in the gaps. closest() is reliable.
+    const onPointer = (e) => {
+      const g = e.target.closest && e.target.closest('[data-cell]');
+      if (!g || !root.contains(g)) return;
+      e.preventDefault();
+      toggle(Number(g.getAttribute('data-cell')));
+    };
+    svg.addEventListener('click', onPointer);
+
+    const onKey = (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const g = e.target.closest && e.target.closest('[data-cell]');
+      if (!g) return;
+      e.preventDefault();
+      toggle(Number(g.getAttribute('data-cell')));
+    };
+    svg.addEventListener('keydown', onKey);
+
+    const presetBtns = [...root.querySelectorAll('[data-preset]')];
+    const onPreset = (e) => {
+      const p = PRESETS[e.currentTarget.getAttribute('data-preset')] || [];
+      edges = new Map(p.map(([a, b]) => [key(a, b), [a, b]]));
+      armed = null;
+      render();
+    };
+    presetBtns.forEach((b) => b.addEventListener('click', onPreset));
+
+    root._cleanup = () => {
+      svg.removeEventListener('click', onPointer);
+      svg.removeEventListener('keydown', onKey);
+      presetBtns.forEach((b) => b.removeEventListener('click', onPreset));
+      root._cleanup = null;
+    };
+
+    edges = new Map(PRESETS.grid.map(([a, b]) => [key(a, b), [a, b]]));
+    render();
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>

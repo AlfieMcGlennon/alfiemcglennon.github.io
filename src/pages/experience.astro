@@ -1,0 +1,784 @@
+---
+// experience.astro — the cinematic, scroll-driven climate-risk film.
+// Full narrative (Acts 0–7) driven by ONE morphing particle system:
+// stars → settle onto a real lit NASA Earth → gather into the PEOPLE exposed to
+// weather → and from their hands rise into the copula, then the quantum surface.
+// The model is built from the people it protects. Non-SVG / WebGL, full filmic
+// post stack (ACES + selective bloom + vignette + grain + CA + a per-act grade
+// arc). Indexable; reduced-motion / no-WebGL fall back to a real static poster.
+// The calm recruiter homepage (index.astro) and concept routes stay untouched.
+const projects = [
+  { n: '01', label: 'GB Grid Scenario Tool', line: 'A browser DC power-flow model of GB transmission constraints.', href: 'https://alfiemcglennon.github.io/gb-grid-tool/', external: true },
+  { n: '02', label: 'RL Grid Dispatch', line: 'Reinforcement learning dispatching a constrained national grid.', href: '/writing/rl-grid-dispatch-baseline/' },
+  { n: '03', label: 'Quantum, honestly', line: 'A single qubit as a tunable Fourier model, reported without hype.', href: '/writing/quantum-computing-explainer/' },
+  { n: '04', label: 'Compound Heat Stress', line: 'When heat and humidity combine beyond what either predicts alone.', href: '/research/' },
+];
+const siteUrl = 'https://alfiemcglennon.github.io';
+const jsonLd = {
+  '@context': 'https://schema.org', '@type': 'Person',
+  name: 'Alfred McGlennon', alternateName: 'Alfie McGlennon', url: siteUrl,
+  jobTitle: 'Climate-risk & machine-learning researcher',
+  description: 'MSc Climate Change & AI. Modelling how weather becomes risk — compound extremes, copulas, and the honest edge of quantum machine learning.',
+  sameAs: ['https://github.com/AlfieMcGlennon', 'https://www.linkedin.com/in/alfred-mcglennon-927589253/'],
+};
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alfie McGlennon — reading the sky, and the risk inside it</title>
+    <meta name="description" content="A scroll-driven film: from the whole Earth down to the people weather puts at risk, and up into the maths and quantum tools used to predict it. Climate-risk and machine-learning research by Alfred (Alfie) McGlennon." />
+    <link rel="canonical" href={`${siteUrl}/experience/`} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Alfie McGlennon — reading the sky, and the risk inside it" />
+    <meta property="og:description" content="A scroll-driven climate-risk film, from the whole Earth down to the people at risk and up into the tools to predict it." />
+    <meta property="og:image" content={`${siteUrl}/images/earth/earth_atmos_2048.jpg`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&display=swap" rel="stylesheet" />
+    <link rel="preload" as="image" href="/images/earth/earth_atmos_2048.jpg" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+
+  <body class="exp">
+    <canvas class="stage" data-stage aria-hidden="true"></canvas>
+    <div class="stage-poster" data-poster aria-hidden="true"></div>
+    <div class="scrim" data-scrim aria-hidden="true"></div>
+
+    <svg class="paths" data-paths viewBox="0 0 1000 260" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#34e7c9"/></marker></defs>
+      <path class="p-edge" d="M170,130 L330,130" data-edge="0" marker-end="url(#ah)"/>
+      <path class="p-edge" d="M500,130 L660,130" data-edge="1" marker-end="url(#ah)"/>
+      <path class="p-edge" d="M830,130 C880,130 880,130 880,90" data-edge="2" marker-end="url(#ah)"/>
+      <g class="p-node"><circle cx="110" cy="130" r="56"/><text x="110" y="135">HAZARD</text></g>
+      <g class="p-node"><circle cx="415" cy="130" r="56"/><text x="415" y="135">EXPOSURE</text></g>
+      <g class="p-node"><circle cx="745" cy="130" r="56"/><text x="745" y="135">IMPACT</text></g>
+      <g class="p-node alt"><circle cx="890" cy="60" r="50"/><text x="890" y="65">RESPONSE</text></g>
+    </svg>
+
+    <div class="preloader" data-pre aria-hidden="true">
+      <div class="pre-mark">ALFIE McGLENNON</div>
+      <div class="pre-bar"><i data-pre-bar></i></div>
+      <div class="pre-note">Loading the world…</div>
+    </div>
+
+    <div class="exp-top">
+      <a class="et-mark" href="/">ALFIE McGLENNON</a>
+      <a class="et-skip" href="/">Skip the experience →</a>
+    </div>
+
+    <main class="acts">
+      <!-- ACT 0 — SPACE -->
+      <section class="act" data-act="0" style="--h:112vh">
+        <div class="act-copy"><div class="act-inner">
+          <p class="kicker" data-fade>Climate · risk · machine learning · quantum</p>
+          <h1 class="statement xl" data-split>Reading the sky, and the risk inside it.</h1>
+          <p class="lede" data-fade>I'm Alfie. I study how weather becomes risk, and build the tools to see it coming. Scroll — we go down together.</p>
+        </div></div>
+        <div class="cue" aria-hidden="true"><span>scroll</span><i></i></div>
+      </section>
+
+      <!-- ACT 1 — DESCENT: beauty + terror -->
+      <section class="act" data-act="1" style="--h:168vh">
+        <div class="act-copy"><div class="act-inner">
+          <p class="kicker" data-fade>Why this</p>
+          <h2 class="statement" data-split>Weather is the most beautiful system there is.</h2>
+          <h2 class="statement" data-split>It is also the most frightening.</h2>
+          <p class="body" data-roll>The same atmosphere that paints a sky red drowns a city, dries a harvest, knocks out a grid. Most of the harm hides in the extremes that arrive <em>together</em> — exactly the part the simple models miss.</p>
+        </div></div>
+      </section>
+
+      <!-- ACT 2 — PEOPLE / EXPOSURE -->
+      <section class="act" data-act="2" style="--h:158vh">
+        <div class="act-copy"><div class="act-inner">
+          <p class="kicker" data-fade>Down here</p>
+          <h2 class="statement" data-split>Up close, weather becomes exposure.</h2>
+          <p class="body" data-roll>People, homes, harvests, grids — the exposure under the weather. The job isn't forecasting the sky; it's forecasting the <em>risk</em>: where, how often, how bad.</p>
+          <p class="body" data-roll>Every point is someone the model is meant to protect. Hold that — the maths comes back to it.</p>
+        </div></div>
+      </section>
+
+      <!-- ACT 3 — IMPACT (honest, abstract) -->
+      <section class="act" data-act="3" style="--h:150vh">
+        <div class="act-copy"><div class="act-inner">
+          <p class="kicker" data-fade>The hard part</p>
+          <h2 class="statement" data-split>The real danger is when extremes land together.</h2>
+          <p class="body" data-roll>Treat each hazard alone and the books look fine. The losses that surprise everyone come from the day two things fail at once — the heat <em>and</em> the humidity, the demand spike <em>and</em> the outage. That correlation is what gets undercosted.</p>
+        </div></div>
+      </section>
+
+      <!-- ACT 4 — CAUSAL PATHWAYS -->
+      <section class="act" data-act="4" style="--h:150vh">
+        <div class="act-copy"><div class="act-inner">
+          <p class="kicker" data-fade>So we trace the chain</p>
+          <h2 class="statement" data-split>Hazard, exposure, impact — and where we can step in.</h2>
+          <p class="body" data-roll>Risk isn't one number — it's a chain. Trace it and you find the one place a model, a plan, or a grid operator can still change the outcome.</p>
+        </div></div>
+      </section>
+
+      <!-- ACT 5 — PREDICTION / COPULA -->
+      <section class="act" data-act="5" style="--h:175vh">
+        <div class="act-copy"><div class="act-inner">
+          <p class="kicker" data-fade>Risk, back in our hands</p>
+          <h2 class="statement" data-split>The model is built from the people it protects.</h2>
+          <p class="body" data-roll>This surface is a copula: two ordinary risks, bound so their dangerous corners rise <em>together</em>. It isn't handed down from on high — it's assembled out of the exposure below it. That tail dependence is exactly what undercosts disasters when it's ignored.</p>
+        </div></div>
+      </section>
+
+      <!-- ACT 6 — QUANTUM -->
+      <section class="act" data-act="6" style="--h:175vh">
+        <div class="act-copy"><div class="act-inner">
+          <p class="kicker" data-fade>Reaching further</p>
+          <h2 class="statement" data-split>And we reach for sharper tools.</h2>
+          <p class="body" data-roll>The same surface, re-expressed: a single qubit as a tunable Fourier model for atmospheric data. No clear advantage yet, and I'll say so plainly — but the ground it's making is genuinely exciting, and making it <em>legible</em> is half the work.</p>
+        </div></div>
+      </section>
+
+      <!-- OUTRO — resolution: work + contact -->
+      <section class="outro">
+        <p class="kicker" data-fade>Selected work</p>
+        <div class="cards">
+          {projects.map((p) => (
+            <a class="card" data-roll href={p.href} {...(p.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+              <span class="c-n">{p.n}</span><span class="c-title">{p.label}</span><span class="c-line">{p.line}</span><span class="c-go">→</span>
+            </a>
+          ))}
+        </div>
+        <div class="contact">
+          <p class="kicker" data-fade>The work continues</p>
+          <h2 class="statement" data-split>Let's make risk legible.</h2>
+          <p class="links" data-fade>
+            <a id="exp-email" href="#">email</a><span>/</span>
+            <a href="https://github.com/AlfieMcGlennon" target="_blank" rel="noopener noreferrer">github</a><span>/</span>
+            <a href="https://www.linkedin.com/in/alfred-mcglennon-927589253/" target="_blank" rel="noopener noreferrer">linkedin</a>
+          </p>
+          <p class="note">A cinematic take on the work — narrative scaffold, more to come. The calm version of this site lives <a href="/">here</a>.</p>
+        </div>
+      </section>
+    </main>
+
+    <style is:global>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body.exp { background: #05080f; color: #eef2f8; font-family: 'Outfit', system-ui, sans-serif; overflow-x: hidden;
+        --accent: #34e7c9; --ink: #eef2f8; --dim: #9fb0c8; --faint: #5d6f88; }
+      a { color: inherit; }
+
+      .stage { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; display: none; }
+      body.cinema .stage { display: block; }
+      .stage-poster { position: fixed; inset: 0; z-index: 0;
+        background: radial-gradient(120% 90% at 70% 15%, rgba(20,40,70,0.0) 0%, rgba(5,8,15,0.55) 60%, rgba(5,8,15,0.95) 100%), url('/images/earth/earth_atmos_2048.jpg');
+        background-size: cover; background-position: 60% 30%; filter: saturate(0.92) brightness(0.7); }
+      body.cinema .stage-poster { display: none; }
+      .scrim { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 1;
+        background: linear-gradient(180deg, rgba(4,7,14,0.55) 0%, rgba(4,7,14,0.15) 30%, rgba(4,7,14,0.25) 65%, rgba(4,7,14,0.85) 100%); }
+      body.cinema .scrim { opacity: 0; transition: opacity 0.4s ease; }
+
+      .paths { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-44%); width: min(86vw, 940px); z-index: 3; opacity: 0; pointer-events: none; }
+      .p-edge { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0.9; filter: drop-shadow(0 0 4px rgba(52,231,201,0.5)); }
+      .p-node circle { fill: rgba(8,16,26,0.85); stroke: rgba(52,231,201,0.28); stroke-width: 1.2; }
+      .p-node.alt circle { stroke: var(--accent); stroke-width: 1.6; }
+      .p-node text { fill: #dbe6f2; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.16em; text-anchor: middle; }
+
+      .preloader { position: fixed; inset: 0; z-index: 50; background: #05080f; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem; }
+      body.cinema .preloader { display: flex; }
+      .preloader.gone { opacity: 0; pointer-events: none; transition: opacity 0.7s ease; }
+      .pre-mark { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.34em; color: #cdd7e6; }
+      .pre-bar { width: min(240px, 60vw); height: 2px; background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden; }
+      .pre-bar i { display: block; height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+      .pre-note { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.18em; color: var(--faint); }
+
+      .exp-top { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 1.1rem clamp(1.1rem, 4vw, 2.6rem); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.16em; }
+      .et-mark { font-weight: 700; text-decoration: none; color: #fff; }
+      .et-skip { color: #aebbd0; text-decoration: none; transition: color 0.2s ease; }
+      .et-skip:hover { color: #fff; }
+
+      /* acts — sticky copy pinned full-height so consecutive acts never overlap */
+      .acts { position: relative; z-index: 2; }
+      .act { min-height: var(--h, 160vh); }
+      .act-copy { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; }
+      .act-copy::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+        background: linear-gradient(95deg, rgba(4,7,14,0.74) 0%, rgba(4,7,14,0.5) 30%, rgba(4,7,14,0.12) 56%, rgba(4,7,14,0) 76%); }
+      .act-inner { position: relative; width: 100%; max-width: 1000px; margin: 0 auto; padding: 0 clamp(1.1rem, 5vw, 4rem); }
+
+      .kicker { font-family: 'JetBrains Mono', monospace; font-size: clamp(0.66rem, 0.9vw, 0.74rem); letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.7rem; }
+      .statement { font-weight: 800; font-size: clamp(2rem, 5.6vw, 4.2rem); line-height: 0.98; letter-spacing: -0.038em; max-width: 16ch; margin-bottom: 0.38rem; text-shadow: 0 2px 26px rgba(0,0,0,0.62), 0 1px 3px rgba(0,0,0,0.55); }
+      .statement.xl { font-size: clamp(2.5rem, 8vw, 6.3rem); line-height: 0.93; max-width: 13ch; margin-bottom: 0.9rem; }
+      .lede { font-family: 'Source Serif 4', Georgia, serif; font-style: italic; font-size: clamp(1.05rem, 1.8vw, 1.42rem); color: #eaeff7; max-width: 34ch; line-height: 1.34; margin-top: 0.2rem; text-shadow: 0 2px 18px rgba(0,0,0,0.6); }
+      .body { font-family: 'Source Serif 4', Georgia, serif; font-size: clamp(1.02rem, 1.5vw, 1.2rem); line-height: 1.5; color: #eaeff7; max-width: 42ch; margin-top: 0.85rem; text-shadow: 0 2px 16px rgba(0,0,0,0.6); }
+      .body + .body { margin-top: 0.65rem; }
+      .body em, .lede em { color: #fff; font-style: italic; }
+
+      .cue { position: fixed; bottom: 1.8rem; left: 50%; transform: translateX(-50%); z-index: 4; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.3em; color: #8aa0bd; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; transition: opacity 0.5s ease; }
+      .cue i { width: 1px; height: 34px; background: linear-gradient(#8aa0bd, transparent); animation: cue 2.2s ease-in-out infinite; }
+      @keyframes cue { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+      .outro { position: relative; z-index: 2; max-width: 1000px; margin: 0 auto; padding: 8vh clamp(1.1rem, 5vw, 4rem) 8vh;
+        background: linear-gradient(180deg, rgba(4,7,14,0) 0%, rgba(4,7,14,0.8) 16%, rgba(4,7,14,0.92) 100%); }
+      .cards { display: grid; grid-template-columns: 1fr; gap: 1px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; margin-top: 1.4rem; }
+      @media (min-width: 760px) { .cards { grid-template-columns: 1fr 1fr; } }
+      .card { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: 'n title go' 'n line go'; column-gap: 1rem; align-items: center; padding: 1.7rem 1.6rem; background: rgba(9,14,24,0.82); backdrop-filter: blur(6px); text-decoration: none; color: #eef2f8; transition: background 0.25s ease; }
+      .card:hover { background: rgba(16,26,42,0.94); }
+      .c-n { grid-area: n; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--accent); }
+      .c-title { grid-area: title; font-weight: 700; font-size: clamp(1.1rem, 2.2vw, 1.45rem); }
+      .c-line { grid-area: line; font-family: 'Source Serif 4', serif; font-size: 0.92rem; color: var(--dim); margin-top: 0.22rem; }
+      .c-go { grid-area: go; font-size: 1.5rem; color: #6b7d97; transition: transform 0.25s ease, color 0.25s ease; }
+      .card:hover .c-go { transform: translateX(6px); color: var(--accent); }
+
+      .contact { text-align: center; padding: 14vh 0 6vh; }
+      .contact .kicker { color: var(--accent); }
+      .contact .statement { margin: 0 auto 1.3rem; max-width: none; font-weight: 900; font-size: clamp(2.4rem, 9vw, 6.2rem); letter-spacing: -0.04em; line-height: 0.95; }
+      .links { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; display: flex; gap: 1rem; justify-content: center; margin-bottom: 2.4rem; }
+      .links a { text-decoration: none; color: #cdd7e6; border-bottom: 1px solid transparent; transition: color 0.2s ease, border-color 0.2s ease; }
+      .links a:hover { color: #fff; border-bottom-color: var(--accent); } .links span { color: #44546b; }
+      .note { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #6b7d97; } .note a { color: #aebbd0; }
+
+      .split-word { display: inline-block; overflow: hidden; padding-bottom: 0.12em; vertical-align: bottom; }
+      .split-word > span { display: inline-block; will-change: transform; }
+      body.cinema [data-split] .split-word > span { transform: translateY(110%); }
+      body.cinema [data-fade] { opacity: 0; }
+      body.cinema [data-roll] { opacity: 0; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .cue { display: none; }
+        .split-word > span, [data-fade], [data-roll] { transform: none !important; opacity: 1 !important; }
+      }
+    </style>
+
+    <script>
+      import * as THREE from 'three';
+      import Lenis from 'lenis';
+      import { animate, stagger, inView } from 'motion';
+      import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+      import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+      import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+      import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+      import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+      import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
+      import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const EASE = [0.16, 1, 0.3, 1];
+      const clamp01 = (v) => Math.max(0, Math.min(1, v));
+      const smooth = (t) => { t = clamp01(t); return t * t * (3 - 2 * t); };
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const hx = (h) => { h = h.replace('#', ''); return [parseInt(h.slice(0,2),16)/255, parseInt(h.slice(2,4),16)/255, parseInt(h.slice(4,6),16)/255]; };
+      function webglOK() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
+
+      document.querySelectorAll('[data-split]').forEach((el) => {
+        const words = el.textContent.split(' '); el.textContent = '';
+        words.forEach((wd, i) => {
+          const w = document.createElement('span'); w.className = 'split-word';
+          const s = document.createElement('span'); s.textContent = wd; w.appendChild(s);
+          el.appendChild(w); if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+        });
+      });
+      (function () { const el = document.getElementById('exp-email'); if (el) el.href = 'mailto:alfie@alfiemcglennon.com'; })();
+
+      const CINEMA = !reduced && webglOK();
+      if (CINEMA) { document.body.classList.add('cinema'); bootCinema(); }
+
+      function bootCinema() {
+        const canvas = document.querySelector('[data-stage]');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+        renderer.toneMapping = THREE.NoToneMapping;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        const maxAniso = renderer.capabilities.getMaxAnisotropy();
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(18, window.innerWidth / window.innerHeight, 0.01, 100);
+        const sunDir = new THREE.Vector3(1.0, 0.28, 0.55).normalize();
+        const camPosU = new THREE.Vector3();
+        const srgb = `vec3 srgb2lin(vec3 c){ return pow(c, vec3(2.2)); }`;
+
+        // IBL for the prediction surface (verified: RoomEnvironment() no-args; PMREMGenerator is a core export in 0.184)
+        const pmrem = new THREE.PMREMGenerator(renderer);
+        const roomEnv = new RoomEnvironment();
+        scene.environment = pmrem.fromScene(roomEnv, 0.04).texture;
+        roomEnv.dispose?.(); pmrem.dispose();
+
+        /* ---------- Earth (opaque; hidden during surface acts) ---------- */
+        const earthGroup = new THREE.Group();
+        earthGroup.rotation.z = 0.41;
+        scene.add(earthGroup);
+        const sphere = new THREE.SphereGeometry(1, 96, 64);
+
+        const earthMat = new THREE.ShaderMaterial({
+          uniforms: { uDay: { value: null }, uNight: { value: null }, uSpec: { value: null },
+            uSunDir: { value: sunDir }, uCamPos: { value: camPosU }, uNightStrength: { value: 2.6 }, uFade: { value: 1.0 } },
+          vertexShader: `varying vec2 vUv; varying vec3 vWN; varying vec3 vWP;
+            void main(){ vUv = uv; vWN = normalize(mat3(modelMatrix) * normal);
+              vec4 wp = modelMatrix * vec4(position,1.0); vWP = wp.xyz;
+              gl_Position = projectionMatrix * viewMatrix * wp; }`,
+          fragmentShader: `uniform sampler2D uDay, uNight, uSpec; uniform vec3 uSunDir, uCamPos; uniform float uNightStrength, uFade;
+            varying vec2 vUv; varying vec3 vWN; varying vec3 vWP; ${srgb}
+            void main(){
+              vec3 N = normalize(vWN); vec3 L = normalize(uSunDir);
+              float sun = dot(N, L); float day = smoothstep(-0.12, 0.22, sun);
+              vec3 dayCol = srgb2lin(texture2D(uDay, vUv).rgb);
+              vec3 nightCol = srgb2lin(texture2D(uNight, vUv).rgb);
+              float specMask = texture2D(uSpec, vUv).r;
+              float diff = max(sun, 0.0);
+              vec3 daySide = dayCol * (0.045 + 0.95 * diff);
+              vec3 V = normalize(uCamPos - vWP); vec3 H = normalize(L + V);
+              float spec = pow(max(dot(N, H), 0.0), 70.0) * specMask * smoothstep(0.0, 0.15, sun);
+              daySide += vec3(1.0, 0.93, 0.78) * spec * 2.2;
+              vec3 nightSide = nightCol * uNightStrength + dayCol * 0.012;
+              vec3 col = mix(nightSide, daySide, day);
+              gl_FragColor = vec4(col * uFade, 1.0);
+            }`,
+        });
+        const earth = new THREE.Mesh(sphere, earthMat);
+        earthGroup.add(earth);
+
+        /* ---------- Clouds (sparse: only thick cloud, eroded by low-freq fbm, so the Earth shows) ---------- */
+        const cloudMat = new THREE.ShaderMaterial({
+          transparent: true, depthWrite: false,
+          uniforms: { uClouds: { value: null }, uSunDir: { value: sunDir }, uFade: { value: 1.0 } },
+          vertexShader: `varying vec2 vUv; varying vec3 vWN;
+            void main(){ vUv = uv; vWN = normalize(mat3(modelMatrix) * normal);
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+          fragmentShader: `uniform sampler2D uClouds; uniform vec3 uSunDir; uniform float uFade; varying vec2 vUv; varying vec3 vWN;
+            float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+            float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
+              float a=hash(i), b=hash(i+vec2(1.0,0.0)), c=hash(i+vec2(0.0,1.0)), d=hash(i+vec2(1.0,1.0));
+              return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }
+            float fbm(vec2 p){ float s=0.0, a=0.5; for(int k=0;k<4;k++){ s+=a*noise(p); p*=2.03; a*=0.5; } return s; }
+            void main(){
+              float base = texture2D(uClouds, vUv).r;
+              float detail = fbm(vUv * vec2(180.0, 90.0));     // lower freq -> not blocky
+              float cover = smoothstep(0.45, 0.85, base);      // only thicker clouds survive
+              cover *= 0.4 + 0.6 * smoothstep(0.20, 0.60, detail);   // erode/thin with fbm, don't zero out
+              float sun = dot(normalize(vWN), normalize(uSunDir));
+              float day = smoothstep(-0.25, 0.3, sun);
+              vec3 col = vec3(1.0) * (0.10 + 0.90 * day);
+              gl_FragColor = vec4(col, cover * (0.10 + 0.50 * day) * uFade);  // sparse: Earth shows through
+            }`,
+        });
+        const clouds = new THREE.Mesh(new THREE.SphereGeometry(1.004, 96, 64), cloudMat);
+        earthGroup.add(clouds);
+
+        /* ---------- Atmosphere ---------- */
+        const atmoMat = new THREE.ShaderMaterial({
+          transparent: true, side: THREE.BackSide, depthWrite: false, blending: THREE.AdditiveBlending,
+          uniforms: { uColor: { value: new THREE.Color(0x3a78ff) }, uThick: { value: 1.0 }, uFade: { value: 1.0 } },
+          vertexShader: `varying vec3 vNV; void main(){ vNV = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+          fragmentShader: `uniform vec3 uColor; uniform float uThick, uFade; varying vec3 vNV;
+            void main(){ float intensity = pow(max(0.0, 0.72 - dot(vNV, vec3(0.0,0.0,1.0))), 2.5);
+              gl_FragColor = vec4(uColor * intensity * 1.5 * uThick * uFade, 1.0); }`,
+        });
+        const atmo = new THREE.Mesh(new THREE.SphereGeometry(1.025, 96, 64), atmoMat);
+        earthGroup.add(atmo);
+
+        /* ---------- Ground ring under the people cluster (a faint "on the ground" cue) ---------- */
+        const peopleDir = new THREE.Vector3(0.62, 0.0, 1.5).normalize();
+        const ringMat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+          uniforms: { uFade: { value: 0.0 }, uColor: { value: new THREE.Color(0x34e7c9) } },
+          vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+          fragmentShader: `uniform float uFade; uniform vec3 uColor; varying vec2 vUv;
+            void main(){ float d = distance(vUv, vec2(0.5)); float ring = smoothstep(0.5,0.46,d) * smoothstep(0.30,0.40,d);
+              gl_FragColor = vec4(uColor, ring * 0.5 * uFade); }` });
+        const groundRing = new THREE.Mesh(new THREE.CircleGeometry(0.2, 48), ringMat);
+        groundRing.position.copy(peopleDir).multiplyScalar(1.012);
+        groundRing.lookAt(peopleDir.clone().multiplyScalar(2));
+        scene.add(groundRing);
+
+        /* =====================================================================
+           THE THROUGHLINE — one particle system, morphed across the whole arc.
+        ===================================================================== */
+        const GRID = 84, N = GRID * GRID;        // 7056 points
+        const tlGeo = new THREE.BufferGeometry();
+        const livePos = new Float32Array(N * 3);
+        const liveCol = new Float32Array(N * 3);
+        const liveSize = new Float32Array(N);
+        const seeds = new Float32Array(N);
+        for (let i = 0; i < N; i++) seeds[i] = Math.random();
+        tlGeo.setAttribute('position', new THREE.BufferAttribute(livePos, 3).setUsage(THREE.DynamicDrawUsage));
+        tlGeo.setAttribute('aColor', new THREE.BufferAttribute(liveCol, 3).setUsage(THREE.DynamicDrawUsage));
+        tlGeo.setAttribute('aSize', new THREE.BufferAttribute(liveSize, 1).setUsage(THREE.DynamicDrawUsage));
+        const tlMat = new THREE.ShaderMaterial({
+          transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+          uniforms: { uPixelScale: { value: 2.5 } },
+          vertexShader: `attribute vec3 aColor; attribute float aSize; uniform float uPixelScale; varying vec3 vColor;
+            void main(){ vColor = aColor; vec4 mv = modelViewMatrix * vec4(position, 1.0);
+              gl_PointSize = clamp(aSize * uPixelScale / max(0.001, -mv.z), 1.5, 56.0);
+              gl_Position = projectionMatrix * mv; }`,
+          fragmentShader: `varying vec3 vColor;
+            void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d);
+              if (r > 0.5) discard;
+              float core = smoothstep(0.5, 0.0, r);
+              float halo = smoothstep(0.5, 0.2, r);
+              float a = core * 0.9 + halo * 0.3;
+              gl_FragColor = vec4(vColor * (1.0 + core * 0.5), a); }`,
+        });
+        const points = new THREE.Points(tlGeo, tlMat);
+        points.frustumCulled = false; points.renderOrder = 2;
+        scene.add(points);
+
+        // surface math (shared u,v grid for copula <-> quantum continuous morph)
+        const copulaZ = (u, v) => {
+          const a = Math.exp(-(((u-1)**2 + (v-1)**2)) / 0.12);
+          const b = Math.exp(-(((u-0)**2 + (v-0)**2)) / 0.12);
+          const ridge = 0.35 * Math.exp(-((u - v) ** 2) / 0.06);
+          return (a + b + ridge + 0.05) / 1.45;
+        };
+        const quantumZ = (u, v) => {
+          // a truncated Fourier / interference surface — concentric ripples + standing-wave modes,
+          // visibly distinct from the copula's twin tail-peaks (honest: it's just a wave sum)
+          const x = (u - 0.5) * 2, y = (v - 0.5) * 2, r = Math.sqrt(x*x + y*y);
+          let z = 0.5
+            + 0.26 * Math.cos(7.0 * Math.PI * r) * Math.exp(-1.1 * r)
+            + 0.16 * Math.cos(4.0 * Math.PI * u) * Math.cos(4.0 * Math.PI * v)
+            + 0.10 * Math.cos(6.0 * Math.PI * u);
+          return clamp01(z);
+        };
+        const SURF_S = 1.7, SURF_H = 1.3;
+
+        const COL = { star: hx('#cfe0ff'), earth: hx('#9fd6f7'), people: hx('#ffc27a'), impact: hx('#ff5a4d'),
+          copLo: hx('#0f766e'), copMid: hx('#34e7c9'), copHi: hx('#f7b955'),
+          qLo: hx('#3b3a8f'), qMid: hx('#8b5cf6'), qHi: hx('#a8d8ff'), cta: hx('#d7f3ff') };
+        // HDR-boost so cores exceed 1.0 -> selective bloom ignites them (the "brighter particles" the user wanted)
+        const HDR = { star: 1.9, earth: 1.5, people: 2.8, impact: 2.5, copLo: 1.6, copMid: 2.3, copHi: 2.2, qLo: 1.9, qMid: 2.4, qHi: 2.5, cta: 2.0 };
+        Object.keys(COL).forEach((k) => COL[k] = COL[k].map((c) => c * HDR[k]));
+
+        function buildForm(kind) {
+          const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), siz = new Float32Array(N);
+          for (let i = 0; i < N; i++) {
+            const j = i * 3; let x, y, z, c;
+            const gx = i % GRID, gy = (i - gx) / GRID;
+            const u = gx / (GRID - 1), v = gy / (GRID - 1);
+            if (kind === 'stars') {
+              const th = seeds[i] * Math.PI * 2, ph = Math.acos(2 * ((i * 0.61803398875) % 1) - 1), r = 17 + ((i * 7.13) % 22);
+              x = r*Math.sin(ph)*Math.cos(th); y = r*Math.sin(ph)*Math.sin(th); z = r*Math.cos(ph); c = COL.star;
+            } else if (kind === 'earth') {
+              const th = seeds[i] * Math.PI * 2, ph = Math.acos(2 * ((i * 0.61803398875) % 1) - 1), r = 1.008;
+              x = r*Math.sin(ph)*Math.cos(th); y = r*Math.sin(ph)*Math.sin(th); z = r*Math.cos(ph); c = COL.earth;
+            } else if (kind === 'people' || kind === 'impact') {
+              const core = seeds[i] < 0.62;            // ~60% dense settled core, ~40% scattered halo
+              const a1 = (seeds[i] - 0.5), a2 = (((i * 0.123) % 1) - 0.5), a3 = (((i * 0.317) % 1) - 0.5);
+              const spread = core ? 0.34 : 0.92;
+              const dir = peopleDir.clone().add(new THREE.Vector3(a1, a2 * 0.85, a3 * 0.55).multiplyScalar(spread)).normalize();
+              let r = core ? (1.011 + seeds[i] * 0.006) : (1.013 + a3 * 0.05);
+              if (kind === 'impact') r += (0.06 + seeds[i] * 0.6);     // shocked outward
+              x = dir.x*r; y = dir.y*r; z = dir.z*r; c = kind === 'impact' ? COL.impact : COL.people;
+            } else if (kind === 'copula' || kind === 'quantum') {
+              const zv = kind === 'copula' ? copulaZ(u, v) : quantumZ(u, v);
+              x = (u - 0.5) * SURF_S; z = (v - 0.5) * SURF_S; y = (zv - 0.42) * SURF_H + 0.045;   // glints just above the mesh
+              const t = clamp01(zv);
+              if (kind === 'copula') c = t < 0.5 ? COL.copLo.map((p,k)=>lerp(p,COL.copMid[k],t*2)) : COL.copMid.map((p,k)=>lerp(p,COL.copHi[k],(t-0.5)*2));
+              else c = t < 0.5 ? COL.qLo.map((p,k)=>lerp(p,COL.qMid[k],t*2)) : COL.qMid.map((p,k)=>lerp(p,COL.qHi[k],(t-0.5)*2));
+            } else { // cta
+              const ang = seeds[i] * Math.PI * 2, rr = Math.sqrt((i % 997) / 997) * 0.82;
+              x = Math.cos(ang) * rr; y = Math.sin(ang) * rr * 0.7; z = 0.0; c = COL.cta;
+            }
+            let sz;
+            if (kind === 'stars') sz = 22 + seeds[i] * 22 + ((i % 31 === 0) ? 30 : 0);
+            else if (kind === 'earth') sz = 2.4 + seeds[i] * 2.0;
+            else if (kind === 'people') sz = (seeds[i] < 0.62 ? 5.6 : 3.0) + seeds[i] * 2.4;
+            else if (kind === 'impact') sz = 4.0 + seeds[i] * 4.0;
+            else if (kind === 'copula' || kind === 'quantum') sz = 4.2 + seeds[i] * 2.6;
+            else sz = 7.0 + seeds[i] * 5.0;
+            pos[j] = x; pos[j+1] = y; pos[j+2] = z; col[j] = c[0]; col[j+1] = c[1]; col[j+2] = c[2]; siz[i] = sz;
+          }
+          return { pos, col, siz };
+        }
+        // act-uniform timeline: stars(act0) earth(act1) people(act2) impact(act3) copula(act5) quantum(act6) cta(outro)
+        const BP = [0.00, 0.18, 0.31, 0.44, 0.66, 0.81, 0.95];
+        const FORMS = ['stars','earth','people','impact','copula','quantum','cta'].map(buildForm);
+        livePos.set(FORMS[0].pos); liveCol.set(FORMS[0].col); liveSize.set(FORMS[0].siz);
+
+        function updateThroughline(p) {
+          let k = 0; while (k < BP.length - 2 && p > BP[k + 1]) k++;
+          const a = FORMS[k], b = FORMS[k + 1];
+          const seg = (p - BP[k]) / ((BP[k + 1] - BP[k]) || 1);
+          const cl = smooth(seg);
+          for (let i = 0; i < N; i++) {
+            const j = i * 3, s = seeds[i];
+            const lt = smooth((seg - s * 0.35) / 0.65);
+            for (let d = 0; d < 3; d++) {
+              livePos[j+d] += ((a.pos[j+d] + (b.pos[j+d] - a.pos[j+d]) * lt) - livePos[j+d]) * 0.18;
+              liveCol[j+d] += ((a.col[j+d] + (b.col[j+d] - a.col[j+d]) * cl) - liveCol[j+d]) * 0.12;
+            }
+            liveSize[i] += ((a.siz[i] + (b.siz[i] - a.siz[i]) * lt) - liveSize[i]) * 0.18;
+          }
+          tlGeo.attributes.position.needsUpdate = true;
+          tlGeo.attributes.aColor.needsUpdate = true;
+          tlGeo.attributes.aSize.needsUpdate = true;
+        }
+
+        /* ---------- The defended prediction SURFACE (copula <-> quantum, one mesh) ---------- */
+        const surfGeo = new THREE.PlaneGeometry(SURF_S, SURF_S, GRID - 1, GRID - 1);
+        surfGeo.rotateX(-Math.PI / 2);          // XZ plane, height = +Y (matches the point convention)
+        const surfMat = new THREE.MeshStandardMaterial({ color: 0x0b1622, roughness: 0.34, metalness: 0.0,
+          emissive: 0x34e7c9, emissiveIntensity: 1.0, transparent: true, opacity: 0, depthWrite: false });
+        surfMat.onBeforeCompile = (sh) => {
+          surfMat.userData.sh = sh;
+          sh.uniforms.uGlow = { value: 0 };
+          sh.uniforms.uM = { value: 0 };
+          sh.vertexShader = 'varying float vH;\n' + sh.vertexShader.replace(
+            '#include <begin_vertex>',
+            '#include <begin_vertex>\n vH = position.y / ' + SURF_H.toFixed(4) + ' + 0.42;');
+          sh.fragmentShader = 'varying float vH;\nuniform float uGlow;\nuniform float uM;\n' + sh.fragmentShader.replace(
+            '#include <emissivemap_fragment>',
+            `#include <emissivemap_fragment>
+             vec3 _lo = mix(vec3(0.063,0.463,0.431), vec3(0.231,0.227,0.561), uM);   // teal -> indigo
+             vec3 _hi = mix(vec3(0.969,0.725,0.333), vec3(0.659,0.847,1.0), uM);     // amber -> cyan
+             vec3 _ec = mix(_lo, _hi, clamp(vH, 0.0, 1.0));
+             float _c = abs(fract(vH * 7.0) - 0.5);
+             float _line = 1.0 - smoothstep(0.0, 0.06, _c);
+             totalEmissiveRadiance = _ec * (0.22 + 0.95 * _line) * uGlow;`);
+        };
+        const surf = new THREE.Mesh(surfGeo, surfMat);
+        surf.frustumCulled = false; surf.renderOrder = 1; surf.visible = false;
+        scene.add(surf);
+        const pa = surfGeo.attributes.position;
+        const _zc = new Float32Array(N), _zq = new Float32Array(N);
+        for (let i = 0; i < N; i++) { const gx = i % GRID, gy = (i - gx) / GRID, u = gx / (GRID - 1), v = gy / (GRID - 1); _zc[i] = copulaZ(u, v); _zq[i] = quantumZ(u, v); }
+        let _lastM = -1;
+        function setSurface(m) {
+          if (Math.abs(m - _lastM) < 0.002) return; _lastM = m;
+          for (let i = 0; i < N; i++) { const z = _zc[i] + (_zq[i] - _zc[i]) * m; pa.setY(i, (z - 0.42) * SURF_H); }
+          pa.needsUpdate = true; surfGeo.computeVertexNormals();
+        }
+
+        /* ---------- Post-processing ---------- */
+        const composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        const BLOOM_STRENGTH = 0.72;
+        const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.0, 0.55, 1.0);
+        composer.addPass(bloom);
+        const GradeShader = {
+          uniforms: { tDiffuse: { value: null }, uExposure: { value: 0.0 }, uTime: { value: 0.0 },
+            uVignette: { value: 0.85 }, uGrain: { value: 0.026 }, uAberration: { value: 0.0032 },
+            uHaze: { value: 0.0 }, uHazard: { value: 0.0 }, uGradeTint: { value: new THREE.Vector3(0.6, 0.74, 1.0) },
+            uResolution: { value: new THREE.Vector2(1, 1) } },
+          vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position, 1.0); }`,
+          fragmentShader: `uniform sampler2D tDiffuse; uniform float uExposure, uTime, uVignette, uGrain, uAberration, uHaze, uHazard;
+            uniform vec3 uGradeTint; uniform vec2 uResolution; varying vec2 vUv;
+            vec3 aces(vec3 x){ float a=2.51,b=0.03,c=2.43,d=0.59,e=0.14; return clamp((x*(a*x+b))/(x*(c*x+d)+e),0.0,1.0); }
+            float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+            void main(){
+              vec2 dir = vUv - 0.5;
+              float ca = uAberration * dot(dir, dir) * (4.0 + uHazard * 5.0);
+              vec3 col;
+              col.r = texture2D(tDiffuse, vUv - dir * ca).r;
+              col.g = texture2D(tDiffuse, vUv).g;
+              col.b = texture2D(tDiffuse, vUv + dir * ca).b;
+              col *= uExposure; col = aces(col);
+              // atmospheric haze on descent (edges recede first)
+              col = mix(col, vec3(0.04, 0.08, 0.14), smoothstep(0.15, 0.95, length(dir)) * uHaze);
+              // hazard push (impact act)
+              float hz = uHazard * smoothstep(1.2, 0.2, length(dir));
+              col = clamp(mix(col, col * 0.82 + vec3(1.0, 0.32, 0.14) * 0.6, hz), 0.0, 1.0);
+              // global colour-grade arc (multiply post-ACES, low weight -> no grey midpoints)
+              col *= mix(vec3(1.0), uGradeTint, 0.16);
+              float vig = smoothstep(1.15, 0.35, length(dir) * 1.35); col *= mix(1.0, vig, uVignette);
+              float g = hash(vUv * uResolution + fract(uTime)) * 2.0 - 1.0; col += g * uGrain;
+              gl_FragColor = vec4(col, 1.0);
+            }`,
+        };
+        const grade = new ShaderPass(GradeShader); composer.addPass(grade);
+        composer.addPass(new OutputPass());
+        const fxaa = new ShaderPass(FXAAShader); composer.addPass(fxaa);
+
+        function resize() {
+          const w = window.innerWidth, h = window.innerHeight, dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+          renderer.setPixelRatio(dpr); renderer.setSize(w, h, false);
+          composer.setPixelRatio(dpr); composer.setSize(w, h);
+          camera.aspect = w / h; camera.updateProjectionMatrix(); bloom.setSize(w, h);
+          grade.uniforms.uResolution.value.set(w * dpr, h * dpr);
+          fxaa.material.uniforms.resolution.value.set(1 / (w * dpr), 1 / (h * dpr));
+          tlMat.uniforms.uPixelScale.value = h * dpr * 0.0015;
+          measure();
+        }
+        window.addEventListener('resize', resize);
+
+        /* ---------- camera spine ---------- */
+        const KEYS = [
+          { p: 0.00, pos: [0.10, 0.06, 7.4], fov: 18, look: [0, 0, 0] },        // act0 space: long lens, vast
+          { p: 0.13, pos: [0.20, 0.06, 5.0], fov: 18, look: [0, 0, 0] },        // act1 descent: slow push
+          { p: 0.25, pos: [0.55, 0.05, 3.0], fov: 22, look: [0.08, 0, 0.12] },  // approach
+          { p: 0.32, pos: [0.72, 0.02, 1.62], fov: 36, look: [0.24, 0.0, 0.45] }, // act2: the people
+          { p: 0.44, pos: [0.70, 0.0, 1.78], fov: 40, look: [0.26, 0.0, 0.5] },  // act3: impact (close, intense)
+          { p: 0.56, pos: [0.20, 0.85, 3.05], fov: 30, look: [0, 0.05, 0] },     // act4 causal: rise + pull back, surface forms
+          { p: 0.69, pos: [1.45, 0.70, 2.55], fov: 30, look: [0, 0.05, 0] },     // act5: orbit right (copula)
+          { p: 0.81, pos: [-1.25, 0.78, 2.65], fov: 30, look: [0, 0.05, 0] },    // act6: orbit left (quantum)
+          { p: 0.92, pos: [0.06, 0.35, 4.2], fov: 24, look: [0, 0, 0] },         // outro: globe re-frames
+          { p: 1.00, pos: [0.10, 0.18, 6.4], fov: 20, look: [0, 0, 0] },         // bookends the open
+        ];
+        const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3();
+        const targetPos = new THREE.Vector3(...KEYS[0].pos), targetLook = new THREE.Vector3(0,0,0);
+        let targetFov = KEYS[0].fov;
+        const curPos = targetPos.clone(), curLook = targetLook.clone();
+        camera.position.copy(curPos); camera.fov = targetFov; camera.updateProjectionMatrix();
+        function sampleCamera(p) {
+          let i = 0; while (i < KEYS.length - 2 && p > KEYS[i + 1].p) i++;
+          const a = KEYS[i], b = KEYS[i + 1], lt = smooth((p - a.p) / ((b.p - a.p) || 1));
+          tmpA.set(...a.pos); tmpB.set(...b.pos); targetPos.copy(tmpA).lerp(tmpB, lt);
+          tmpA.set(...a.look); tmpB.set(...b.look); targetLook.copy(tmpA).lerp(tmpB, lt);
+          targetFov = a.fov + (b.fov - a.fov) * lt;
+        }
+
+        function earthVis(p) {
+          if (p < 0.25) return 1.0;
+          if (p < 0.345) return lerp(1.0, 0.5, smooth((p - 0.25) / 0.095));   // dusk dip -> the people glow like settlements
+          if (p < 0.46) return lerp(0.5, 0.8, smooth((p - 0.345) / 0.115));   // partial return for the impact beat
+          if (p < 0.58) return lerp(0.8, 0.0, smooth((p - 0.46) / 0.12));     // fade out so the surface owns the stage
+          if (p < 0.875) return 0.0;
+          return lerp(0.0, 1.0, smooth((p - 0.875) / 0.125));                 // globe returns for the resolution
+        }
+
+        // per-act colour-grade arc (chromatic stops; multiply-tint never greys the midpoint)
+        const TINTS = [
+          [0.00, [0.55, 0.70, 1.00]], [0.18, [0.78, 0.80, 0.98]], [0.31, [1.00, 0.86, 0.66]],
+          [0.44, [1.00, 0.60, 0.48]], [0.66, [0.52, 0.96, 0.88]], [0.81, [0.72, 0.58, 1.00]], [1.00, [0.66, 0.82, 1.00]],
+        ];
+
+        /* ---------- causal pathway overlay ---------- */
+        const pathsEl = document.querySelector('[data-paths]');
+        const edges = pathsEl ? Array.from(pathsEl.querySelectorAll('.p-edge')) : [];
+        edges.forEach((e) => { const L = e.getTotalLength(); e.style.strokeDasharray = L; e.style.strokeDashoffset = L; e.dataset.len = L; });
+        function updatePaths(p) {
+          if (!pathsEl) return;
+          // act4 (causal) only: visible ~0.51-0.62, drawn fast, gone before the copula act (0.625)
+          const vis = Math.min(smooth((p - 0.505) / 0.025), smooth((0.625 - p) / 0.02));
+          pathsEl.style.opacity = String(clamp01(vis));
+          const draw = clamp01((p - 0.515) / 0.055);
+          edges.forEach((e, idx) => { const L = +e.dataset.len; const local = reduced ? 1 : clamp01((draw - idx * 0.16) / 0.5);
+            e.style.strokeDashoffset = String(L * (1 - smooth(local))); });
+        }
+
+        /* ---------- scroll driver ---------- */
+        let progress = 0;
+        const cueEl = document.querySelector('.cue');
+        const lenis = new Lenis({ lerp: 0.085 });
+        // Act-uniform progress: each act (+ the outro) gets an EQUAL slice of [0,1],
+        // regardless of its pixel height, so every visual lands with its own copy.
+        const actEls = Array.from(document.querySelectorAll('.act'));
+        const outroEl = document.querySelector('.outro');
+        let segBounds = [];
+        function measure() {
+          const sy = window.scrollY;
+          segBounds = actEls.map((el) => el.getBoundingClientRect().top + sy);
+          if (outroEl) segBounds.push(outroEl.getBoundingClientRect().top + sy);
+          segBounds.push(document.documentElement.scrollHeight);
+        }
+        function readScroll() {
+          const nB = segBounds.length; if (nB < 2) { progress = 0; return; }
+          const nSeg = nB - 1;
+          const y = window.scrollY + window.innerHeight * 0.5;   // viewport centre
+          let seg = nSeg;
+          if (y <= segBounds[0]) seg = 0;
+          else if (y < segBounds[nB - 1]) { for (let k = 0; k < nSeg; k++) { if (y < segBounds[k + 1]) { seg = k + (y - segBounds[k]) / Math.max(1, segBounds[k + 1] - segBounds[k]); break; } } }
+          progress = clamp01(seg / nSeg);
+        }
+        window.addEventListener('scroll', readScroll, { passive: true });
+
+        let raf = 0, running = true, t0 = 0, intro = 0;
+        let lastT = 0, msAvg = 16, lowMode = false;     // perf probe
+        const FOLLOW = 0.06;
+        function frame(t) {
+          if (!t0) t0 = t;
+          const secs = (t - t0) / 1000;
+          if (lastT) msAvg += ((t - lastT) - msAvg) * 0.1; lastT = t;
+          if (!lowMode && msAvg > 26) {                 // sustained <~38fps -> downgrade once
+            lowMode = true;
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+            renderer.setPixelRatio(dpr); composer.setPixelRatio(dpr); grade.uniforms.uGrain.value = 0.0;
+          }
+          lenis.raf(t); readScroll();
+          const p = progress;
+          const haz = reduced ? 0 : clamp01(Math.min(smooth((p - 0.38) / 0.05), smooth((0.50 - p) / 0.05)));
+
+          sampleCamera(p);
+          targetPos.x += Math.sin(secs * 0.24) * 0.03;   // idle breath
+          targetPos.y += Math.cos(secs * 0.19) * 0.025;
+          curPos.lerp(targetPos, FOLLOW); curLook.lerp(targetLook, FOLLOW);
+          camera.position.copy(curPos);
+          if (!reduced && haz > 0.5) { camera.position.x += Math.sin(secs * 55) * 0.004 * haz; camera.position.y += Math.cos(secs * 48) * 0.003 * haz; }
+          camera.lookAt(curLook);
+          if (Math.abs(camera.fov - targetFov) > 0.001) { camera.fov += (targetFov - camera.fov) * FOLLOW; camera.updateProjectionMatrix(); }
+          camPosU.copy(camera.position);
+
+          earthGroup.rotation.y = 0.6 + secs * 0.01;
+          clouds.rotation.y = secs * 0.004;
+          const vis = earthVis(p);
+          earthGroup.visible = vis > 0.01;
+          earthMat.uniforms.uFade.value = vis; cloudMat.uniforms.uFade.value = vis; atmoMat.uniforms.uFade.value = vis;
+          atmoMat.uniforms.uThick.value = 1.0 + 0.9 * smooth((p - 0.12) / 0.18);
+          ringMat.uniforms.uFade.value = clamp01(Math.min(smooth((p - 0.26) / 0.04), smooth((0.375 - p) / 0.04))) * vis;
+
+          updateThroughline(p);
+          const mp = smooth(clamp01((p - 0.66) / 0.15));   // copula->quantum, aligned with the point morph (BP[4..5])
+          const sVis = clamp01(Math.min(smooth((p - 0.60) / 0.05), smooth((0.90 - p) / 0.05)));  // acts 5-6
+          surf.visible = sVis > 0.01; surfMat.opacity = 0.92 * sVis;
+          if (sVis > 0.005) setSurface(mp);                // skip the 7056-vert recompute while off-screen
+          if (surfMat.userData.sh) { surfMat.userData.sh.uniforms.uGlow.value = 1.5 * sVis; surfMat.userData.sh.uniforms.uM.value = mp; }
+
+          updatePaths(p);
+          if (cueEl) cueEl.style.opacity = p < 0.03 ? '1' : '0';
+
+          grade.uniforms.uTime.value = secs;
+          grade.uniforms.uHaze.value = clamp01(Math.min(smooth((p - 0.10) / 0.05), smooth((0.27 - p) / 0.06))) * 0.45;
+          grade.uniforms.uHazard.value = haz;
+          let ti = 0; while (ti < TINTS.length - 2 && p > TINTS[ti + 1][0]) ti++;
+          const ta = TINTS[ti], tb = TINTS[ti + 1], tl = smooth((p - ta[0]) / ((tb[0] - ta[0]) || 1));
+          grade.uniforms.uGradeTint.value.set(lerp(ta[1][0], tb[1][0], tl), lerp(ta[1][1], tb[1][1], tl), lerp(ta[1][2], tb[1][2], tl));
+          const base = lowMode ? 0.34 : BLOOM_STRENGTH;
+          bloom.strength = base * (1 + 0.7 * haz) * intro;
+
+          composer.render();
+          raf = running ? requestAnimationFrame(frame) : 0;
+        }
+        document.addEventListener('visibilitychange', () => { running = !document.hidden; if (running && !raf) { t0 = 0; lastT = 0; raf = requestAnimationFrame(frame); } });
+
+        /* ---------- designed first paint ---------- */
+        const loader = new THREE.TextureLoader();
+        const barEl = document.querySelector('[data-pre-bar]');
+        const want = [
+          ['/images/earth/earth_atmos_2048.jpg', earthMat.uniforms.uDay, true],
+          ['/images/earth/earth_lights_2048.png', earthMat.uniforms.uNight, true],
+          ['/images/earth/earth_specular_2048.jpg', earthMat.uniforms.uSpec, false],
+          ['/images/earth/earth_clouds_2048.webp', cloudMat.uniforms.uClouds, true],
+        ];
+        let done = 0; const bump = () => { done++; if (barEl) barEl.style.width = (done / want.length * 100) + '%'; };
+        Promise.all(want.map(([url, uni, hi]) =>
+          loader.loadAsync(url).then((tex) => {
+            tex.colorSpace = THREE.NoColorSpace; tex.anisotropy = hi ? maxAniso : 1; tex.wrapS = THREE.RepeatWrapping;
+            uni.value = tex; bump();
+          }).catch((err) => { console.warn('[experience] texture failed:', url, err); bump(); })
+        )).then(() => {
+          resize(); composer.render();
+          raf = requestAnimationFrame(frame);
+          const pre = document.querySelector('[data-pre]'); if (pre) { pre.classList.add('gone'); setTimeout(() => pre.remove(), 800); }
+          animate(0, 1, { duration: 1.6, ease: EASE, onUpdate: (v) => { grade.uniforms.uExposure.value = v; intro = v; } });
+          revealCopy();
+        });
+      }
+
+      function revealCopy() {
+        const hero = document.querySelector('.act[data-act="0"]');
+        if (hero) {
+          const spans = hero.querySelectorAll('[data-split] .split-word > span');
+          if (spans.length) animate(spans, { y: ['110%', '0%'] }, { duration: 0.85, delay: stagger(0.035, { startDelay: 0.35 }), ease: EASE });
+          hero.querySelectorAll('[data-fade]').forEach((el, i) => animate(el, { opacity: [0, 1], y: [16, 0] }, { duration: 0.7, delay: 0.75 + i * 0.1, ease: EASE }));
+        }
+        document.querySelectorAll('.act:not([data-act="0"]) [data-split], .outro [data-split]').forEach((el) => {
+          const spans = el.querySelectorAll('.split-word > span');
+          inView(el, () => animate(spans, { y: ['110%', '0%'] }, { duration: 0.85, delay: stagger(0.04), ease: EASE }), { amount: 0.5 });
+        });
+        document.querySelectorAll('[data-roll]:not(.card)').forEach((el) => inView(el, () => animate(el, { opacity: [0, 1], y: [38, 0] }, { duration: 0.9, ease: EASE }), { amount: 0.4 }));
+        document.querySelectorAll('.act:not([data-act="0"]) [data-fade], .outro [data-fade]').forEach((el) => inView(el, () => animate(el, { opacity: [0, 1] }, { duration: 0.8, ease: EASE }), { amount: 0.6 }));
+        const cards = document.querySelectorAll('.outro .card');
+        const cardsWrap = document.querySelector('.outro .cards');
+        if (cards.length && cardsWrap) inView(cardsWrap, () => animate(cards, { opacity: [0, 1], y: [28, 0] }, { duration: 0.7, delay: stagger(0.08), ease: EASE }), { amount: 0.2 });
+      }
+    </script>
+  </body>
+</html>

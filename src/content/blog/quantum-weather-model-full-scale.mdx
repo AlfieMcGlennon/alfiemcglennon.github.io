@@ -1,0 +1,359 @@
+---
+title: "A Quantum Weather Model at Full Scale"
+description: "I rebuilt ECMWF's AIFS architecture and swapped its processor for a quantum circuit, at 1.2 million inputs and outputs over Europe. It lost. Here are the controls that make the loss believable, and the one thing that did work on real hardware."
+date: 2026-08-15
+project: "quantum-ml"
+accent: "#4338ca"
+tags: ["quantum-machine-learning", "weather", "aifs", "ibm-quantum", "negative-results", "benchmarking"]
+draft: true
+math: true
+---
+
+{/*
+  Sequel to "Reading a Quantum Weather Model". Conventions: British English, NO em
+  dashes, KaTeX, <details class="fold"> for depth. Written as a step-down: the main
+  line is readable by anyone, every technical layer sits in a fold. Every number is
+  traceable to results/*.json in the era5_qwm harness.
+*/}
+
+import QWHarness from '../../components/QWHarness.astro';
+import QWSweep from '../../components/QWSweep.astro';
+import QWTopology from '../../components/QWTopology.astro';
+import QWWireLab from '../../components/QWWireLab.astro';
+
+Last time I had a nine qubit circuit that could forecast one patch of atmosphere. The
+obvious next question: does that survive contact with a real weather model?
+
+So I rebuilt one. ECMWF's AIFS works in three parts. An **encoder** compresses the weather
+grid onto a smaller mesh. A **processor** steps that mesh forward in time. A **decoder**
+writes tomorrow's weather back out.
+
+I kept the encoder and decoder classical, and swapped only the processor.
+
+<QWHarness />
+
+That is the whole design. Everything except the middle box is identical across every run,
+so any difference in skill belongs to the processor. Real data: ERA5 over Europe at 0.25
+degrees, five pressure levels, temperature, wind, pressure and humidity. **1.2 million
+numbers in, 1.2 million out.**
+
+The quantum version lost. The rest of this is why I believe that.
+
+## Does the test even work?
+
+The trap in this field is running a quantum model against a weak baseline and declaring
+victory. The opposite trap, which is the one I was in danger of, is running it in a slot
+where nothing would have worked and declaring defeat.
+
+So before comparing anything to quantum, the setup has to prove it can detect a processor
+working at all. Three versions, three random seeds each:
+
+| What is in the slot | Skill |
+| --- | --- |
+| AIFS style processor | **+0.533** |
+| Frozen random block | +0.459 |
+| Nothing at all | +0.444 |
+
+A real processor beats an empty slot by **+0.089**. That is a large, stable gap. The test
+works, so a quantum null measured on it means something.
+
+Two rows there are unusual and both matter.
+
+**"Nothing at all"** is the floor. Encoder wired straight to decoder. Most benchmarks skip
+this, and without it you cannot tell whether your clever block helped or whether the network
+around it did the work.
+
+**"Frozen random block"** is a randomly wired processor that is never trained. It still beats
+the floor. So if a trained model cannot beat *that*, the training is not doing anything.
+
+<details class="fold">
+<summary>Why the frozen random control is the one to steal</summary>
+
+At smaller scales this arm won outright. On a 45 node mesh the frozen random block beat
+every trained processor, and the quantum arm matched the empty slot to four decimal places.
+
+That is small sample overfitting: a trained block has parameters to misuse, a frozen one
+does not. Training on 319, 639, 1,278 and 2,556 samples, the trained processor's deficit
+against random closes steadily from -0.047 to -0.006, and with 10,224 samples it crosses
+into a win.
+
+The general lesson: at the scale most quantum machine learning papers work at, a frozen
+random baseline may beat your model, and almost nobody runs it.
+</details>
+
+## How nine qubits cover a million numbers
+
+A fair question at this point is how a nine qubit circuit touches a mesh of thousands of
+nodes. It does not. The same small circuit is slid across the mesh in overlapping patches,
+and the overlaps are averaged.
+
+<QWSweep />
+
+This is also why the quantum version is slow. The mesh does not need more qubits, it needs
+more *runs*, and the number of runs grows with the mesh.
+
+## The result
+
+In a slot where a classical processor clearly earns its place, the quantum one does not.
+Four mesh sizes, three resolutions, four forecast lead times. It never won.
+
+The cleanest comparison came from a control I ran for a different reason. Same data, all
+versions on a matched learning rate:
+
+| What is in the slot | Skill | Training time |
+| --- | --- | --- |
+| Frozen random | +0.5556 | 185 s |
+| AIFS style | +0.5547 | 198 s |
+| Quantum | +0.5522 | **3,777 s** |
+| Nothing at all | +0.5517 | 177 s |
+
+Those four numbers span 0.004. They are one number. The quantum processor spent **21 times
+the compute** to land exactly where an empty slot lands.
+
+## Four things I had to take back
+
+These are the method, not an apology attached to it. Each one was a single seed telling a
+flattering story.
+
+**"The encoding fix is worth ten times the noise."** I had initialised the circuit's angles
+about 7.5 times too small, leaving it nearly linear at the start of training. A real
+handicap, and mine. Fixing it looked worth +0.014. But I had measured the noise on a
+*different* configuration. Six seeds of each gave **+0.019, plus or minus 0.007**. Real
+enough to mention, not enough to lean on, and it changes no ranking.
+
+**"More data will close the gap."** The quantum arm does improve faster per doubling of data
+than any classical arm. But it starts 0.118 behind and closes at 0.018 a doubling, so it
+needs about another seven doublings. There is not that much ERA5. Across the 8x range I
+actually ran, the gap went 0.182 to 0.118 and did not close.
+
+**"Sample the record more finely, then."** No. Six hourly instead of daily buys skill at less
+than half the rate, because consecutive six hourly states are near duplicates. Samples are
+not information.
+
+**"Quantum tops this table."** Briefly, by 0.002. Then I noticed that arm had been handed a
+better learning rate than everything it was being compared with. Matching it dissolved the
+result. It flattered my own model, which is exactly why I checked.
+
+<details class="fold">
+<summary>The one that nearly got away</summary>
+
+The quantum arm collapsed to zero skill twice, once on a seed and once at a data scale, with
+the training loss flat for all thirty epochs. No classical arm collapsed once, all project.
+
+I nearly wrote that up as fundamental instability. Then I lowered the learning rate and both
+cases trained fine. The honest claim is much narrower: this model needed careful tuning to
+train at all, where the classical blocks did not.
+</details>
+
+## The biggest mistake was the one I inherited
+
+I took AIFS's architecture and assumed the processor slot was substrate-neutral. It is
+not, and the clearest example is not about quantum at all.
+
+AIFS is a **global** model. Nothing enters from outside, because there is no outside. I
+transplanted that onto a **regional** box over Europe and gave it none of the machinery a
+regional model actually runs on. Real limited-area models are *driven at their edges* by a
+coarser global forecast: they are told what is arriving.
+
+Mine was not. So I tested it at longer lead times and got a result that looked like a
+finding: the processor's advantage did not just shrink with lead, it **inverted**.
+
+| lead | anemoi minus no-processor |
+| --- | --- |
+| +1 day | +0.089 |
+| +3 days | -0.023 |
+| +5 days | -0.035 |
+| +7 days | -0.044 |
+
+I nearly wrote that up as a property of processors. It is a property of my domain. At +5
+days the weather over Europe depends on what was over the Atlantic, and the model cannot
+see it. No processor can compute information that is not in the input, but a processor
+with 28,000 parameters can certainly overfit trying.
+
+So I fed the model its boundary: the true state on a ring of cells around the edge, which
+is what a driving model provides. The ring is exactly the border already excluded from
+scoring, so nothing leaks into the marked region.
+
+| arm | no boundaries | with boundaries |
+| --- | --- | --- |
+| no processor | +0.345 | +0.486 |
+| frozen random | +0.322 | +0.520 |
+| **AIFS-style** | +0.310 | **+0.728** |
+| **processor advantage** | **-0.034** | **+0.241** |
+
+The inversion was mine. Given the information a regional model normally has, the processor
+does not become a liability at long lead. It becomes **nearly three times more valuable**
+than at one day.
+
+Two details make this more than a fix. The size of the gain is ordered by how far each arm
+can move information: the attention block gained +0.417, the local random one +0.198, and
+no-processor +0.142. And the gain grows with lead, exactly as an inflow explanation
+requires. That is the mechanism, not just the outcome.
+
+It is also, so far, the only headline in this project that survived being repeated across
+three random seeds unchanged.
+
+<details class="fold">
+<summary>What this does not show</summary>
+
+Feeding the *true* future boundary is perfect boundary conditions. A real driving model
+carries its own error, so this is an upper bound: it isolates the mechanism rather than
+simulating an operational forecast.
+
+And boundaries fix the *task*, not the *slot*. At 1 degree the same treatment lifts every
+arm from about 0.34 to about 0.85 skill, yet the processor advantage there is only +0.017.
+Boundaries decide how much signal exists; mesh size decides whether a processor can use it.
+</details>
+
+## It was not losing because it was quantum
+
+Here is the flaw that took longest to see, and it undermines every table above.
+
+The AIFS-style processor is **attention**: it looks at the whole mesh at once. The quantum
+processor is a small circuit **slid over the mesh in patches**, moving information one
+patch at a time. Those are different kinds of operator. So when the quantum arm lost, two
+explanations were tangled together: it was quantum, and it was local. Nothing I had built
+could tell them apart.
+
+So I built the missing arm. Same encoder, same decoder, same patch sweep, same receptive
+field, same blending, same seed, same parameter count. The **only** difference is whether
+the little core inside is a nine-qubit circuit or an ordinary classical map.
+
+| what is in the slot | skill | share of what attention gains |
+| --- | --- | --- |
+| AIFS-style, whole mesh at once | +0.857 | 100% |
+| **classical, same patches as the circuit** | **+0.854** | **87%** |
+| frozen random, same patches | +0.854 | 82% |
+| **the quantum circuit** | **+0.848** | **49%** |
+| nothing at all | +0.840 |  -  |
+
+**Most of the gap was never about quantum.** A perfectly ordinary classical operator, given
+the same small window the circuit gets, throws away most of the advantage too. On the finer
+mesh it is starker: the matched classical arm captures 12% of what attention does, and does
+not even beat the frozen random one.
+
+The circuit does lose a bit more on top, and it takes about twenty times the compute to do
+it. But the headline finding of this project turns out to be about **architecture, not
+substrate**. I spent months measuring a processor slot and most of what I measured was the
+shape of the operator, not what it was made of.
+
+<details class="fold">
+<summary>The obvious fix, and why it makes things worse</summary>
+
+If the problem is that the patch is too small, spread it out. The nine qubits can sample a
+spaced grid instead of a contiguous one, covering a 9x9 area for exactly the same cost.
+
+    3x3 patch    +0.517
+    5x5 spread   +0.481
+    9x9 spread   +0.447
+
+Monotonically worse. At one day ahead the weather is moved by local advection, so the
+neighbouring cells are precisely the ones that matter, and skipping them to reach further
+throws away the signal. The circuit's small footprint is *appropriate*, not a handicap.
+
+Which leaves depth or multi-scale as the real fix, and both mean running the circuit many
+more times, which is the one thing it cannot afford.
+</details>
+
+## What the processor is actually for
+
+One result came out clean. Splitting the classical processor's advantage by variable:
+
+| Variable | Gain from the processor |
+| --- | --- |
+| Pressure and geopotential | **+0.132** |
+| Temperature | +0.069 |
+| Wind | +0.066 |
+| Humidity | **+0.042** |
+
+Biggest gain on the pressure field, smallest on humidity. That is exactly right. The
+processor's job is to move information across the map, so it earns its keep on the large
+scale pressure pattern, which is driven by distant conditions, and earns least on humidity,
+which is patchy and local.
+
+That is not a quantum result. It is evidence the test measures real atmospheric behaviour,
+which is what makes the rest of it worth trusting.
+
+## Scale, and the wall
+
+Because the whole question is whether this follows AIFS upward, I ran the classical version
+on a mesh of **41,869 nodes**, the size of AIFS's own. It trained in **85 minutes** on a
+laptop GPU.
+
+The quantum processor on that same mesh, costed from its own measured speed, would need
+roughly **1,800 hours**. That is the wall, measured rather than argued.
+
+## On a real quantum computer
+
+Everything above is simulated. The architecture claim I keep making is *train classically,
+run the forecast on quantum hardware*, so I ran it: encoder and decoder on the laptop, the
+processor on IBM's 156 qubit machine, both scored against real ERA5.
+
+First attempt kept **44 per cent** of its simulated skill. Then I looked at why.
+
+<QWTopology />
+
+<QWWireLab />
+
+The circuit connects qubits in a 3x3 grid, matching the map cells, which is what makes it
+readable. IBM's chips give each qubit at most three connections. A grid centre needs four.
+It cannot be laid down, as a matter of geometry, so the compiler pads it with extra
+operations and the error piles up.
+
+Reordering the same nine cells as a snake keeps every connection a genuine neighbour, but
+forms a line rather than a grid, and a line fits the chip exactly.
+
+| Circuit | Gates on hardware | Simulated | **On hardware** |
+| --- | --- | --- | --- |
+| 3x3 grid | 198 | +0.600 | +0.265 |
+| Snake | **40** | +0.598 | **+0.502** |
+
+Same skill in simulation. Double on hardware. **158 of those 198 operations were shuffling,
+not computing.**
+
+One more free gain. The part that turns the circuit's measurements into a forecast is a
+small classical layer, and it had been trained on perfect simulated measurements while being
+fed noisy real ones. Retraining just that layer on the hardware's own output, which needs no
+quantum computer at all, reached **96 per cent** of simulated skill.
+
+<details class="fold">
+<summary>The control that makes 96 per cent trustworthy, and the cost</summary>
+
+Retraining on twelve cases and scoring on twelve unseen ones could just be fitting the test
+set. So: the same retraining on *simulated* output gains +0.007, and a simulator trained
+layer applied to hardware is slightly worse than the original. Only the hardware's own
+output helps. That isolates it as genuine noise adaptation.
+
+Whole hardware campaign: 2,499 seconds of quantum compute.
+</details>
+
+I first wrote this up as a deep tension, that the thing making the circuit interpretable is
+the thing hardware cannot do. **That was wrong.** A differently shaped but equally readable
+circuit runs natively. It was an unforced error: I designed for the maths and never asked
+what the chip could do.
+
+The general point is worth keeping. With a GPU, hardware is interchangeable and only speed
+changes. **With a quantum computer the wiring diagram is part of your model.** Identical
+weights ran at 44 or 84 per cent fidelity depending only on whether the circuit's shape
+matched the chip's.
+
+## What this does and does not show
+
+It shows quantum inference is **not blocked by noise** at this scale. Most of the loss was
+a compiler problem.
+
+It does not rescue the model. A 96 per cent faithful hardware forecast is a faithful copy of
+something that adds nothing over an empty slot. And the circuit survives hardware *because*
+it is small and shallow, which is the same reason it is not useful.
+
+Scope, plainly: this is AIFS *shaped*, not AIFS *scale*. Regional Europe, five levels, one
+laptop, against a global model with hundreds of millions of parameters on a cluster. That
+does not affect the comparison between processors, since every version shares the same
+encoder, decoder and seed. But read it as "does the quantum block do the processor's job",
+not as competitive forecast scores.
+
+The bet, that this pays off at scales classical computers cannot reach, is still a bet. I
+would rather say that than dress up a null.
+
+For *why* it comes out this way rather than the evidence that it does, that is the
+[companion piece](/writing/where-quantum-actually-breaks).

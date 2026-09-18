@@ -1,0 +1,100 @@
+---
+// The 9-qubit "weather circuit" diagram, rebuilt as native SVG on the site
+// palette. One map cell per qubit on a 3x3 grid (C11..C33). Four labelled
+// stages: encode (teal), entangle (indigo), trainable (amber), read out (ink).
+// The entangling layer is a nearest-neighbour brickwork of CNOTs. Static.
+const c = {
+  ink: '#1c1917', inkDim: '#44403c', inkMuted: '#78716c', inkFaint: '#a8a29e',
+  bg: '#f7f6f2', rule: '#ddd8d0', accent: '#4338ca', teal: '#0f766e', amber: '#b45309',
+};
+
+const labels = ['C11', 'C12', 'C13', 'C21', 'C22', 'C23', 'C31', 'C32', 'C33'];
+const y0 = 104, step = 36;
+const rows = labels.map((lab, i) => ({ lab, y: y0 + i * step }));
+const yOf = (i) => y0 + i * step;
+
+const wireX0 = 64, wireX1 = 636;
+const encX = 150, entA = 286, entB = 314, trnX = 452, outX = 590;
+
+// nearest-neighbour entangling brickwork (control on top, target below)
+const pairsA = [[0, 1], [2, 3], [4, 5], [6, 7]];
+const pairsB = [[1, 2], [3, 4], [5, 6], [7, 8]];
+const cnots = [
+  ...pairsA.map(([a, b]) => ({ a, b, x: entA })),
+  ...pairsB.map(([a, b]) => ({ a, b, x: entB })),
+];
+
+const headerY = 80;
+const vbH = yOf(8) + 40;
+---
+
+<figure class="qw-fig" data-reveal>
+  <svg viewBox={`0 0 680 ${vbH}`} role="img" aria-label="A nine-qubit quantum circuit, one map cell per qubit on a three by three grid. Each qubit is encoded with a rotation R of x, entangled with its neighbours by a brickwork of controlled-NOT gates, passed through a trainable rotation R of theta, and measured.">
+    <!-- titles -->
+    <text x="20" y="28" font-family="'Outfit', system-ui, sans-serif" font-size="19" font-weight="600" fill={c.ink}>A 9-qubit quantum weather circuit</text>
+    <text x="20" y="48" font-family="'JetBrains Mono', monospace" font-size="11.5" fill={c.inkMuted}>one map cell per qubit, on a 3&#215;3 grid</text>
+
+    <!-- stage headers -->
+    <text x={encX} y={headerY} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="0.08em" fill={c.teal}>ENCODE</text>
+    <text x={300} y={headerY} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="0.08em" fill={c.accent}>ENTANGLE</text>
+    <text x={trnX} y={headerY} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="0.08em" fill={c.amber}>TRAINABLE</text>
+    <text x={outX} y={headerY} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="0.08em" fill={c.inkDim}>READ&#8201;OUT</text>
+
+    <!-- qubit wires + labels -->
+    {rows.map((r) => (
+      <g>
+        <line x1={wireX0} y1={r.y} x2={wireX1} y2={r.y} stroke={c.rule} stroke-width="1.4" />
+        <text x={42} y={r.y + 4} text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="12" fill={c.inkDim}>{r.lab}</text>
+      </g>
+    ))}
+
+    <!-- entangling brickwork (drawn under the gate boxes) -->
+    {cnots.map((g) => (
+      <g>
+        <line x1={g.x} y1={yOf(g.a)} x2={g.x} y2={yOf(g.b)} stroke={c.accent} stroke-width="1.6" />
+        <circle cx={g.x} cy={yOf(g.a)} r="3.8" fill={c.accent} />
+        <circle cx={g.x} cy={yOf(g.b)} r="8.5" fill={c.bg} stroke={c.accent} stroke-width="1.6" />
+        <line x1={g.x - 8.5} y1={yOf(g.b)} x2={g.x + 8.5} y2={yOf(g.b)} stroke={c.accent} stroke-width="1.6" />
+        <line x1={g.x} y1={yOf(g.b) - 8.5} x2={g.x} y2={yOf(g.b) + 8.5} stroke={c.accent} stroke-width="1.6" />
+      </g>
+    ))}
+
+    <!-- encode + trainable + readout gates -->
+    {rows.map((r) => (
+      <g>
+        <rect x={encX - 28} y={r.y - 12} width="56" height="24" rx="5" fill={c.teal} />
+        <text x={encX} y={r.y + 4.5} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" fill="#ffffff">R(x)</text>
+
+        <rect x={trnX - 28} y={r.y - 12} width="56" height="24" rx="5" fill={c.bg} stroke={c.amber} stroke-width="1.5" />
+        <text x={trnX} y={r.y + 4.5} text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" fill={c.amber}>R(&#952;)</text>
+
+        <rect x={outX - 17} y={r.y - 13} width="34" height="26" rx="5" fill={c.bg} stroke={c.inkDim} stroke-width="1.4" />
+        <path d={`M ${outX - 9} ${r.y + 5} A 9 9 0 0 1 ${outX + 9} ${r.y + 5}`} fill="none" stroke={c.inkDim} stroke-width="1.4" />
+        <line x1={outX} y1={r.y + 5} x2={outX + 7} y2={r.y - 6} stroke={c.inkDim} stroke-width="1.4" stroke-linecap="round" />
+      </g>
+    ))}
+  </svg>
+  <figcaption>Encode each cell, entangle the qubits, apply the trainable rotations, then read out. Decompose the trained circuit and each cell-pair number becomes a readable coupling: how strongly, say, C11 and C13 move together.</figcaption>
+</figure>
+
+<style>
+  .qw-fig { margin: 2.25rem 0 1.25rem; }
+  .qw-fig svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: var(--bg-raised, #f7f6f2);
+    border: 1px solid var(--rule, #ddd8d0);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+  }
+  .qw-fig figcaption {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--ink-muted, #78716c);
+    text-align: center;
+    margin-top: 0.7rem;
+    letter-spacing: 0.01em;
+  }
+</style>
