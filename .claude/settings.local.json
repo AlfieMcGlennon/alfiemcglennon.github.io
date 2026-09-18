@@ -27,7 +27,12 @@
       "Bash(ls /c/Python*)",
       "Bash(/c/Users/alfie/AppData/Local/Programs/Python/Python312/python.exe -m pip install PyPDF2 -q)",
       "Bash(/c/Users/alfie/AppData/Local/Programs/Python/Python312/python.exe -c ':*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(mkdir -p \"C:/Website/hero-variants\")",
+      "Bash(git clone:*)",
+      "Bash($PYTHON:*)",
+      "Bash(/c/Users/alfie/AppData/Local/Programs/Python/Python312/python.exe:*)",
+      "Bash(pkill -f \"astro dev\")"
     ]
   }
 }

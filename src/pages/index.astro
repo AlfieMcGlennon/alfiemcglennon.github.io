@@ -75,6 +75,9 @@ import Base from '../layouts/Base.astro';
         From copula-based dependence modelling to reinforcement learning on
         the national grid.
       </p>
+      <p class="hero-experience">
+        <a href="/experience/">Enter the cinematic version &rarr;</a>
+      </p>
     </div>
 
     <div class="weather-readout" data-weather-readout aria-label="Live weather telemetry">
@@ -546,6 +549,29 @@ import Base from '../layouts/Base.astro';
   .wr-link:hover {
     color: var(--teal);
     border-bottom-color: var(--teal);
+  }
+
+  /* link to the cinematic /experience showcase (calm homepage stays the front door) */
+  .hero-experience {
+    margin-top: 1.4rem;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .hero-experience a {
+    color: var(--teal-deep);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--teal);
+    padding-bottom: 2px;
+    transition: color 0.25s ease, border-color 0.25s ease;
+  }
+  .hero-experience a:hover { color: var(--teal); border-bottom-color: var(--teal); }
+  .hero[data-weather="night"] .hero-experience a,
+  .hero[data-weather="storm"] .hero-experience a,
+  .hero[data-weather="rain"] .hero-experience a {
+    color: #7fd3c4;
+    border-bottom-color: rgba(127, 211, 196, 0.55);
   }
 
   /* Dark sky states: invert text contrast and drop the white halo */
