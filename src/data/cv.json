@@ -123,9 +123,9 @@
       "institution": "University of Reading",
       "location": "Reading, UK",
       "start": "2025",
-      "end": "2026 (expected)",
+      "end": "2026",
       "notes": [
-        "Dissertation: Predicting Compound Heat Stress Risk in Europe using copula-based frameworks and ML-driven dependence estimation.",
+        "Dissertation (submitted September 2026): Compound Humid-Heat Dependence over Europe: Characterisation, Attribution and Model Evaluation with a Copula-Based Framework.",
         "Key modules: Applied Data Science with Python, Artificial Intelligence and Machine Learning, Climate Change Causes and Consequences, Data Science and Climate Services, Causality and Decision Making in Climate Change."
       ]
     },

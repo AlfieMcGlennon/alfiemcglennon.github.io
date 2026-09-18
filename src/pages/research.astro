@@ -4,13 +4,13 @@ import Base from '../layouts/Base.astro';
 
 <Base
   title="Research | Alfie McGlennon"
-  description="MSc dissertation on compound heat stress risk in Europe. A copula-based framework with ML-driven dependence estimation, fitted to ERA5 and evaluated against CMIP6."
+  description="MSc dissertation on compound humid-heat dependence over Europe. A copula-based framework fitted to 75 years of hourly ERA5 and evaluated against ECMWF's AIFS and IFS forecasts and the CMIP6 ensemble."
   ogTitle="Research | Alfie McGlennon"
-  ogDescription="Dissertation research questions, motivation, and approach. Copulas, multiplicative bias decomposition, XGBoost for Kendall's tau."
+  ogDescription="Dissertation questions, approach and findings. GAS dynamic copulas, XGBoost for Kendall's tau, and model evaluation against AIFS, IFS and CMIP6."
 >
   <article class="page-narrow research">
     <p class="kicker">Dissertation</p>
-    <h1>Predicting Compound Heat Stress Risk in Europe: A Copula-Based Framework with ML-Driven Dependence Estimation</h1>
+    <h1>Compound Humid-Heat Dependence over Europe: Characterisation, Attribution and Model Evaluation with a Copula-Based Framework</h1>
 
     <p class="lede">
       Compound heat stress happens when high temperature and high humidity
@@ -81,7 +81,7 @@ import Base from '../layouts/Base.astro';
 
     <h2>Data</h2>
     <p>
-      ERA5 reanalysis (1981 to 2020) as the ground-truth dependence
+      ERA5 reanalysis (1950 to 2024, hourly) as the ground-truth dependence
       climatology. CMIP6 projections for historical and future scenarios.
       Destination Earth (DestinE) climate digital-twin output where
       available.
@@ -89,10 +89,9 @@ import Base from '../layouts/Base.astro';
 
     <h2>Publication plan</h2>
     <p>
-      I&rsquo;m hoping to publish from parts of this work if the timeline
-      allows. The decomposition framework and the ML-driven dependence
-      estimation are both potentially publishable, but the priority right
-      now is getting the dissertation right.
+      I&rsquo;m hoping to publish from parts of this work. The decomposition
+      framework and the model-evaluation strand are the two most likely
+      candidates.
     </p>
 
     <hr class="research-rule" />
@@ -100,7 +99,33 @@ import Base from '../layouts/Base.astro';
     <section class="other-research">
       <div class="dot" aria-hidden="true"></div>
       <p>
-        Results are ongoing and will be added here as the work progresses.
+        Submitted September 2026. The headline findings are below.
+      </p>
+      <p>
+        Dependence follows the atmospheric state, set largely by
+        thermodynamic and moisture controls. That gives it a strong
+        spatial and seasonal structure, and it is why the anomalies,
+        once that structure is removed, are close to unpredictable.
+      </p>
+      <p>
+        An ablation across the driver set showed that the land surface,
+        not circulation, carries the predictable signal. Circulation
+        features contribute to the diagnostic ceiling but add little
+        out-of-sample skill for the next window, which was not the
+        answer I expected going in.
+      </p>
+      <p>
+        That structure survives a change of model type. IFS and most of
+        the CMIP6 ensemble reproduce the dependence in direction, and
+        broadly in magnitude, across most of the European domain despite
+        neither being trained on it. AIFS does too, though it has a
+        structural advantage there, since it is trained on ERA5.
+      </p>
+      <p>
+        The Mediterranean is where it breaks down. There the dependence
+        sits near zero, so the statistical error is small in absolute
+        terms while the physical error is larger, driven by higher
+        temperatures and lower soil moisture.
       </p>
     </section>
   </article>
