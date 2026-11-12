@@ -2,13 +2,15 @@
 const pathname = Astro.url.pathname;
 
 const links = [
-  { href: '/research/', label: 'Research' },
-  { href: '/projects/', label: 'Projects' },
-  { href: '/writing/', label: 'Writing' },
-  { href: '/cv/', label: 'CV' },
+  { href: '/tide/', label: 'Tide' },
+  { href: '/archive/', label: 'Archive' },
 ];
 
+// Pages kept under Archive rather than in the nav.
+const archived = ['/research/', '/projects/', '/writing/', '/cv/'];
+
 function isActive(href, current) {
+  if (href === '/archive/' && archived.some(a => current.startsWith(a))) return true;
   return current === href || current.startsWith(href);
 }
 ---

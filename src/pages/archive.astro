@@ -1,0 +1,84 @@
+---
+import Base from '../layouts/Base.astro';
+
+const pages = [
+  { href: '/research/', label: 'Research', line: 'Compound heat stress and copula-based risk.' },
+  { href: '/projects/', label: 'Projects', line: 'Grid dispatch, quantum ML, climate tooling.' },
+  { href: '/writing/', label: 'Writing', line: 'Full project write-ups, and the thinking behind them.' },
+  { href: '/cv/', label: 'CV', line: 'Education, experience and skills.' },
+];
+---
+
+<Base
+  title="Archive | Alfie McGlennon"
+  description="Older pages from this site: research, projects, writing and CV."
+  ogTitle="Archive | Alfie McGlennon"
+  ogDescription="Older pages from this site: research, projects, writing and CV."
+>
+  <article class="page archive">
+    <header class="archive-head">
+      <p class="kicker">Archive</p>
+      <h1>Older pages</h1>
+      <p class="lede">
+        Work from my degree and the projects around it. These pages are no
+        longer updated, but everything is still here.
+      </p>
+    </header>
+
+    <ul class="archive-list">
+      {pages.map(p => (
+        <li class="archive-item">
+          <a href={p.href}>
+            <span class="archive-label">{p.label}</span>
+            <span class="archive-line">{p.line}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </article>
+</Base>
+
+<style>
+  .archive-head {
+    margin-bottom: 2.5rem;
+  }
+
+  .archive-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .archive-item {
+    margin: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .archive-item:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .archive-item a {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1.25rem;
+    padding: 1.1rem 0;
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .archive-label {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    min-width: 7rem;
+  }
+
+  .archive-line {
+    color: var(--ink-dim);
+  }
+
+  .archive-item a:hover .archive-label {
+    color: var(--amber);
+  }
+</style>
